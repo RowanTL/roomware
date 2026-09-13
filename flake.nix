@@ -24,7 +24,20 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = [ rustToolchain ];
+          nativeBuildInputs = with pkgs; [
+            rustToolchain
+            pkg-config
+            meson
+            ninja
+            desktop-file-utils
+            glib
+            gcc
+          ];
+
+          buildInputs = with pkgs; [
+            gtk4
+            libadwaita
+          ];
         };
       });
 }
