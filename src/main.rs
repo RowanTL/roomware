@@ -4,11 +4,15 @@ use relm4::{
     RelmWidgetExt, SimpleComponent, gtk,
 };
 use roomware::hints::{DEFAULT_HINT_AMT, Hints};
-use roomware::timer::Timer;
+use roomware::player::{Player, PlayerMsg};
+use roomware::timer::{Timer, TimerOutput};
 
 struct MainWindow {
     hints: Controller<Hints>,
     timer: Controller<Timer>,
+    // dead_code here to keep Controller alive
+    #[allow(dead_code)]
+    player: Controller<Player>,
 }
 
 #[relm4::component]
@@ -33,16 +37,26 @@ impl SimpleComponent for MainWindow {
         }
     }
 
-    // Initialize the UI.
     fn init(
         _init: Self::Init,
         root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let hints = Hints::builder().launch(DEFAULT_HINT_AMT).detach();
-        let timer = Timer::builder().launch(()).detach();
+        let player = Player::builder().launch(()).detach();
+        let timer = Timer::builder()
+            .launch(())
+            .forward(player.sender(), |output| match output {
+                TimerOutput::TimeChanged(remaining) => PlayerMsg::UpdateTime(remaining),
+            });
 
-        let model = MainWindow { hints, timer };
+        player.widget().present();
+
+        let model = MainWindow {
+            hints,
+            timer,
+            player,
+        };
 
         // Insert the macro code generation here
         let widgets = view_output!();
