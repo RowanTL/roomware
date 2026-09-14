@@ -1,4 +1,4 @@
-use gtk::prelude::{GridExt, GtkWindowExt};
+use gtk::prelude::{ButtonExt, GridExt, GtkWindowExt};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, gtk,
@@ -10,7 +10,7 @@ use roomware::timer::{Timer, TimerOutput};
 struct MainWindow {
     hints: Controller<Hints>,
     timer: Controller<Timer>,
-    // dead_code here to keep Controller alive
+    // dead_code here to keep player Controller alive
     #[allow(dead_code)]
     player: Controller<Player>,
 }
@@ -52,6 +52,12 @@ impl SimpleComponent for MainWindow {
 
         player.widget().present();
 
+        let play_video_button = gtk::Button::with_label("Play Video");
+        let player_sender = player.sender().clone();
+        play_video_button.connect_clicked(move |_| {
+            player_sender.emit(PlayerMsg::PlayVideo);
+        });
+
         let model = MainWindow {
             hints,
             timer,
@@ -63,6 +69,7 @@ impl SimpleComponent for MainWindow {
 
         widgets.grid.attach(model.timer.widget(), 0, 0, 1, 1);
         widgets.grid.attach(model.hints.widget(), 1, 0, 1, 1);
+        widgets.grid.attach(&play_video_button, 0, 1, 2, 1);
 
         ComponentParts { model, widgets }
     }
