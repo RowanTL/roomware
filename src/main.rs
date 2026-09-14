@@ -1,21 +1,19 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent, gtk};
+use gtk::prelude::GtkWindowExt;
+use relm4::{
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    SimpleComponent, gtk,
+};
+use roomware::hints::Hints;
 
 struct MainWindow {
-    counter: u8,
-}
-
-#[derive(Debug)]
-enum AppMsg {
-    Increment,
-    Decrement,
+    hints: Controller<Hints>,
 }
 
 #[relm4::component]
 impl SimpleComponent for MainWindow {
-    type Init = u8;
+    type Init = ();
 
-    type Input = AppMsg;
+    type Input = ();
     type Output = ();
 
     view! {
@@ -24,56 +22,31 @@ impl SimpleComponent for MainWindow {
             set_default_width: 300,
             set_default_height: 100,
 
-            gtk::Box {
-                set_orientation: gtk::Orientation::Vertical,
-                set_spacing: 5,
-                set_margin_all: 5,
-
-                gtk::Button {
-                    set_label: "Increment",
-                    connect_clicked => AppMsg::Increment
-                },
-
-                gtk::Button::with_label("Decrement") {
-                    connect_clicked => AppMsg::Decrement
-                },
-
-                gtk::Label {
-                    #[watch]
-                    set_label: &format!("Hints Remaining: {}", model.counter),
-                    set_margin_all: 5,
-                }
-            }
+            #[local_ref]
+            hints_box -> gtk::Box {}
         }
     }
 
     // Initialize the UI.
     fn init(
-        counter: Self::Init,
+        _init: Self::Init,
         root: Self::Root,
-        sender: ComponentSender<Self>,
+        _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = MainWindow { counter };
+        let hints = Hints::builder().launch(0).detach();
+
+        let model = MainWindow { hints };
+
+        let hints_box = model.hints.widget();
 
         // Insert the macro code generation here
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
-
-    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
-        match msg {
-            AppMsg::Increment => {
-                self.counter = self.counter.wrapping_add(1);
-            }
-            AppMsg::Decrement => {
-                self.counter = self.counter.wrapping_sub(1);
-            }
-        }
-    }
 }
 
 fn main() {
-    let app = RelmApp::new("RoomWare.Monitor.Alpha");
-    app.run::<MainWindow>(5);
+    let app = RelmApp::new("EscapeOnMain.RoomWare.Monitor");
+    app.run::<MainWindow>(());
 }

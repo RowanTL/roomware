@@ -3,15 +3,6 @@
 version = 4
 
 [[package]]
-name = "RoomWare"
-version = "0.1.0"
-dependencies = [
- "gtk4",
- "relm4",
- "relm4-components",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -639,6 +630,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "roomware"
+version = "0.1.0"
+dependencies = [
+ "gtk4",
+ "relm4",
+ "relm4-components",
 ]
 
 [[package]]
