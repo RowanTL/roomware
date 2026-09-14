@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 gtk = { version = "0.11.4", package = "gtk4", features = ["v4_22"] }
+relm4 = "0.11.0"
+relm4-components = "0.11.0"
