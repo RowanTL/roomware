@@ -3,7 +3,7 @@ use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 // In seconds, 3600 seconds = 1 hour
-const DEFAULT_TIME_LIMIT: u32 = 3600;
+const DEFAULT_TIME_LIMIT: u32 = 1;
 
 pub struct Timer {
     remaining: u32,
@@ -90,6 +90,9 @@ impl SimpleComponent for Timer {
 
 impl Timer {
     fn start(&mut self, sender: &ComponentSender<Self>) {
+        if self.remaining == 0 {
+            return;
+        }
         self.running = true;
 
         let input_sender = sender.input_sender().clone();
