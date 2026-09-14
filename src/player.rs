@@ -57,7 +57,7 @@ impl SimpleComponent for Player {
                 gtk::Video::for_filename(Some(VIDEO_PATH)) {
                     #[watch]
                     set_visible: model.playing_video,
-                    set_autoplay: false,
+                    set_autoplay: true,
                     set_loop: false,
                     set_hexpand: true,
                     set_vexpand: true,
