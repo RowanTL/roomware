@@ -3,6 +3,8 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 
 use crate::timer::format_time;
 
+const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
+
 pub struct Player {
     remaining: u32,
 }
@@ -24,6 +26,7 @@ impl SimpleComponent for Player {
             set_title: Some("RoomWare - Player Display"),
             set_default_width: 300,
             set_default_height: 100,
+            add_css_class: "player-window",
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -48,6 +51,7 @@ impl SimpleComponent for Player {
 
         let widgets = view_output!();
 
+        apply_background_style();
         place_on_secondary_monitor(&root);
 
         ComponentParts { model, widgets }
@@ -60,6 +64,26 @@ impl SimpleComponent for Player {
             }
         }
     }
+}
+
+fn apply_background_style() {
+    let Some(display) = gtk::gdk::Display::default() else {
+        return;
+    };
+
+    let provider = gtk::CssProvider::new();
+    provider.load_from_string(
+        format!(
+            "window.player-window {{ background-color: #{}; }}",
+            DEFAULT_PLAYER_BACKGROUND
+        )
+        .as_str(),
+    );
+    gtk::style_context_add_provider_for_display(
+        &display,
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
 
 fn place_on_secondary_monitor(window: &gtk::Window) {
