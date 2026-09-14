@@ -89,7 +89,7 @@ impl SimpleComponent for Player {
 
             let stream_to_play = stream.clone();
             widgets.video.connect_map(move |_| {
-                stream_to_play.seek(0);
+                stream_to_play.seek(0); // frame 0 of video
                 stream_to_play.play();
             });
 
