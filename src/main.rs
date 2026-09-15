@@ -65,7 +65,7 @@ impl SimpleComponent for MainWindow {
 
         player.widget().present();
 
-        let play_video_button = gtk::Button::with_label("Play Video");
+        let play_video_button = gtk::Button::with_label("Play Intro");
         let player_sender = player.sender().clone();
         play_video_button.connect_clicked(move |_| {
             player_sender.emit(PlayerMsg::PlayVideo);
