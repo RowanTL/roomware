@@ -13,12 +13,17 @@ pub enum HintsMsg {
     Decrement,
 }
 
+#[derive(Debug)]
+pub enum HintsOutput {
+    CounterChanged(u8),
+}
+
 #[relm4::component(pub)]
 impl SimpleComponent for Hints {
     type Init = u8;
 
     type Input = HintsMsg;
-    type Output = ();
+    type Output = HintsOutput;
 
     view! {
         gtk::Box {
@@ -53,10 +58,12 @@ impl SimpleComponent for Hints {
         // Insert the macro code generation here
         let widgets = view_output!();
 
+        let _ = sender.output(HintsOutput::CounterChanged(model.counter));
+
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             HintsMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
@@ -65,5 +72,7 @@ impl SimpleComponent for Hints {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
+
+        let _ = sender.output(HintsOutput::CounterChanged(self.counter));
     }
 }

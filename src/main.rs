@@ -1,15 +1,17 @@
-use gtk::prelude::{ButtonExt, EditableExt, GridExt, GtkWindowExt};
+use gtk::prelude::{ButtonExt, GridExt, GtkWindowExt};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, gtk,
 };
-use roomware::hints::{DEFAULT_HINT_AMT, Hints};
+use roomware::hint_control::{HintControl, HintControlOutput};
+use roomware::hints::{DEFAULT_HINT_AMT, Hints, HintsOutput};
 use roomware::player::{Player, PlayerMsg};
 use roomware::timer::{Timer, TimerOutput};
 
 struct MainWindow {
     hints: Controller<Hints>,
     timer: Controller<Timer>,
+    hint_control: Controller<HintControl>,
     // dead_code here to keep player Controller alive
     #[allow(dead_code)]
     player: Controller<Player>,
@@ -42,12 +44,23 @@ impl SimpleComponent for MainWindow {
         root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let hints = Hints::builder().launch(DEFAULT_HINT_AMT).detach();
         let player = Player::builder().launch(()).detach();
+        let hints = Hints::builder()
+            .launch(DEFAULT_HINT_AMT)
+            .forward(player.sender(), |output| match output {
+                HintsOutput::CounterChanged(remaining) => {
+                    PlayerMsg::UpdateHintsRemaining(remaining)
+                }
+            });
         let timer = Timer::builder()
             .launch(())
             .forward(player.sender(), |output| match output {
                 TimerOutput::TimeChanged(remaining) => PlayerMsg::UpdateTime(remaining),
+            });
+        let hint_control = HintControl::builder()
+            .launch(())
+            .forward(player.sender(), |output| match output {
+                HintControlOutput::ShowHint(hint) => PlayerMsg::ShowHint(hint),
             });
 
         player.widget().present();
@@ -58,27 +71,10 @@ impl SimpleComponent for MainWindow {
             player_sender.emit(PlayerMsg::PlayVideo);
         });
 
-        let hint_entry = gtk::Entry::new();
-        let show_message_button = gtk::Button::with_label("Show Hint");
-        let clear_message_button = gtk::Button::with_label("Clear Hint");
-
-        let player_sender = player.sender().clone();
-        let entry_for_message = hint_entry.clone();
-        show_message_button.connect_clicked(move |_| {
-            player_sender.emit(PlayerMsg::ShowHint(entry_for_message.text().to_string()));
-            entry_for_message.set_text("");
-        });
-
-        let player_sender = player.sender().clone();
-        let entry_for_message = hint_entry.clone();
-        clear_message_button.connect_clicked(move |_| {
-            player_sender.emit(PlayerMsg::ShowHint(String::from("")));
-            entry_for_message.set_text("");
-        });
-
         let model = MainWindow {
             hints,
             timer,
+            hint_control,
             player,
         };
 
@@ -88,9 +84,7 @@ impl SimpleComponent for MainWindow {
         widgets.grid.attach(model.timer.widget(), 0, 0, 1, 1);
         widgets.grid.attach(model.hints.widget(), 1, 0, 1, 1);
         widgets.grid.attach(&play_video_button, 0, 1, 2, 1);
-        widgets.grid.attach(&hint_entry, 0, 2, 1, 1);
-        widgets.grid.attach(&show_message_button, 1, 2, 1, 1);
-        widgets.grid.attach(&clear_message_button, 0, 3, 2, 1);
+        widgets.grid.attach(model.hint_control.widget(), 0, 2, 2, 1);
 
         ComponentParts { model, widgets }
     }

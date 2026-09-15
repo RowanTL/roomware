@@ -8,6 +8,7 @@ use crate::timer::format_time;
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 const DEFAULT_TIMER_FONT_SIZE: usize = 100;
 const DEFAULT_HINT_FONT_SIZE: usize = 70;
+const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
 const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
 
 pub struct Player {
@@ -16,6 +17,7 @@ pub struct Player {
     video_stream: Option<gtk::MediaStream>,
     hint: String,
     show_hint: bool,
+    hints_remaining: u8,
 }
 
 #[derive(Debug)]
@@ -24,6 +26,7 @@ pub enum PlayerMsg {
     PlayVideo,
     VideoFinished,
     ShowHint(String),
+    UpdateHintsRemaining(u8),
 }
 
 #[relm4::component(pub)]
@@ -82,6 +85,15 @@ impl SimpleComponent for Player {
                     set_loop: false,
                     set_hexpand: true,
                     set_vexpand: true,
+                },
+
+                gtk::Label {
+                    #[watch]
+                    set_label: &format!("Hints Remaining: {}", model.hints_remaining),
+                    set_halign: gtk::Align::Center,
+                    set_valign: gtk::Align::End,
+                    set_margin_all: 5,
+                    add_css_class: "hints-remaining-label",
                 }
             }
         }
@@ -98,6 +110,7 @@ impl SimpleComponent for Player {
             video_stream: None,
             hint: String::new(),
             show_hint: false,
+            hints_remaining: 0,
         };
 
         let widgets = view_output!();
@@ -144,6 +157,9 @@ impl SimpleComponent for Player {
                 self.show_hint = !hint.is_empty();
                 self.hint = hint;
             }
+            PlayerMsg::UpdateHintsRemaining(hints_remaining) => {
+                self.hints_remaining = hints_remaining;
+            }
         }
     }
 }
@@ -156,8 +172,11 @@ fn apply_css_style() {
     let provider = gtk::CssProvider::new();
     provider.load_from_string(
         format!(
-            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }}",
-            DEFAULT_PLAYER_BACKGROUND, DEFAULT_TIMER_FONT_SIZE, DEFAULT_HINT_FONT_SIZE
+            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }} label.hints-remaining-label {{ font-size: {}px; }}",
+            DEFAULT_PLAYER_BACKGROUND,
+            DEFAULT_TIMER_FONT_SIZE,
+            DEFAULT_HINT_FONT_SIZE,
+            DEFAULT_HINTS_REMAINING_FONT_SIZE
         )
         .as_str(),
     );

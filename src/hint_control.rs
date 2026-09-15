@@ -1,0 +1,76 @@
+use gtk::prelude::{BoxExt, ButtonExt, EditableExt, OrientableExt, WidgetExt};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
+
+pub struct HintControl {
+    entry: Option<gtk::Entry>,
+}
+
+#[derive(Debug)]
+pub enum HintControlMsg {
+    Show,
+    Clear,
+}
+
+#[derive(Debug)]
+pub enum HintControlOutput {
+    ShowHint(String),
+}
+
+#[relm4::component(pub)]
+impl SimpleComponent for HintControl {
+    type Init = ();
+
+    type Input = HintControlMsg;
+    type Output = HintControlOutput;
+
+    view! {
+        gtk::Box {
+            set_orientation: gtk::Orientation::Horizontal,
+            set_spacing: 5,
+
+            #[name = "entry"]
+            gtk::Entry {
+                set_hexpand: true,
+            },
+
+            gtk::Button::with_label("Show Hint") {
+                connect_clicked => HintControlMsg::Show,
+            },
+
+            gtk::Button::with_label("Clear Hint") {
+                connect_clicked => HintControlMsg::Clear,
+            },
+        }
+    }
+
+    fn init(
+        _init: Self::Init,
+        root: Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let mut model = HintControl { entry: None };
+
+        let widgets = view_output!();
+
+        model.entry = Some(widgets.entry.clone());
+
+        ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
+        let Some(entry) = &self.entry else {
+            return;
+        };
+
+        match msg {
+            HintControlMsg::Show => {
+                let _ = sender.output(HintControlOutput::ShowHint(entry.text().to_string()));
+                entry.set_text("");
+            }
+            HintControlMsg::Clear => {
+                let _ = sender.output(HintControlOutput::ShowHint(String::new()));
+                entry.set_text("");
+            }
+        }
+    }
+}
