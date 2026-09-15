@@ -6,13 +6,16 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 use crate::timer::format_time;
 
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
-const DEFAULT_TIMER_FONT_SIZE: &str = "100px";
+const DEFAULT_TIMER_FONT_SIZE: usize = 100;
+const DEFAULT_HINT_FONT_SIZE: usize = 70;
 const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
 
 pub struct Player {
     remaining: u32,
     playing_video: bool,
     video_stream: Option<gtk::MediaStream>,
+    hint: String,
+    show_hint: bool,
 }
 
 #[derive(Debug)]
@@ -20,6 +23,7 @@ pub enum PlayerMsg {
     UpdateTime(u32),
     PlayVideo,
     VideoFinished,
+    ShowHint(String),
 }
 
 #[relm4::component(pub)]
@@ -43,15 +47,30 @@ impl SimpleComponent for Player {
                     #[watch]
                     set_visible: !model.playing_video,
                     set_orientation: gtk::Orientation::Vertical,
-                    set_halign: gtk::Align::Center,
-                    set_valign: gtk::Align::Start,
                     set_vexpand: true,
 
                     gtk::Label {
                         #[watch]
                         set_label: &format_time(model.remaining),
+                        set_halign: gtk::Align::Center,
+                        set_valign: gtk::Align::Start,
                         set_margin_all: 5,
                         add_css_class: "timer-label",
+                    },
+
+                    gtk::Box {
+                        #[watch]
+                        set_visible: model.show_hint,
+                        set_halign: gtk::Align::Center,
+                        set_valign: gtk::Align::Center,
+                        set_vexpand: true,
+
+                        gtk::Label {
+                            #[watch]
+                            set_label: &model.hint,
+                            set_margin_all: 5,
+                            add_css_class: "message-label",
+                        }
                     }
                 },
 
@@ -77,6 +96,8 @@ impl SimpleComponent for Player {
             remaining: 0,
             playing_video: false,
             video_stream: None,
+            hint: String::new(),
+            show_hint: false,
         };
 
         let widgets = view_output!();
@@ -98,7 +119,7 @@ impl SimpleComponent for Player {
             model.video_stream = Some(stream);
         }
 
-        apply_background_style();
+        apply_css_style();
         place_on_secondary_monitor(&root);
 
         ComponentParts { model, widgets }
@@ -118,11 +139,16 @@ impl SimpleComponent for Player {
                     stream.pause();
                 }
             }
+            PlayerMsg::ShowHint(hint) => {
+                let hint = hint.trim().to_string();
+                self.show_hint = !hint.is_empty();
+                self.hint = hint;
+            }
         }
     }
 }
 
-fn apply_background_style() {
+fn apply_css_style() {
     let Some(display) = gtk::gdk::Display::default() else {
         return;
     };
@@ -130,8 +156,8 @@ fn apply_background_style() {
     let provider = gtk::CssProvider::new();
     provider.load_from_string(
         format!(
-            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}; }}",
-            DEFAULT_PLAYER_BACKGROUND, DEFAULT_TIMER_FONT_SIZE
+            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }}",
+            DEFAULT_PLAYER_BACKGROUND, DEFAULT_TIMER_FONT_SIZE, DEFAULT_HINT_FONT_SIZE
         )
         .as_str(),
     );

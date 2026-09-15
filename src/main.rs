@@ -1,4 +1,4 @@
-use gtk::prelude::{ButtonExt, GridExt, GtkWindowExt};
+use gtk::prelude::{ButtonExt, EditableExt, GridExt, GtkWindowExt};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, gtk,
@@ -58,6 +58,24 @@ impl SimpleComponent for MainWindow {
             player_sender.emit(PlayerMsg::PlayVideo);
         });
 
+        let hint_entry = gtk::Entry::new();
+        let show_message_button = gtk::Button::with_label("Show Hint");
+        let clear_message_button = gtk::Button::with_label("Clear Hint");
+
+        let player_sender = player.sender().clone();
+        let entry_for_message = hint_entry.clone();
+        show_message_button.connect_clicked(move |_| {
+            player_sender.emit(PlayerMsg::ShowHint(entry_for_message.text().to_string()));
+            entry_for_message.set_text("");
+        });
+
+        let player_sender = player.sender().clone();
+        let entry_for_message = hint_entry.clone();
+        clear_message_button.connect_clicked(move |_| {
+            player_sender.emit(PlayerMsg::ShowHint(String::from("")));
+            entry_for_message.set_text("");
+        });
+
         let model = MainWindow {
             hints,
             timer,
@@ -70,6 +88,9 @@ impl SimpleComponent for MainWindow {
         widgets.grid.attach(model.timer.widget(), 0, 0, 1, 1);
         widgets.grid.attach(model.hints.widget(), 1, 0, 1, 1);
         widgets.grid.attach(&play_video_button, 0, 1, 2, 1);
+        widgets.grid.attach(&hint_entry, 0, 2, 1, 1);
+        widgets.grid.attach(&show_message_button, 1, 2, 1, 1);
+        widgets.grid.attach(&clear_message_button, 0, 3, 2, 1);
 
         ComponentParts { model, widgets }
     }
