@@ -6,6 +6,7 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 use crate::timer::format_time;
 
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
+const DEFAULT_TIMER_FONT_SIZE: &str = "100px";
 const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
 
 pub struct Player {
@@ -43,13 +44,14 @@ impl SimpleComponent for Player {
                     set_visible: !model.playing_video,
                     set_orientation: gtk::Orientation::Vertical,
                     set_halign: gtk::Align::Center,
-                    set_valign: gtk::Align::Center,
+                    set_valign: gtk::Align::Start,
                     set_vexpand: true,
 
                     gtk::Label {
                         #[watch]
                         set_label: &format_time(model.remaining),
                         set_margin_all: 5,
+                        add_css_class: "timer-label",
                     }
                 },
 
@@ -128,8 +130,8 @@ fn apply_background_style() {
     let provider = gtk::CssProvider::new();
     provider.load_from_string(
         format!(
-            "window.player-window {{ background-color: #{}; }}",
-            DEFAULT_PLAYER_BACKGROUND
+            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}; }}",
+            DEFAULT_PLAYER_BACKGROUND, DEFAULT_TIMER_FONT_SIZE
         )
         .as_str(),
     );
