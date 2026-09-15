@@ -4,8 +4,9 @@ use gtk::prelude::{
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::timer::format_time;
+use crate::utils::apply_css_style;
 
-const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
+pub(crate) const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 const DEFAULT_TIMER_FONT_SIZE: usize = 100;
 const DEFAULT_HINT_FONT_SIZE: usize = 70;
 const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
@@ -146,7 +147,14 @@ impl SimpleComponent for Player {
             model.video_stream = Some(stream);
         }
 
-        apply_css_style();
+        apply_css_style(&format!(
+            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }} label.hints-remaining-label {{ font-size: {}px; }}",
+            DEFAULT_PLAYER_BACKGROUND,
+            DEFAULT_TIMER_FONT_SIZE,
+            DEFAULT_HINT_FONT_SIZE,
+            DEFAULT_HINTS_REMAINING_FONT_SIZE
+        ));
+
         place_on_secondary_monitor(&root);
 
         let _ = sender.output(PlayerOutput::StateChanged(model.to_state()));
@@ -192,29 +200,6 @@ impl Player {
             hints_remaining: self.hints_remaining,
         }
     }
-}
-
-fn apply_css_style() {
-    let Some(display) = gtk::gdk::Display::default() else {
-        return;
-    };
-
-    let provider = gtk::CssProvider::new();
-    provider.load_from_string(
-        format!(
-            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }} label.hints-remaining-label {{ font-size: {}px; }}",
-            DEFAULT_PLAYER_BACKGROUND,
-            DEFAULT_TIMER_FONT_SIZE,
-            DEFAULT_HINT_FONT_SIZE,
-            DEFAULT_HINTS_REMAINING_FONT_SIZE
-        )
-        .as_str(),
-    );
-    gtk::style_context_add_provider_for_display(
-        &display,
-        &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-    );
 }
 
 fn place_on_secondary_monitor(window: &gtk::Window) {

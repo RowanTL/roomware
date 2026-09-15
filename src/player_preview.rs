@@ -1,8 +1,13 @@
-use gtk::prelude::{BoxExt, OrientableExt, WidgetExt};
-use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
+use gtk::prelude::{OrientableExt, WidgetExt};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
+use crate::player::DEFAULT_PLAYER_BACKGROUND;
 use crate::player::PlayerState;
 use crate::timer::format_time;
+use crate::utils::apply_css_style;
+
+const PREVIEW_WIDTH: i32 = 300;
+const PREVIEW_HEIGHT: i32 = 100;
 
 pub struct PlayerPreview {
     state: PlayerState,
@@ -23,12 +28,16 @@ impl SimpleComponent for PlayerPreview {
     view! {
         gtk::Box {
             set_orientation: gtk::Orientation::Vertical,
-            set_spacing: 5,
-            set_margin_all: 5,
+            set_width_request: PREVIEW_WIDTH,
+            set_height_request: PREVIEW_HEIGHT,
+            set_overflow: gtk::Overflow::Hidden,
+            add_css_class: "player-preview-box",
 
             gtk::Label {
                 #[watch]
                 set_visible: model.state.playing_video,
+                set_halign: gtk::Align::Center,
+                set_valign: gtk::Align::Start,
                 set_label: "Intro Playing",
             },
 
@@ -37,18 +46,28 @@ impl SimpleComponent for PlayerPreview {
                 set_visible: !model.state.playing_video,
                 #[watch]
                 set_label: &format_time(model.state.remaining),
+                set_halign: gtk::Align::Center,
+                set_valign: gtk::Align::Start,
             },
 
-            gtk::Label {
-                #[watch]
-                set_visible: !model.state.playing_video && model.state.show_hint,
-                #[watch]
-                set_label: &model.state.hint,
+            gtk::Box {
+                set_vexpand: true,
+                set_halign: gtk::Align::Center,
+                set_valign: gtk::Align::Center,
+
+                gtk::Label {
+                    #[watch]
+                    set_visible: !model.state.playing_video && model.state.show_hint,
+                    #[watch]
+                    set_label: &model.state.hint,
+                }
             },
 
             gtk::Label {
                 #[watch]
                 set_label: &format!("Hints Remaining: {}", model.state.hints_remaining),
+                set_halign: gtk::Align::Center,
+                set_valign: gtk::Align::End,
             },
         }
     }
@@ -69,6 +88,11 @@ impl SimpleComponent for PlayerPreview {
         };
 
         let widgets = view_output!();
+
+        apply_css_style(&format!(
+            "box.player-preview-box {{ background-color: #{}; }}",
+            DEFAULT_PLAYER_BACKGROUND
+        ));
 
         ComponentParts { model, widgets }
     }
