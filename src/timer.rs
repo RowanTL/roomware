@@ -36,12 +36,6 @@ impl SimpleComponent for Timer {
             set_spacing: 5,
             set_margin_all: 5,
 
-            gtk::Label {
-                #[watch]
-                set_label: &format_time(model.remaining),
-                set_margin_all: 5,
-            },
-
             gtk::Button {
                 #[watch]
                 set_label: if model.running { "Stop" } else { "Start" },

@@ -39,12 +39,6 @@ impl SimpleComponent for Hints {
             gtk::Button::with_label("Decrement") {
                 connect_clicked => HintsMsg::Decrement
             },
-
-            gtk::Label {
-                #[watch]
-                set_label: &format!("Hints Remaining: {}", model.counter),
-                set_margin_all: 5,
-            }
         }
     }
 
