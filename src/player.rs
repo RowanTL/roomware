@@ -29,12 +29,26 @@ pub enum PlayerMsg {
     UpdateHintsRemaining(u8),
 }
 
+#[derive(Debug, Clone)]
+pub struct PlayerState {
+    pub remaining: u32,
+    pub playing_video: bool,
+    pub hint: String,
+    pub show_hint: bool,
+    pub hints_remaining: u8,
+}
+
+#[derive(Debug)]
+pub enum PlayerOutput {
+    StateChanged(PlayerState),
+}
+
 #[relm4::component(pub)]
 impl SimpleComponent for Player {
     type Init = ();
 
     type Input = PlayerMsg;
-    type Output = ();
+    type Output = PlayerOutput;
 
     view! {
         gtk::Window {
@@ -135,10 +149,12 @@ impl SimpleComponent for Player {
         apply_css_style();
         place_on_secondary_monitor(&root);
 
+        let _ = sender.output(PlayerOutput::StateChanged(model.to_state()));
+
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             PlayerMsg::UpdateTime(remaining) => {
                 self.remaining = remaining;
@@ -160,6 +176,20 @@ impl SimpleComponent for Player {
             PlayerMsg::UpdateHintsRemaining(hints_remaining) => {
                 self.hints_remaining = hints_remaining;
             }
+        }
+
+        let _ = sender.output(PlayerOutput::StateChanged(self.to_state()));
+    }
+}
+
+impl Player {
+    fn to_state(&self) -> PlayerState {
+        PlayerState {
+            remaining: self.remaining,
+            playing_video: self.playing_video,
+            hint: self.hint.clone(),
+            show_hint: self.show_hint,
+            hints_remaining: self.hints_remaining,
         }
     }
 }

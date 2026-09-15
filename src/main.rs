@@ -5,13 +5,15 @@ use relm4::{
 };
 use roomware::hint_control::{HintControl, HintControlOutput};
 use roomware::hints::{DEFAULT_HINT_AMT, Hints, HintsOutput};
-use roomware::player::{Player, PlayerMsg};
+use roomware::player::{Player, PlayerMsg, PlayerOutput};
+use roomware::player_preview::{PlayerPreview, PlayerPreviewMsg};
 use roomware::timer::{Timer, TimerOutput};
 
 struct MainWindow {
     hints: Controller<Hints>,
     timer: Controller<Timer>,
     hint_control: Controller<HintControl>,
+    player_preview: Controller<PlayerPreview>,
     // dead_code here to keep player Controller alive
     #[allow(dead_code)]
     player: Controller<Player>,
@@ -44,7 +46,12 @@ impl SimpleComponent for MainWindow {
         root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let player = Player::builder().launch(()).detach();
+        let player_preview = PlayerPreview::builder().launch(()).detach();
+        let player = Player::builder()
+            .launch(())
+            .forward(player_preview.sender(), |output| match output {
+                PlayerOutput::StateChanged(state) => PlayerPreviewMsg::Sync(state),
+            });
         let hints = Hints::builder()
             .launch(DEFAULT_HINT_AMT)
             .forward(player.sender(), |output| match output {
@@ -75,6 +82,7 @@ impl SimpleComponent for MainWindow {
             hints,
             timer,
             hint_control,
+            player_preview,
             player,
         };
 
@@ -85,6 +93,7 @@ impl SimpleComponent for MainWindow {
         widgets.grid.attach(model.hints.widget(), 1, 0, 1, 1);
         widgets.grid.attach(&play_video_button, 0, 1, 2, 1);
         widgets.grid.attach(model.hint_control.widget(), 0, 2, 2, 1);
+        widgets.grid.attach(model.player_preview.widget(), 0, 3, 2, 1);
 
         ComponentParts { model, widgets }
     }
