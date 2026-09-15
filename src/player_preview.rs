@@ -1,13 +1,18 @@
 use gtk::prelude::{OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
-use crate::player::DEFAULT_PLAYER_BACKGROUND;
-use crate::player::PlayerState;
+use crate::player::{
+    DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_PLAYER_BACKGROUND,
+    DEFAULT_TIMER_FONT_SIZE, PlayerState,
+};
 use crate::timer::format_time;
 use crate::utils::apply_css_style;
 
 const PREVIEW_WIDTH: i32 = 300;
 const PREVIEW_HEIGHT: i32 = 100;
+
+// Player's fonts are sized for a fullscreen monitor; shrink them to fit this little box.
+const PREVIEW_FONT_SCALE_DIVISOR: usize = 2;
 
 pub struct PlayerPreview {
     state: PlayerState,
@@ -39,6 +44,7 @@ impl SimpleComponent for PlayerPreview {
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Start,
                 set_label: "Intro Playing",
+                add_css_class: "timer-label-preview",
             },
 
             gtk::Label {
@@ -48,6 +54,7 @@ impl SimpleComponent for PlayerPreview {
                 set_label: &format_time(model.state.remaining),
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Start,
+                add_css_class: "timer-label-preview",
             },
 
             gtk::Box {
@@ -60,6 +67,7 @@ impl SimpleComponent for PlayerPreview {
                     set_visible: !model.state.playing_video && model.state.show_hint,
                     #[watch]
                     set_label: &model.state.hint,
+                    add_css_class: "message-label-preview",
                 }
             },
 
@@ -68,6 +76,7 @@ impl SimpleComponent for PlayerPreview {
                 set_label: &format!("Hints Remaining: {}", model.state.hints_remaining),
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::End,
+                add_css_class: "hints-remaining-label-preview",
             },
         }
     }
@@ -90,8 +99,11 @@ impl SimpleComponent for PlayerPreview {
         let widgets = view_output!();
 
         apply_css_style(&format!(
-            "box.player-preview-box {{ background-color: #{}; }}",
-            DEFAULT_PLAYER_BACKGROUND
+            "box.player-preview-box {{ background-color: #{}; }} label.timer-label-preview {{ font-size: {}px; }} label.message-label-preview {{ font-size: {}px; }} label.hints-remaining-label-preview {{ font-size: {}px; }}",
+            DEFAULT_PLAYER_BACKGROUND,
+            DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+            DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+            DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR
         ));
 
         ComponentParts { model, widgets }

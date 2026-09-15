@@ -29,8 +29,6 @@ impl SimpleComponent for MainWindow {
     view! {
         gtk::Window {
             set_title: Some("RoomWare"),
-            set_default_width: 300,
-            set_default_height: 100,
 
             #[name = "grid"]
             gtk::Grid {
@@ -88,6 +86,8 @@ impl SimpleComponent for MainWindow {
 
         // Insert the macro code generation here
         let widgets = view_output!();
+
+        root.fullscreen();
 
         widgets.grid.attach(model.timer.widget(), 0, 0, 1, 1);
         widgets.grid.attach(model.hints.widget(), 1, 0, 1, 1);

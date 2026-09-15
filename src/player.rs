@@ -7,9 +7,9 @@ use crate::timer::format_time;
 use crate::utils::apply_css_style;
 
 pub(crate) const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
-const DEFAULT_TIMER_FONT_SIZE: usize = 100;
-const DEFAULT_HINT_FONT_SIZE: usize = 70;
-const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
+pub(crate) const DEFAULT_TIMER_FONT_SIZE: usize = 100;
+pub(crate) const DEFAULT_HINT_FONT_SIZE: usize = 70;
+pub(crate) const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
 const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
 
 pub struct Player {
