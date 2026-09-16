@@ -1,6 +1,6 @@
 use relm4::gtk;
 
-pub(crate) fn apply_css_style(css_string: &str) {
+pub fn apply_css_style(css_string: &str) {
     let Some(display) = gtk::gdk::Display::default() else {
         return;
     };

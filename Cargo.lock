@@ -639,6 +639,7 @@ dependencies = [
  "gtk4",
  "relm4",
  "relm4-components",
+ "toml",
 ]
 
 [[package]]

@@ -7,3 +7,4 @@ edition = "2024"
 gtk = { version = "0.11.4", package = "gtk4", features = ["v4_22"] }
 relm4 = "0.11.0"
 relm4-components = "0.11.0"
+toml = { version = "1.1.6", features = ["preserve_order"] }
