@@ -3,11 +3,11 @@ use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, gtk,
 };
-use roomware::hint_control::{HintControl, HintControlMsg, HintControlOutput};
-use roomware::hint_menu::{HintMenu, HintMenuOutput};
+use roomware::hints::control::{HintControl, HintControlMsg, HintControlOutput};
+use roomware::hints::menu::{HintMenu, HintMenuOutput};
 use roomware::hints::{DEFAULT_HINT_AMT, Hints, HintsOutput};
+use roomware::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use roomware::player::{Player, PlayerMsg, PlayerOutput};
-use roomware::player_preview::{PlayerPreview, PlayerPreviewMsg};
 use roomware::timer::{Timer, TimerOutput};
 use roomware::utils::apply_css_style;
 

@@ -6,6 +6,8 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 use crate::timer::format_time;
 use crate::utils::apply_css_style;
 
+pub mod preview;
+
 pub(crate) const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 pub(crate) const DEFAULT_TIMER_FONT_SIZE: usize = 100;
 pub(crate) const DEFAULT_HINT_FONT_SIZE: usize = 70;

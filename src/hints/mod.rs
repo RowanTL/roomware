@@ -1,6 +1,9 @@
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
+pub mod control;
+pub mod menu;
+
 pub const DEFAULT_HINT_AMT: u8 = 5;
 
 pub struct Hints {
