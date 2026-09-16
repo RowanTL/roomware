@@ -105,6 +105,7 @@ impl SimpleComponent for MainWindow {
         let player_preview_frame = gtk::Frame::new(Some("Player Screen Preview"));
         player_preview_frame.set_child(Some(player_preview.widget()));
         player_preview_frame.set_hexpand(true);
+        player_preview_frame.add_css_class("player-preview-frame");
 
         let hint_menu_frame = gtk::Frame::new(Some("Hint Selection"));
         hint_menu_frame.set_child(Some(hint_menu.widget()));
@@ -125,12 +126,12 @@ impl SimpleComponent for MainWindow {
         apply_css_style(
             "window.main-window { background-color: #333333; } \
              window.main-window frame { border: 2px solid #D3D3D3; padding: 6px; } \
-             window.main-window frame label { color: #D3D3D3; } \
+             window.main-window frame:not(.player-preview-frame) label { color: #D3D3D3; } \
              window.main-window frame > label { font-weight: bold; } \
              window.main-window expander title { color: #D3D3D3; } \
              window.main-window expander title arrow { color: #D3D3D3; } \
              window.main-window button { background-color: #D3D3D3; color: #1A1A1A; } \
-             window.main-window frame button label { color: #1A1A1A; } \
+             window.main-window frame:not(.player-preview-frame) button label { color: #1A1A1A; } \
              window.main-window entry { background-color: #D3D3D3; color: #1A1A1A; }",
         );
 
