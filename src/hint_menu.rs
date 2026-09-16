@@ -5,21 +5,38 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 
 const HINTS_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/hints.toml");
 
+struct Hint {
+    key: String,
+    value: String,
+}
+
 struct HintTable {
     name: String,
-    hints: Vec<String>,
+    hints: Vec<Hint>,
 }
 
 pub struct HintMenu {
     tables: Vec<HintTable>,
 }
 
+#[derive(Debug)]
+pub enum HintMenuMsg {
+    HintClicked(String),
+    HintActivated(String),
+}
+
+#[derive(Debug)]
+pub enum HintMenuOutput {
+    HintSelected(String),
+    HintActivated(String),
+}
+
 #[relm4::component(pub)]
 impl SimpleComponent for HintMenu {
     type Init = ();
 
-    type Input = ();
-    type Output = ();
+    type Input = HintMenuMsg;
+    type Output = HintMenuOutput;
 
     view! {
         gtk::ScrolledWindow {
@@ -39,7 +56,7 @@ impl SimpleComponent for HintMenu {
     fn init(
         _init: Self::Init,
         root: Self::Root,
-        _sender: ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = HintMenu {
             tables: load_hint_tables(),
@@ -52,9 +69,22 @@ impl SimpleComponent for HintMenu {
 
             let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
             for hint in &table.hints {
-                let label = gtk::Label::new(Some(hint));
+                let label = gtk::Label::new(Some(&hint.key));
                 label.set_halign(gtk::Align::Start);
                 label.set_wrap(true);
+
+                let click = gtk::GestureClick::new();
+                let value = hint.value.clone();
+                let input_sender = sender.input_sender().clone();
+                click.connect_pressed(move |_, n_press, _, _| {
+                    if n_press == 1 {
+                        input_sender.emit(HintMenuMsg::HintClicked(value.clone()));
+                    } else if n_press == 2 {
+                        input_sender.emit(HintMenuMsg::HintActivated(value.clone()));
+                    }
+                });
+                label.add_controller(click);
+
                 hints_box.append(&label);
             }
             expander.set_child(Some(&hints_box));
@@ -65,7 +95,16 @@ impl SimpleComponent for HintMenu {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
+        match msg {
+            HintMenuMsg::HintClicked(value) => {
+                let _ = sender.output(HintMenuOutput::HintSelected(value));
+            }
+            HintMenuMsg::HintActivated(value) => {
+                let _ = sender.output(HintMenuOutput::HintActivated(value));
+            }
+        }
+    }
 }
 
 fn load_hint_tables() -> Vec<HintTable> {
@@ -81,19 +120,25 @@ fn load_hint_tables() -> Vec<HintTable> {
         .filter_map(|(name, value)| {
             let table = value.as_table()?;
 
-            let mut hints: Vec<(u32, String)> = table
+            let mut hints: Vec<(u32, Hint)> = table
                 .iter()
                 .filter_map(|(key, value)| {
                     let index = key.strip_prefix("hint")?.parse::<u32>().ok()?;
-                    let text = value.as_str()?.to_string();
-                    Some((index, text))
+                    let value = value.as_str()?.to_string();
+                    Some((
+                        index,
+                        Hint {
+                            key: key.clone(),
+                            value,
+                        },
+                    ))
                 })
                 .collect();
             hints.sort_by_key(|(index, _)| *index);
 
             Some(HintTable {
                 name: name.clone(),
-                hints: hints.into_iter().map(|(_, text)| text).collect(),
+                hints: hints.into_iter().map(|(_, hint)| hint).collect(),
             })
         })
         .collect()

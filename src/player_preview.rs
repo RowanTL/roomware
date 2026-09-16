@@ -99,6 +99,10 @@ impl SimpleComponent for PlayerPreview {
         let widgets = view_output!();
 
         apply_css_style(&format!(
+            // "box.player-preview-box {{ background-color: #{}; }} \
+            //  box.player-preview-box label.timer-label-preview {{ font-size: {}px; color: #1A1A1A; }} \
+            //  box.player-preview-box label.message-label-preview {{ font-size: {}px; color: #1A1A1A; }} \
+            //  box.player-preview-box label.hints-remaining-label-preview {{ font-size: {}px; color: #1A1A1A; }}",
             "box.player-preview-box {{ background-color: #{}; }} label.timer-label-preview {{ font-size: {}px; }} label.message-label-preview {{ font-size: {}px; }} label.hints-remaining-label-preview {{ font-size: {}px; }}",
             DEFAULT_PLAYER_BACKGROUND,
             DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,

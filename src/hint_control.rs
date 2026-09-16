@@ -9,6 +9,8 @@ pub struct HintControl {
 pub enum HintControlMsg {
     Show,
     Clear,
+    SetText(String),
+    ShowValue(String),
 }
 
 #[derive(Debug)]
@@ -69,6 +71,14 @@ impl SimpleComponent for HintControl {
             }
             HintControlMsg::Clear => {
                 let _ = sender.output(HintControlOutput::ShowHint(String::new()));
+                entry.set_text("");
+            }
+            HintControlMsg::SetText(text) => {
+                entry.set_text(&text);
+            }
+            HintControlMsg::ShowValue(text) => {
+                entry.set_text(&text);
+                let _ = sender.output(HintControlOutput::ShowHint(text));
                 entry.set_text("");
             }
         }

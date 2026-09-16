@@ -3,8 +3,8 @@ use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, gtk,
 };
-use roomware::hint_control::{HintControl, HintControlOutput};
-use roomware::hint_menu::HintMenu;
+use roomware::hint_control::{HintControl, HintControlMsg, HintControlOutput};
+use roomware::hint_menu::{HintMenu, HintMenuOutput};
 use roomware::hints::{DEFAULT_HINT_AMT, Hints, HintsOutput};
 use roomware::player::{Player, PlayerMsg, PlayerOutput};
 use roomware::player_preview::{PlayerPreview, PlayerPreviewMsg};
@@ -77,7 +77,12 @@ impl SimpleComponent for MainWindow {
             .forward(player.sender(), |output| match output {
                 HintControlOutput::ShowHint(hint) => PlayerMsg::ShowHint(hint),
             });
-        let hint_menu = HintMenu::builder().launch(()).detach();
+        let hint_menu = HintMenu::builder()
+            .launch(())
+            .forward(hint_control.sender(), |output| match output {
+                HintMenuOutput::HintSelected(value) => HintControlMsg::SetText(value),
+                HintMenuOutput::HintActivated(value) => HintControlMsg::ShowValue(value),
+            });
 
         player.widget().present();
 
