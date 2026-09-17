@@ -7,5 +7,7 @@
 - [x] Move game master functionality to library code instead of main
 - [ ] Comment all functions
 - [x] Make hint send when clicking the enter button (Don't do anything if its empty)
-- [ ] Make background colors configurable rather than be hardcoded constants (in config.toml)
-- [ ] Make a readme lol
+- [x] Make background colors configurable rather than be hardcoded constants (in config.toml)
+- [ ] Make a readme
+- [ ] Fix long hints fucking up the screen
+- [ ] Add a ping button that plays a sound

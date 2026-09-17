@@ -5,13 +5,12 @@ use gtk::prelude::{
 };
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
-use crate::config::player_background_uri;
+use crate::config::theme;
 use crate::timer::format_time;
 use crate::utils::{apply_css_style, load_image};
 
 pub mod preview;
 
-pub(crate) const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 pub(crate) const DEFAULT_TIMER_FONT_SIZE: usize = 100;
 pub(crate) const DEFAULT_HINT_FONT_SIZE: usize = 70;
 pub(crate) const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
@@ -22,7 +21,7 @@ pub struct Player {
     playing_video: bool,
     video_stream: Option<gtk::MediaStream>,
     hint: String,
-    // Set when the hint is a path to an image; `hint` is then left empty.
+    // Set when the hint is a path to an image; `hint` is left empty.
     hint_image: Option<gtk::gdk::Texture>,
     show_hint: bool,
     hints_remaining: u8,
@@ -167,11 +166,15 @@ impl SimpleComponent for Player {
         }
 
         apply_css_style(&format!(
-            "window.player-window {{ {} }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }} label.hints-remaining-label {{ font-size: {}px; }}",
-            background_css(),
-            DEFAULT_TIMER_FONT_SIZE,
-            DEFAULT_HINT_FONT_SIZE,
-            DEFAULT_HINTS_REMAINING_FONT_SIZE
+            "window.player-window {{ {background} }} \
+             label.timer-label {{ font-size: {timer_size}px; color: #{label}; }} \
+             label.message-label {{ font-size: {hint_size}px; color: #{label}; }} \
+             label.hints-remaining-label {{ font-size: {remaining_size}px; color: #{label}; }}",
+            background = background_css(),
+            timer_size = DEFAULT_TIMER_FONT_SIZE,
+            hint_size = DEFAULT_HINT_FONT_SIZE,
+            remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE,
+            label = theme().player_label_color,
         ));
 
         place_on_secondary_monitor(&root);
@@ -233,11 +236,11 @@ impl Player {
 pub(crate) fn background_css() -> &'static str {
     static BACKGROUND_CSS: OnceLock<String> = OnceLock::new();
 
-    BACKGROUND_CSS.get_or_init(|| match player_background_uri() {
+    BACKGROUND_CSS.get_or_init(|| match &theme().player_background_image {
         Some(uri) => format!(
             "background-image: url(\"{uri}\"); background-size: cover; background-position: center;"
         ),
-        None => format!("background-color: #{DEFAULT_PLAYER_BACKGROUND};"),
+        None => format!("background-color: #{};", theme().player_background_color),
     })
 }
 

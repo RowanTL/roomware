@@ -1,6 +1,7 @@
 use gtk::prelude::{OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
+use crate::config::theme;
 use crate::player::{
     DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_TIMER_FONT_SIZE,
     PlayerState, background_css,
@@ -111,14 +112,15 @@ impl SimpleComponent for PlayerPreview {
         let widgets = view_output!();
 
         apply_css_style(&format!(
-            "box.player-preview-box {{ {} }} \
-             box.player-preview-box label.timer-label-preview {{ font-size: {}px; color: #1A1A1A; }} \
-             box.player-preview-box label.message-label-preview {{ font-size: {}px; color: #1A1A1A; }} \
-             box.player-preview-box label.hints-remaining-label-preview {{ font-size: {}px; color: #1A1A1A; }}",
-            background_css(),
-            DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
-            DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
-            DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR
+            "box.player-preview-box {{ {background} }} \
+             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; color: #{label}; }} \
+             box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{label}; }} \
+             box.player-preview-box label.hints-remaining-label-preview {{ font-size: {remaining_size}px; color: #{label}; }}",
+            background = background_css(),
+            timer_size = DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+            hint_size = DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+            remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+            label = theme().player_label_color,
         ));
 
         ComponentParts { model, widgets }
