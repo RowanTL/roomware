@@ -1,4 +1,4 @@
-use gtk::prelude::{BoxExt, ButtonExt, EditableExt, OrientableExt, WidgetExt};
+use gtk::prelude::{BoxExt, ButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 pub struct HintControl {
@@ -8,6 +8,7 @@ pub struct HintControl {
 #[derive(Debug)]
 pub enum HintControlMsg {
     Show,
+    Submit,
     Clear,
     SetText(String),
     ShowValue(String),
@@ -33,6 +34,7 @@ impl SimpleComponent for HintControl {
             #[name = "entry"]
             gtk::Entry {
                 set_hexpand: true,
+                connect_activate => HintControlMsg::Submit,
             },
 
             gtk::Button::with_label("Show Hint") {
@@ -67,6 +69,17 @@ impl SimpleComponent for HintControl {
         match msg {
             HintControlMsg::Show => {
                 let _ = sender.output(HintControlOutput::ShowHint(entry.text().to_string()));
+                entry.set_text("");
+            }
+            HintControlMsg::Submit => {
+                let hint = entry.text().to_string();
+
+                // If hint box is empty, do nothing
+                if hint.trim().is_empty() {
+                    return;
+                }
+
+                let _ = sender.output(HintControlOutput::ShowHint(hint));
                 entry.set_text("");
             }
             HintControlMsg::Clear => {
