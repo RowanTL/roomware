@@ -5,10 +5,6 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 
 const HINTS_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/hints.toml");
 
-// Recognised `hints.toml` key prefixes, each followed by a number. Text hints
-// are listed before pictures within a step; both sort by their number.
-const KEY_PREFIXES: [&str; 2] = ["hint", "pic"];
-
 struct Hint {
     key: String,
     value: String,
@@ -111,15 +107,6 @@ impl SimpleComponent for HintMenu {
     }
 }
 
-/// Split a key such as `hint2` or `pic1` into the sort order of its prefix and
-/// its number. Keys that match no prefix are skipped entirely.
-fn parse_key(key: &str) -> Option<(usize, u32)> {
-    KEY_PREFIXES.iter().enumerate().find_map(|(group, prefix)| {
-        let index = key.strip_prefix(prefix)?.parse::<u32>().ok()?;
-        Some((group, index))
-    })
-}
-
 fn load_hint_tables() -> Vec<HintTable> {
     let Ok(contents) = fs::read_to_string(HINTS_TOML_PATH) else {
         return Vec::new();
@@ -133,25 +120,19 @@ fn load_hint_tables() -> Vec<HintTable> {
         .filter_map(|(name, value)| {
             let table = value.as_table()?;
 
-            let mut hints: Vec<((usize, u32), Hint)> = table
+            let hints = table
                 .iter()
                 .filter_map(|(key, value)| {
-                    let order = parse_key(key)?;
-                    let value = value.as_str()?.to_string();
-                    Some((
-                        order,
-                        Hint {
-                            key: key.clone(),
-                            value,
-                        },
-                    ))
+                    Some(Hint {
+                        key: key.clone(),
+                        value: value.as_str()?.to_string(),
+                    })
                 })
                 .collect();
-            hints.sort_by_key(|(order, _)| *order);
 
             Some(HintTable {
                 name: name.clone(),
-                hints: hints.into_iter().map(|(_, hint)| hint).collect(),
+                hints,
             })
         })
         .collect()
