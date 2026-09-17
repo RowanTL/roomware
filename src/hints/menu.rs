@@ -107,6 +107,7 @@ impl SimpleComponent for HintMenu {
     }
 }
 
+/// Loads the hints from a hints.toml file
 fn load_hint_tables() -> Vec<HintTable> {
     let Ok(contents) = fs::read_to_string(HINTS_TOML_PATH) else {
         return Vec::new();

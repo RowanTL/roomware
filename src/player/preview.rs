@@ -12,8 +12,9 @@ use crate::utils::apply_css_style;
 const PREVIEW_WIDTH: i32 = 300;
 const PREVIEW_HEIGHT: i32 = 100;
 
-// Player's fonts are sized for a fullscreen monitor; shrink them to fit this little box.
-const PREVIEW_FONT_SCALE_DIVISOR: usize = 2;
+// Player's fonts are sized for a fullscreen monitor; shrink them to fit the preview box.
+// Here just in case now.
+const PREVIEW_FONT_SCALE_DIVISOR: usize = 1;
 
 pub struct PlayerPreview {
     state: PlayerState,

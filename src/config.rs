@@ -44,7 +44,7 @@ pub fn theme() -> &'static Theme {
 impl Theme {
     /// Reads config.toml, falling back to the `DEFAULT_*` colors key by key.
     fn load() -> Self {
-        // Make this accept a path later :/
+        // TODO: Make this accept a path later :/
         let root = fs::read_to_string(CONFIG_TOML_PATH)
             .ok()
             .and_then(|contents| contents.parse::<toml::Table>().ok())
@@ -86,7 +86,7 @@ impl Theme {
     }
 }
 
-/// Reads a color, falling back to `default` when the is invalid.
+/// Reads a color, falling back to `default` when it's invalid.
 /// A leading `#` is accepted but not required.
 fn color(root: &toml::Table, path: &str, default: &str) -> String {
     lookup(root, path)

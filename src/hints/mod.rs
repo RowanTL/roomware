@@ -52,7 +52,6 @@ impl SimpleComponent for Hints {
     ) -> ComponentParts<Self> {
         let model = Hints { counter };
 
-        // Insert the macro code generation here
         let widgets = view_output!();
 
         let _ = sender.output(HintsOutput::CounterChanged(model.counter));

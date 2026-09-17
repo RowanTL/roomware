@@ -247,6 +247,7 @@ impl SimpleComponent for Player {
 }
 
 impl Player {
+    /// Helps with updating the preview in the game master view.
     fn to_state(&self) -> PlayerState {
         PlayerState {
             remaining: self.remaining,

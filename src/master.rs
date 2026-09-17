@@ -126,7 +126,6 @@ impl SimpleComponent for GameMasterWindow {
             player,
         };
 
-        // Insert the macro code generation here
         let widgets = view_output!();
 
         let theme = theme();

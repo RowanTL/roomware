@@ -114,6 +114,8 @@ impl Timer {
     }
 }
 
+/// Takes a time in seconds and makes a nice output string
+/// from it.
 pub(crate) fn format_time(total_seconds: u32) -> String {
     let minutes = total_seconds / 60;
     let seconds = total_seconds % 60;
