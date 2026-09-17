@@ -1,7 +1,8 @@
 use std::sync::OnceLock;
 
 use gtk::prelude::{
-    CastNone, DisplayExt, GtkWindowExt, ListModelExt, MediaStreamExt, OrientableExt, WidgetExt,
+    Cast, CastNone, DisplayExt, GtkWindowExt, ListModelExt, MediaStreamExt, OrientableExt,
+    WidgetExt, WidgetExtManual,
 };
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
@@ -12,8 +13,11 @@ use crate::utils::{apply_css_style, load_image};
 pub mod preview;
 
 pub(crate) const DEFAULT_TIMER_FONT_SIZE: usize = 100;
-pub(crate) const DEFAULT_HINT_FONT_SIZE: usize = 70;
+pub(crate) const DEFAULT_HINT_FONT_SIZE: usize = 50;
 pub(crate) const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
+pub(crate) const HINT_WRAP_WIDTH_CHARS: i32 = 30;
+pub(crate) const MIN_HINT_FONT_SIZE: usize = 16;
+pub(crate) const HINT_MARGIN: i32 = 5;
 const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
 
 pub struct Player {
@@ -83,28 +87,42 @@ impl SimpleComponent for Player {
                         add_css_class: "timer-label",
                     },
 
-                    gtk::Box {
-                        #[watch]
-                        set_visible: model.show_hint,
-                        set_halign: gtk::Align::Center,
-                        set_valign: gtk::Align::Center,
+                    #[name = "hint_area"]
+                    gtk::ScrolledWindow {
+                        set_hexpand: true,
                         set_vexpand: true,
+                        set_hscrollbar_policy: gtk::PolicyType::Never,
+                        set_vscrollbar_policy: gtk::PolicyType::External,
 
-                        gtk::Label {
-                            #[watch]
-                            set_visible: model.hint_image.is_none(),
-                            #[watch]
-                            set_label: &model.hint,
-                            set_margin_all: 5,
-                            add_css_class: "message-label",
-                        },
+                        gtk::Box {
+                            set_halign: gtk::Align::Fill,
+                            set_valign: gtk::Align::Center,
+                            set_hexpand: true,
+                            set_vexpand: true,
 
-                        gtk::Picture {
-                            #[watch]
-                            set_visible: model.hint_image.is_some(),
-                            #[watch]
-                            set_paintable: model.hint_image.as_ref(),
-                            set_margin_all: 5,
+                            #[name = "hint_label"]
+                            gtk::Label {
+                                #[watch]
+                                set_visible: model.show_hint && model.hint_image.is_none(),
+                                #[watch]
+                                set_label: &model.hint,
+                                set_margin_all: HINT_MARGIN,
+                                set_hexpand: true,
+                                set_wrap: true,
+                                set_wrap_mode: gtk::pango::WrapMode::WordChar,
+                                set_max_width_chars: HINT_WRAP_WIDTH_CHARS,
+                                set_justify: gtk::Justification::Center,
+                                add_css_class: "message-label",
+                            },
+
+                            gtk::Picture {
+                                #[watch]
+                                set_visible: model.show_hint && model.hint_image.is_some(),
+                                #[watch]
+                                set_paintable: model.hint_image.as_ref(),
+                                set_margin_all: HINT_MARGIN,
+                                set_hexpand: true,
+                            }
                         }
                     }
                 },
@@ -167,6 +185,8 @@ impl SimpleComponent for Player {
 
         apply_css_style(&format!(
             "window.player-window {{ {background} }} \
+             window.player-window scrolledwindow, \
+             window.player-window scrolledwindow viewport {{ background: none; }} \
              label.timer-label {{ font-size: {timer_size}px; color: #{label}; }} \
              label.message-label {{ font-size: {hint_size}px; color: #{label}; }} \
              label.hints-remaining-label {{ font-size: {remaining_size}px; color: #{label}; }}",
@@ -216,6 +236,14 @@ impl SimpleComponent for Player {
 
         let _ = sender.output(PlayerOutput::StateChanged(self.to_state()));
     }
+
+    fn post_view() {
+        fit_font_size(
+            &widgets.hint_label,
+            widgets.hint_area.upcast_ref(),
+            DEFAULT_HINT_FONT_SIZE,
+        );
+    }
 }
 
 impl Player {
@@ -231,6 +259,79 @@ impl Player {
     }
 }
 
+/// A label is always as tall as its text, so a long hint would grow until it
+/// crowded out the labels around it. Shrink the font instead, down to whatever
+/// size makes the wrapped hint fit the space `area` actually has.
+///
+/// This one is also vibe coded.
+pub(crate) fn fit_font_size(label: &gtk::Label, area: &gtk::Widget, max_size: usize) {
+    if fit_font_size_now(label, area, max_size) {
+        return;
+    }
+
+    // Nothing is laid out yet, so there is no size to fit to; the frame clock
+    // hands us one as soon as there is.
+    let label = label.clone();
+    let pending_area = area.clone();
+    area.add_tick_callback(move |_, _| {
+        if fit_font_size_now(&label, &pending_area, max_size) {
+            gtk::glib::ControlFlow::Break
+        } else {
+            gtk::glib::ControlFlow::Continue
+        }
+    });
+}
+
+/// Returns whether `area` was laid out far enough to fit anything to.
+///
+/// This is AI generated. I have no idea what's going on in this function.
+fn fit_font_size_now(label: &gtk::Label, area: &gtk::Widget, max_size: usize) -> bool {
+    let width = area.width() - HINT_MARGIN * 2;
+    let height = area.height() - HINT_MARGIN * 2;
+    if width <= 0 || height <= 0 {
+        return false;
+    }
+
+    let text = label.text();
+    if text.is_empty() {
+        label.set_attributes(None);
+        return true;
+    }
+
+    let context = label.pango_context();
+    let mut font = context.font_description().unwrap_or_default();
+    let layout = gtk::pango::Layout::new(&context);
+    layout.set_text(&text);
+    layout.set_wrap(gtk::pango::WrapMode::WordChar);
+    layout.set_width(width * gtk::pango::SCALE);
+
+    let mut fits = |size: usize| {
+        font.set_absolute_size((size * gtk::pango::SCALE as usize) as f64);
+        layout.set_font_description(Some(&font));
+        layout.pixel_size().1 <= height
+    };
+
+    // Taller text never fits where shorter text didn't, so binary search for the
+    // largest size that still fits rather than measuring every size.
+    let (mut smallest, mut largest) = (MIN_HINT_FONT_SIZE, max_size.max(MIN_HINT_FONT_SIZE));
+    while smallest < largest {
+        let size = smallest + (largest - smallest).div_ceil(2);
+        if fits(size) {
+            smallest = size;
+        } else {
+            largest = size - 1;
+        }
+    }
+
+    let attributes = gtk::pango::AttrList::new();
+    attributes.insert(gtk::pango::AttrSize::new_size_absolute(
+        (smallest * gtk::pango::SCALE as usize) as i32,
+    ));
+    label.set_attributes(Some(&attributes));
+
+    true
+}
+
 /// If the user doesn't configure a background image to use, this function
 /// is called to create a basic background color instead.
 pub(crate) fn background_css() -> &'static str {
@@ -244,8 +345,7 @@ pub(crate) fn background_css() -> &'static str {
     })
 }
 
-// Checks if a second monitor exists and places the player window on it
-// if it does.
+// Checks if a second monitor exists and places the player window on it.
 fn place_on_secondary_monitor(window: &gtk::Window) {
     // https://doc.rust-lang.org/beta/rust-by-example/flow_control/let_else.html
     let Some(display) = gtk::gdk::Display::default() else {

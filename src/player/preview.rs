@@ -1,10 +1,10 @@
-use gtk::prelude::{OrientableExt, WidgetExt};
+use gtk::prelude::{Cast, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 use crate::config::theme;
 use crate::player::{
     DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_TIMER_FONT_SIZE,
-    PlayerState, background_css,
+    HINT_WRAP_WIDTH_CHARS, PlayerState, background_css, fit_font_size,
 };
 use crate::timer::format_time;
 use crate::utils::apply_css_style;
@@ -58,28 +58,44 @@ impl SimpleComponent for PlayerPreview {
                 add_css_class: "timer-label-preview",
             },
 
-            gtk::Box {
+            #[name = "hint_area"]
+            gtk::ScrolledWindow {
+                set_hexpand: true,
                 set_vexpand: true,
-                set_halign: gtk::Align::Center,
-                set_valign: gtk::Align::Center,
+                set_hscrollbar_policy: gtk::PolicyType::Never,
+                set_vscrollbar_policy: gtk::PolicyType::External,
 
-                gtk::Label {
-                    #[watch]
-                    set_visible: !model.state.playing_video
-                        && model.state.show_hint
-                        && model.state.hint_image.is_none(),
-                    #[watch]
-                    set_label: &model.state.hint,
-                    add_css_class: "message-label-preview",
-                },
+                gtk::Box {
+                    set_vexpand: true,
+                    set_hexpand: true,
+                    set_halign: gtk::Align::Fill,
+                    set_valign: gtk::Align::Center,
 
-                gtk::Picture {
-                    #[watch]
-                    set_visible: !model.state.playing_video
-                        && model.state.show_hint
-                        && model.state.hint_image.is_some(),
-                    #[watch]
-                    set_paintable: model.state.hint_image.as_ref(),
+                    #[name = "hint_label"]
+                    gtk::Label {
+                        #[watch]
+                        set_visible: !model.state.playing_video
+                            && model.state.show_hint
+                            && model.state.hint_image.is_none(),
+                        #[watch]
+                        set_label: &model.state.hint,
+                        set_hexpand: true,
+                        set_wrap: true,
+                        set_wrap_mode: gtk::pango::WrapMode::WordChar,
+                        set_max_width_chars: HINT_WRAP_WIDTH_CHARS,
+                        set_justify: gtk::Justification::Center,
+                        add_css_class: "message-label-preview",
+                    },
+
+                    gtk::Picture {
+                        #[watch]
+                        set_visible: !model.state.playing_video
+                            && model.state.show_hint
+                            && model.state.hint_image.is_some(),
+                        #[watch]
+                        set_paintable: model.state.hint_image.as_ref(),
+                        set_hexpand: true,
+                    }
                 }
             },
 
@@ -113,6 +129,8 @@ impl SimpleComponent for PlayerPreview {
 
         apply_css_style(&format!(
             "box.player-preview-box {{ {background} }} \
+             box.player-preview-box scrolledwindow, \
+             box.player-preview-box scrolledwindow viewport {{ background: none; }} \
              box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; color: #{label}; }} \
              box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{label}; }} \
              box.player-preview-box label.hints-remaining-label-preview {{ font-size: {remaining_size}px; color: #{label}; }}",
@@ -132,5 +150,13 @@ impl SimpleComponent for PlayerPreview {
                 self.state = state;
             }
         }
+    }
+
+    fn post_view() {
+        fit_font_size(
+            &widgets.hint_label,
+            widgets.hint_area.upcast_ref(),
+            DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+        );
     }
 }
