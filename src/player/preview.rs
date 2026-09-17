@@ -64,10 +64,21 @@ impl SimpleComponent for PlayerPreview {
 
                 gtk::Label {
                     #[watch]
-                    set_visible: !model.state.playing_video && model.state.show_hint,
+                    set_visible: !model.state.playing_video
+                        && model.state.show_hint
+                        && model.state.hint_image.is_none(),
                     #[watch]
                     set_label: &model.state.hint,
                     add_css_class: "message-label-preview",
+                },
+
+                gtk::Picture {
+                    #[watch]
+                    set_visible: !model.state.playing_video
+                        && model.state.show_hint
+                        && model.state.hint_image.is_some(),
+                    #[watch]
+                    set_paintable: model.state.hint_image.as_ref(),
                 }
             },
 
@@ -91,6 +102,7 @@ impl SimpleComponent for PlayerPreview {
                 remaining: 0,
                 playing_video: false,
                 hint: String::new(),
+                hint_image: None,
                 show_hint: false,
                 hints_remaining: 0,
             },

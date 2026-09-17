@@ -4,7 +4,7 @@ use gtk::prelude::{
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::timer::format_time;
-use crate::utils::apply_css_style;
+use crate::utils::{apply_css_style, load_image};
 
 pub mod preview;
 
@@ -19,6 +19,8 @@ pub struct Player {
     playing_video: bool,
     video_stream: Option<gtk::MediaStream>,
     hint: String,
+    // Set when the hint is a path to an image; `hint` is then left empty.
+    hint_image: Option<gtk::gdk::Texture>,
     show_hint: bool,
     hints_remaining: u8,
 }
@@ -37,6 +39,7 @@ pub struct PlayerState {
     pub remaining: u32,
     pub playing_video: bool,
     pub hint: String,
+    pub hint_image: Option<gtk::gdk::Texture>,
     pub show_hint: bool,
     pub hints_remaining: u8,
 }
@@ -87,9 +90,19 @@ impl SimpleComponent for Player {
 
                         gtk::Label {
                             #[watch]
+                            set_visible: model.hint_image.is_none(),
+                            #[watch]
                             set_label: &model.hint,
                             set_margin_all: 5,
                             add_css_class: "message-label",
+                        },
+
+                        gtk::Picture {
+                            #[watch]
+                            set_visible: model.hint_image.is_some(),
+                            #[watch]
+                            set_paintable: model.hint_image.as_ref(),
+                            set_margin_all: 5,
                         }
                     }
                 },
@@ -126,6 +139,7 @@ impl SimpleComponent for Player {
             playing_video: false,
             video_stream: None,
             hint: String::new(),
+            hint_image: None,
             show_hint: false,
             hints_remaining: 0,
         };
@@ -181,7 +195,13 @@ impl SimpleComponent for Player {
             PlayerMsg::ShowHint(hint) => {
                 let hint = hint.trim().to_string();
                 self.show_hint = !hint.is_empty();
-                self.hint = hint;
+                self.hint_image = load_image(&hint);
+                // A picture stands on its own; don't put its path on screen too.
+                self.hint = if self.hint_image.is_some() {
+                    String::new()
+                } else {
+                    hint
+                };
             }
             PlayerMsg::UpdateHintsRemaining(hints_remaining) => {
                 self.hints_remaining = hints_remaining;
@@ -198,6 +218,7 @@ impl Player {
             remaining: self.remaining,
             playing_video: self.playing_video,
             hint: self.hint.clone(),
+            hint_image: self.hint_image.clone(),
             show_hint: self.show_hint,
             hints_remaining: self.hints_remaining,
         }
