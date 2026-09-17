@@ -128,8 +128,8 @@ impl SimpleComponent for MainWindow {
              window.main-window frame { border: 2px solid #D3D3D3; padding: 6px; } \
              window.main-window frame:not(.player-preview-frame) label { color: #D3D3D3; } \
              window.main-window frame > label { font-weight: bold; } \
-             window.main-window expander title { color: #D3D3D3; } \
-             window.main-window expander title arrow { color: #D3D3D3; } \
+             window.main-window expander-widget > box > title > expander { color: #D3D3D3; } \
+             window.main-window expander-widget > box > title:hover > expander { color: #FFFFFF; } \
              window.main-window button { background-color: #D3D3D3; color: #1A1A1A; } \
              window.main-window frame:not(.player-preview-frame) button label { color: #1A1A1A; } \
              window.main-window entry { background-color: #D3D3D3; color: #1A1A1A; }",
