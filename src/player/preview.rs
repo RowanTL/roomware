@@ -2,8 +2,8 @@ use gtk::prelude::{OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 use crate::player::{
-    DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_PLAYER_BACKGROUND,
-    DEFAULT_TIMER_FONT_SIZE, PlayerState,
+    DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_TIMER_FONT_SIZE,
+    PlayerState, background_css,
 };
 use crate::timer::format_time;
 use crate::utils::apply_css_style;
@@ -111,11 +111,11 @@ impl SimpleComponent for PlayerPreview {
         let widgets = view_output!();
 
         apply_css_style(&format!(
-            "box.player-preview-box {{ background-color: #{}; }} \
+            "box.player-preview-box {{ {} }} \
              box.player-preview-box label.timer-label-preview {{ font-size: {}px; color: #1A1A1A; }} \
              box.player-preview-box label.message-label-preview {{ font-size: {}px; color: #1A1A1A; }} \
              box.player-preview-box label.hints-remaining-label-preview {{ font-size: {}px; color: #1A1A1A; }}",
-            DEFAULT_PLAYER_BACKGROUND,
+            background_css(),
             DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR

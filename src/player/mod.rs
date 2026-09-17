@@ -1,8 +1,11 @@
+use std::sync::OnceLock;
+
 use gtk::prelude::{
     CastNone, DisplayExt, GtkWindowExt, ListModelExt, MediaStreamExt, OrientableExt, WidgetExt,
 };
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
+use crate::config::player_background_uri;
 use crate::timer::format_time;
 use crate::utils::{apply_css_style, load_image};
 
@@ -164,8 +167,8 @@ impl SimpleComponent for Player {
         }
 
         apply_css_style(&format!(
-            "window.player-window {{ background-color: #{}; }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }} label.hints-remaining-label {{ font-size: {}px; }}",
-            DEFAULT_PLAYER_BACKGROUND,
+            "window.player-window {{ {} }} label.timer-label {{ font-size: {}px; }} label.message-label {{ font-size: {}px; }} label.hints-remaining-label {{ font-size: {}px; }}",
+            background_css(),
             DEFAULT_TIMER_FONT_SIZE,
             DEFAULT_HINT_FONT_SIZE,
             DEFAULT_HINTS_REMAINING_FONT_SIZE
@@ -225,6 +228,21 @@ impl Player {
     }
 }
 
+/// If the user doesn't configure a background image to use, this function
+/// is called to create a basic background color instead.
+pub(crate) fn background_css() -> &'static str {
+    static BACKGROUND_CSS: OnceLock<String> = OnceLock::new();
+
+    BACKGROUND_CSS.get_or_init(|| match player_background_uri() {
+        Some(uri) => format!(
+            "background-image: url(\"{uri}\"); background-size: cover; background-position: center;"
+        ),
+        None => format!("background-color: #{DEFAULT_PLAYER_BACKGROUND};"),
+    })
+}
+
+// Checks if a second monitor exists and places the player window on it
+// if it does.
 fn place_on_secondary_monitor(window: &gtk::Window) {
     // https://doc.rust-lang.org/beta/rust-by-example/flow_control/let_else.html
     let Some(display) = gtk::gdk::Display::default() else {

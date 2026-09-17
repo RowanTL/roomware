@@ -1,3 +1,4 @@
+pub mod config;
 pub mod hints;
 pub mod player;
 pub mod timer;
