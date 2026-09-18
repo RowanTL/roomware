@@ -1,12 +1,12 @@
 use gtk::prelude::{Cast, OrientableExt, WidgetExt};
-use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
+use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::config::config;
 use crate::player::{
     DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_TIMER_FONT_SIZE,
     HINT_WRAP_WIDTH_CHARS, PlayerState, background_css, fit_font_size,
 };
-use crate::timer::format_time;
+use crate::timer::{Outcome, format_time};
 use crate::utils::apply_css_style;
 
 const PREVIEW_WIDTH: i32 = 300;
@@ -57,6 +57,10 @@ impl SimpleComponent for PlayerPreview {
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Start,
                 add_css_class: "timer-label-preview",
+                #[watch]
+                set_class_active: ("win", model.state.outcome == Outcome::Won),
+                #[watch]
+                set_class_active: ("lose", model.state.outcome == Outcome::Lost),
             },
 
             #[name = "hint_area"]
@@ -118,6 +122,7 @@ impl SimpleComponent for PlayerPreview {
         let model = PlayerPreview {
             state: PlayerState {
                 remaining: 0,
+                outcome: Outcome::Undecided,
                 playing_video: false,
                 hint: String::new(),
                 hint_image: None,
@@ -133,6 +138,8 @@ impl SimpleComponent for PlayerPreview {
              box.player-preview-box scrolledwindow, \
              box.player-preview-box scrolledwindow viewport {{ background: none; }} \
              box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; color: #{label}; }} \
+             box.player-preview-box label.timer-label-preview.win {{ color: #{win}; }} \
+             box.player-preview-box label.timer-label-preview.lose {{ color: #{lose}; }} \
              box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{label}; }} \
              box.player-preview-box label.hints-remaining-label-preview {{ font-size: {remaining_size}px; color: #{label}; }}",
             background = background_css(),
@@ -140,6 +147,8 @@ impl SimpleComponent for PlayerPreview {
             hint_size = DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             label = config().player_label_color,
+            win = config().player_win_color,
+            lose = config().player_lose_color,
         ));
 
         ComponentParts { model, widgets }

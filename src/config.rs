@@ -7,6 +7,8 @@ use crate::utils::{image_uri, resolve_path};
 const CONFIG_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/config.toml");
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 const DEFAULT_PLAYER_LABEL: &str = "1A1A1A";
+const DEFAULT_PLAYER_WIN: &str = "89D154";
+const DEFAULT_PLAYER_LOSE: &str = "E32D2D";
 const DEFAULT_PLAYER_VIDEO: &str = "./video.mp4";
 const DEFAULT_MASTER_BACKGROUND: &str = "333333";
 const DEFAULT_MASTER_NOISE: &str = "./audio.ogg";
@@ -25,6 +27,8 @@ pub struct Config {
     pub player_background_image: Option<String>,
     pub player_background_color: String,
     pub player_label_color: String,
+    pub player_win_color: String,
+    pub player_lose_color: String,
     pub player_video: Option<PathBuf>,
     pub master_background: String,
     pub master_noise: Option<PathBuf>,
@@ -65,6 +69,8 @@ impl Config {
                 DEFAULT_PLAYER_BACKGROUND,
             ),
             player_label_color: color(&root, "player.label.color", DEFAULT_PLAYER_LABEL),
+            player_win_color: color(&root, "player.win.color", DEFAULT_PLAYER_WIN),
+            player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE),
             player_video: media(&root, "player.video", DEFAULT_PLAYER_VIDEO),
             master_background: color(&root, "master.background", DEFAULT_MASTER_BACKGROUND),
             master_noise: media(&root, "master.noise", DEFAULT_MASTER_NOISE),

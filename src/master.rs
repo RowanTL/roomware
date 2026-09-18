@@ -77,6 +77,7 @@ impl SimpleComponent for GameMasterWindow {
             .launch(())
             .forward(player.sender(), |output| match output {
                 TimerOutput::TimeChanged(remaining) => PlayerMsg::UpdateTime(remaining),
+                TimerOutput::OutcomeChanged(outcome) => PlayerMsg::UpdateOutcome(outcome),
             });
         let hint_control = HintControl::builder()
             .launch(())

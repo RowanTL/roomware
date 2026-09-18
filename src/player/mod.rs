@@ -7,7 +7,7 @@ use gtk::prelude::{
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::config::config;
-use crate::timer::format_time;
+use crate::timer::{Outcome, format_time};
 use crate::utils::{apply_css_style, load_image};
 
 pub mod preview;
@@ -21,6 +21,7 @@ pub(crate) const HINT_MARGIN: i32 = 5;
 
 pub struct Player {
     remaining: u32,
+    outcome: Outcome,
     playing_video: bool,
     video_stream: Option<gtk::MediaStream>,
     audio_stream: Option<gtk::MediaStream>,
@@ -34,6 +35,7 @@ pub struct Player {
 #[derive(Debug)]
 pub enum PlayerMsg {
     UpdateTime(u32),
+    UpdateOutcome(Outcome),
     PlayVideo,
     PlayAudio,
     VideoFinished,
@@ -44,6 +46,7 @@ pub enum PlayerMsg {
 #[derive(Debug, Clone)]
 pub struct PlayerState {
     pub remaining: u32,
+    pub outcome: Outcome,
     pub playing_video: bool,
     pub hint: String,
     pub hint_image: Option<gtk::gdk::Texture>,
@@ -86,6 +89,10 @@ impl SimpleComponent for Player {
                         set_valign: gtk::Align::Start,
                         set_margin_all: 5,
                         add_css_class: "timer-label",
+                        #[watch]
+                        set_class_active: ("win", model.outcome == Outcome::Won),
+                        #[watch]
+                        set_class_active: ("lose", model.outcome == Outcome::Lost),
                     },
 
                     #[name = "hint_area"]
@@ -157,6 +164,7 @@ impl SimpleComponent for Player {
     ) -> ComponentParts<Self> {
         let mut model = Player {
             remaining: 0,
+            outcome: Outcome::Undecided,
             playing_video: false,
             video_stream: None,
             audio_stream: load_audio(),
@@ -190,6 +198,8 @@ impl SimpleComponent for Player {
              window.player-window scrolledwindow, \
              window.player-window scrolledwindow viewport {{ background: none; }} \
              label.timer-label {{ font-size: {timer_size}px; color: #{label}; }} \
+             label.timer-label.win {{ color: #{win}; }} \
+             label.timer-label.lose {{ color: #{lose}; }} \
              label.message-label {{ font-size: {hint_size}px; color: #{label}; }} \
              label.hints-remaining-label {{ font-size: {remaining_size}px; color: #{label}; }}",
             background = background_css(),
@@ -197,6 +207,8 @@ impl SimpleComponent for Player {
             hint_size = DEFAULT_HINT_FONT_SIZE,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE,
             label = config().player_label_color,
+            win = config().player_win_color,
+            lose = config().player_lose_color,
         ));
 
         place_on_secondary_monitor(&root);
@@ -210,6 +222,9 @@ impl SimpleComponent for Player {
         match msg {
             PlayerMsg::UpdateTime(remaining) => {
                 self.remaining = remaining;
+            }
+            PlayerMsg::UpdateOutcome(outcome) => {
+                self.outcome = outcome;
             }
             PlayerMsg::PlayVideo => {
                 // Without a video there is nothing to end the playback, so the
@@ -263,6 +278,7 @@ impl Player {
     fn to_state(&self) -> PlayerState {
         PlayerState {
             remaining: self.remaining,
+            outcome: self.outcome,
             playing_video: self.playing_video,
             hint: self.hint.clone(),
             hint_image: self.hint_image.clone(),
