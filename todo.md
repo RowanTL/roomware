@@ -18,3 +18,4 @@
 - [x] Make configurable win and lose text appear when the respective thing happens
 - [x] Make timer amount configurable in seconds in config.toml
 - [x] Add +1 and -1 minute buttons
+- [ ] Make cli with arguments to config file path
