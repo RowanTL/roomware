@@ -115,7 +115,7 @@ impl SimpleComponent for GameMasterWindow {
         let hint_frame = gtk::Frame::new(Some("Hint Controls"));
         hint_frame.set_child(Some(&hint_box));
 
-        let player_preview_frame = gtk::Frame::new(Some("Player Screen Preview"));
+        let player_preview_frame = gtk::Frame::new(Some("Player View"));
         player_preview_frame.set_child(Some(player_preview.widget()));
         player_preview_frame.set_hexpand(true);
         player_preview_frame.add_css_class("player-preview-frame");
@@ -140,7 +140,7 @@ impl SimpleComponent for GameMasterWindow {
             "window.main-window {{ background-color: #{background}; }} \
              window.main-window frame {{ border: 2px solid #{frame_border}; padding: 6px; }} \
              window.main-window frame:not(.player-preview-frame) label {{ color: #{frame_label}; }} \
-             window.main-window frame > label {{ font-weight: bold; }} \
+             window.main-window frame > label {{ color: #{frame_label}; font-weight: bold; }} \
              window.main-window expander-widget > box > title > expander {{ color: #{expander}; }} \
              window.main-window expander-widget > box > title:hover > expander {{ color: #{expander_hovered}; }} \
              window.main-window button {{ background-color: #{button_background}; color: #{button}; }} \
