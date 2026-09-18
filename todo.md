@@ -12,3 +12,5 @@
 - [x] Fix long hints fucking up the screen
 - [x] Add a ping button that plays a sound
 - [ ] Add configurable paths to played audio and video
+- [ ] Add a win button under the start and stop buttons
+- [ ] Turn timer red when lose and green when win
