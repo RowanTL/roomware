@@ -2,7 +2,8 @@
 
 # Rowan Files
 video.mp4
-*.toml
+config.toml
+hints.toml
 *.png
 *.jpg
 *.mp3
