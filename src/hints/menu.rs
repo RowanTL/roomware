@@ -66,6 +66,7 @@ impl SimpleComponent for HintMenu {
 
         for table in &model.tables {
             let expander = gtk::Expander::new(Some(&table.name));
+            expander.set_expanded(true);
 
             let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
             for hint in &table.hints {
