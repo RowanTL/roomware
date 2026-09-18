@@ -98,7 +98,7 @@ impl SimpleComponent for GameMasterWindow {
             player_sender.emit(PlayerMsg::PlayVideo);
         });
 
-        let play_audio_button = gtk::Button::with_label("Play Audio");
+        let play_audio_button = gtk::Button::with_label("Ping Player");
         let player_sender = player.sender().clone();
         play_audio_button.connect_clicked(move |_| {
             player_sender.emit(PlayerMsg::PlayAudio);
