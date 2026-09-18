@@ -10,4 +10,5 @@
 - [x] Make background colors configurable rather than be hardcoded constants (in config.toml)
 - [ ] Make a readme
 - [x] Fix long hints fucking up the screen
-- [ ] Add a ping button that plays a sound
+- [x] Add a ping button that plays a sound
+- [ ] Add configurable paths to played audio and video

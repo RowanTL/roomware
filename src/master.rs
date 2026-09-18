@@ -98,6 +98,12 @@ impl SimpleComponent for GameMasterWindow {
             player_sender.emit(PlayerMsg::PlayVideo);
         });
 
+        let play_audio_button = gtk::Button::with_label("Play Audio");
+        let player_sender = player.sender().clone();
+        play_audio_button.connect_clicked(move |_| {
+            player_sender.emit(PlayerMsg::PlayAudio);
+        });
+
         let timer_frame = gtk::Frame::new(Some("Timer Controls"));
         timer_frame.set_child(Some(timer.widget()));
 
@@ -155,7 +161,8 @@ impl SimpleComponent for GameMasterWindow {
 
         widgets.grid.attach(&timer_frame, 0, 0, 1, 1);
         widgets.grid.attach(&hint_frame, 1, 0, 1, 1);
-        widgets.grid.attach(&play_video_button, 0, 1, 2, 1);
+        widgets.grid.attach(&play_video_button, 0, 1, 1, 1);
+        widgets.grid.attach(&play_audio_button, 1, 1, 1, 1);
         widgets.grid.attach(&hint_menu_frame, 0, 2, 1, 1);
         widgets.grid.attach(&player_preview_frame, 1, 2, 1, 1);
 

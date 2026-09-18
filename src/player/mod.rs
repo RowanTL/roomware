@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::sync::OnceLock;
 
 use gtk::prelude::{
@@ -19,11 +20,13 @@ pub(crate) const HINT_WRAP_WIDTH_CHARS: i32 = 30;
 pub(crate) const MIN_HINT_FONT_SIZE: usize = 16;
 pub(crate) const HINT_MARGIN: i32 = 5;
 const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
+const AUDIO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/audio.ogg");
 
 pub struct Player {
     remaining: u32,
     playing_video: bool,
     video_stream: Option<gtk::MediaStream>,
+    audio_stream: Option<gtk::MediaStream>,
     hint: String,
     // Set when the hint is a path to an image; `hint` is left empty.
     hint_image: Option<gtk::gdk::Texture>,
@@ -35,6 +38,7 @@ pub struct Player {
 pub enum PlayerMsg {
     UpdateTime(u32),
     PlayVideo,
+    PlayAudio,
     VideoFinished,
     ShowHint(String),
     UpdateHintsRemaining(u8),
@@ -158,6 +162,7 @@ impl SimpleComponent for Player {
             remaining: 0,
             playing_video: false,
             video_stream: None,
+            audio_stream: load_audio(),
             hint: String::new(),
             hint_image: None,
             show_hint: false,
@@ -211,6 +216,14 @@ impl SimpleComponent for Player {
             }
             PlayerMsg::PlayVideo => {
                 self.playing_video = true;
+            }
+            PlayerMsg::PlayAudio => {
+                if let Some(stream) = &self.audio_stream {
+                    if stream.is_seekable() {
+                        stream.seek(0);
+                    }
+                    stream.play();
+                }
             }
             PlayerMsg::VideoFinished => {
                 self.playing_video = false;
@@ -331,6 +344,14 @@ fn fit_font_size_now(label: &gtk::Label, area: &gtk::Widget, max_size: usize) ->
     label.set_attributes(Some(&attributes));
 
     true
+}
+
+/// Loads audio if an audio file is found. Button does nothing
+/// if one isn't found.
+fn load_audio() -> Option<gtk::MediaStream> {
+    Path::new(AUDIO_PATH)
+        .is_file()
+        .then(|| gtk::MediaFile::for_filename(AUDIO_PATH).upcast())
 }
 
 /// If the user doesn't configure a background image to use, this function
