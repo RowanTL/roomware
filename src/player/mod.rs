@@ -147,6 +147,8 @@ impl SimpleComponent for Player {
 
                 gtk::Label {
                     #[watch]
+                    set_visible: !model.playing_video,
+                    #[watch]
                     set_label: &format!("Hints Remaining: {}", model.hints_remaining),
                     set_halign: gtk::Align::Center,
                     set_valign: gtk::Align::End,

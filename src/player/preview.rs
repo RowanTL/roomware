@@ -106,6 +106,8 @@ impl SimpleComponent for PlayerPreview {
 
             gtk::Label {
                 #[watch]
+                set_visible: !model.state.playing_video,
+                #[watch]
                 set_label: &format!("Hints Remaining: {}", model.state.hints_remaining),
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::End,
