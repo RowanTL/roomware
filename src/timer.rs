@@ -2,8 +2,7 @@ use gtk::glib;
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
-// In seconds, 3600 seconds = 1 hour
-pub(crate) const DEFAULT_TIME_LIMIT: u32 = 3600;
+use crate::config::config;
 
 pub struct Timer {
     remaining: u32,
@@ -69,7 +68,7 @@ impl SimpleComponent for Timer {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Timer {
-            remaining: DEFAULT_TIME_LIMIT,
+            remaining: config().master_time,
             running: false,
             outcome: Outcome::Undecided,
             source: None,
@@ -94,7 +93,7 @@ impl SimpleComponent for Timer {
             }
             TimerMsg::Reset => {
                 self.stop();
-                self.remaining = DEFAULT_TIME_LIMIT;
+                self.remaining = config().master_time;
                 self.outcome = Outcome::Undecided;
             }
             TimerMsg::Win => {
@@ -138,8 +137,7 @@ impl Timer {
     }
 }
 
-/// Takes a time in seconds and makes a nice output string
-/// from it.
+/// Takes a time in seconds and generates a nice output string from it.
 pub(crate) fn format_time(total_seconds: u32) -> String {
     let minutes = total_seconds / 60;
     let seconds = total_seconds % 60;

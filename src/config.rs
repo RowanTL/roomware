@@ -14,6 +14,8 @@ const DEFAULT_PLAYER_LOSE_TEXT: &str = "You lose!";
 const DEFAULT_PLAYER_VIDEO: &str = "./video.mp4";
 const DEFAULT_MASTER_BACKGROUND: &str = "333333";
 const DEFAULT_MASTER_NOISE: &str = "./audio.ogg";
+// In seconds, 3600 seconds = 1 hour
+const DEFAULT_MASTER_TIME: u32 = 3600;
 const DEFAULT_FRAME_BORDER: &str = "D3D3D3";
 const DEFAULT_FRAME_LABEL: &str = "D3D3D3";
 const DEFAULT_EXPANDER: &str = "D3D3D3";
@@ -36,6 +38,7 @@ pub struct Config {
     pub player_video: Option<PathBuf>,
     pub master_background: String,
     pub master_noise: Option<PathBuf>,
+    pub master_time: u32,
     pub frame_border: String,
     pub frame_label: String,
     pub expander_color: String,
@@ -65,7 +68,7 @@ impl Config {
 
         Self {
             player_background_image: lookup(&root, "player.background.image")
-                .as_deref()
+                .and_then(toml::Value::as_str)
                 .and_then(image_uri),
             player_background_color: color(
                 &root,
@@ -80,6 +83,7 @@ impl Config {
             player_video: media(&root, "player.video", DEFAULT_PLAYER_VIDEO),
             master_background: color(&root, "master.background", DEFAULT_MASTER_BACKGROUND),
             master_noise: media(&root, "master.noise", DEFAULT_MASTER_NOISE),
+            master_time: seconds(&root, "master.time", DEFAULT_MASTER_TIME),
             frame_border: color(&root, "frame.border", DEFAULT_FRAME_BORDER),
             frame_label: color(&root, "frame.label", DEFAULT_FRAME_LABEL),
             expander_color: color(&root, "expander.color", DEFAULT_EXPANDER),
@@ -105,12 +109,23 @@ impl Config {
     }
 }
 
-// Reads a line of text at the specified path. If the
-// path isn't found, returns what is passed as default.
+// Reads a line of text at the specified path. If the path isn't found,
+// returns what is passed as default.
 fn text(root: &toml::Table, path: &str, default: &str) -> String {
     lookup(root, path)
+        .and_then(toml::Value::as_str)
         .map(|value| value.trim().to_string())
         .unwrap_or_else(|| default.to_string())
+}
+
+/// Reads a length of time in seconds, falling back to `default` when the key
+/// isn't there or isn't a positive whole number.
+fn seconds(root: &toml::Table, path: &str, default: u32) -> u32 {
+    lookup(root, path)
+        .and_then(toml::Value::as_integer)
+        .and_then(|value| u32::try_from(value).ok())
+        .filter(|seconds| *seconds > 0)
+        .unwrap_or(default)
 }
 
 /// Reads a color, falling back to `default` when it's invalid.
@@ -127,12 +142,11 @@ fn color(root: &toml::Table, path: &str, default: &str) -> String {
 }
 
 /// Reads a path to a media file, falling back to `default` when the key is
-/// missing. `None` means there is no file there to play, so whatever plays it
-/// does nothing.
+/// missing. `None` means there is no file there to play.
 fn media(root: &toml::Table, path: &str, default: &str) -> Option<PathBuf> {
-    let configured = lookup(root, path);
+    let configured = lookup(root, path).and_then(toml::Value::as_str);
 
-    resolve_path(configured.as_deref().unwrap_or(default))
+    resolve_path(configured.unwrap_or(default))
 }
 
 /// CSS accepts hex colors of 3, 4, 6 or 8 digits.
@@ -142,7 +156,7 @@ fn is_hex(value: &str) -> bool {
 
 /// Follows a dotted path such as `player.background.color` down the nested
 /// tables that toml builds for both `[a.b]` headers and `a.b = x` keys.
-fn lookup(root: &toml::Table, path: &str) -> Option<String> {
+fn lookup<'a>(root: &'a toml::Table, path: &str) -> Option<&'a toml::Value> {
     let mut keys = path.split('.');
     let mut value = root.get(keys.next()?)?;
 
@@ -150,5 +164,5 @@ fn lookup(root: &toml::Table, path: &str) -> Option<String> {
         value = value.as_table()?.get(key)?;
     }
 
-    Some(value.as_str()?.to_string())
+    Some(value)
 }
