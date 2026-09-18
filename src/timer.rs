@@ -1,8 +1,11 @@
 use gtk::glib;
-use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GridExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::config::config;
+
+// How much the +1 / -1 minute buttons move the clock, in seconds.
+const ADJUSTMENT: u32 = 60;
 
 pub struct Timer {
     remaining: u32,
@@ -24,6 +27,8 @@ pub enum TimerMsg {
     Toggle,
     Reset,
     Win,
+    AddMinute,
+    SubtractMinute,
     Tick,
 }
 
@@ -41,23 +46,39 @@ impl SimpleComponent for Timer {
     type Output = TimerOutput;
 
     view! {
-        gtk::Box {
-            set_orientation: gtk::Orientation::Vertical,
-            set_spacing: 5,
+        gtk::Grid {
+            set_row_spacing: 5,
+            set_column_spacing: 5,
             set_margin_all: 5,
 
-            gtk::Button {
+            attach[0, 0, 1, 1] = &gtk::Button {
                 #[watch]
                 set_label: if model.running { "Stop" } else { "Start" },
                 connect_clicked => TimerMsg::Toggle,
             },
 
-            gtk::Button::with_label("Reset") {
+            attach[0, 1, 1, 1] = &gtk::Button::with_label("Reset") {
                 connect_clicked => TimerMsg::Reset,
             },
 
-            gtk::Button::with_label("Win") {
+            attach[0, 2, 1, 1] = &gtk::Button::with_label("Win") {
                 connect_clicked => TimerMsg::Win,
+            },
+
+            // Spans every row so the two adjustments read as their own group
+            // beside the buttons that run the game, without a hole under them.
+            attach[1, 0, 1, 3] = &gtk::Box {
+                set_orientation: gtk::Orientation::Vertical,
+                set_spacing: 5,
+                set_homogeneous: true,
+
+                gtk::Button::with_label("+1 Minute") {
+                    connect_clicked => TimerMsg::AddMinute,
+                },
+
+                gtk::Button::with_label("-1 Minute") {
+                    connect_clicked => TimerMsg::SubtractMinute,
+                },
             },
         }
     }
@@ -100,11 +121,23 @@ impl SimpleComponent for Timer {
                 self.stop();
                 self.outcome = Outcome::Won;
             }
+            TimerMsg::AddMinute => {
+                self.remaining = self.remaining.saturating_add(ADJUSTMENT);
+                // There is time on the clock again, so the game is back to undecided
+                if self.outcome == Outcome::Lost {
+                    self.outcome = Outcome::Undecided;
+                }
+            }
+            TimerMsg::SubtractMinute => {
+                self.remaining = self.remaining.saturating_sub(ADJUSTMENT);
+                if self.remaining == 0 {
+                    self.time_up();
+                }
+            }
             TimerMsg::Tick => {
                 self.remaining = self.remaining.saturating_sub(1);
                 if self.remaining == 0 {
-                    self.stop();
-                    self.outcome = Outcome::Lost;
+                    self.time_up();
                 }
             }
         }
@@ -134,6 +167,11 @@ impl Timer {
         if let Some(source) = self.source.take() {
             source.remove();
         }
+    }
+
+    fn time_up(&mut self) {
+        self.stop();
+        self.outcome = Outcome::Lost;
     }
 }
 
