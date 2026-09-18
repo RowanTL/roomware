@@ -16,3 +16,5 @@
 - [x] Turn timer red when lose and green when win
 - [x] Video no longer full screens, fix this
 - [ ] Make win and lose text appear when the respective thing happens
+- [ ] Make timer amount configurable in seconds in config.toml
+- [ ] Add +1 and -1 minute buttons

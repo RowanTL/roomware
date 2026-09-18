@@ -3,7 +3,7 @@ use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 // In seconds, 3600 seconds = 1 hour
-pub(crate) const DEFAULT_TIME_LIMIT: u32 = 2;
+pub(crate) const DEFAULT_TIME_LIMIT: u32 = 3600;
 
 pub struct Timer {
     remaining: u32,
