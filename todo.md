@@ -14,3 +14,4 @@
 - [x] Add configurable paths to played audio and video
 - [ ] Add a win button under the start and stop buttons
 - [ ] Turn timer red when lose and green when win
+- [ ] Video no longer full screens, fix this
