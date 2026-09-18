@@ -7,8 +7,10 @@ use crate::utils::{image_uri, resolve_path};
 const CONFIG_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/config.toml");
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 const DEFAULT_PLAYER_LABEL: &str = "1A1A1A";
-const DEFAULT_PLAYER_WIN: &str = "89D154";
-const DEFAULT_PLAYER_LOSE: &str = "E32D2D";
+const DEFAULT_PLAYER_WIN_COLOR: &str = "89D154";
+const DEFAULT_PLAYER_LOSE_COLOR: &str = "E32D2D";
+const DEFAULT_PLAYER_WIN_TEXT: &str = "You win!";
+const DEFAULT_PLAYER_LOSE_TEXT: &str = "You lose!";
 const DEFAULT_PLAYER_VIDEO: &str = "./video.mp4";
 const DEFAULT_MASTER_BACKGROUND: &str = "333333";
 const DEFAULT_MASTER_NOISE: &str = "./audio.ogg";
@@ -29,6 +31,8 @@ pub struct Config {
     pub player_label_color: String,
     pub player_win_color: String,
     pub player_lose_color: String,
+    pub player_win_text: String,
+    pub player_lose_text: String,
     pub player_video: Option<PathBuf>,
     pub master_background: String,
     pub master_noise: Option<PathBuf>,
@@ -69,8 +73,10 @@ impl Config {
                 DEFAULT_PLAYER_BACKGROUND,
             ),
             player_label_color: color(&root, "player.label.color", DEFAULT_PLAYER_LABEL),
-            player_win_color: color(&root, "player.win.color", DEFAULT_PLAYER_WIN),
-            player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE),
+            player_win_color: color(&root, "player.win.color", DEFAULT_PLAYER_WIN_COLOR),
+            player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE_COLOR),
+            player_win_text: text(&root, "player.win.text", DEFAULT_PLAYER_WIN_TEXT),
+            player_lose_text: text(&root, "player.lose.text", DEFAULT_PLAYER_LOSE_TEXT),
             player_video: media(&root, "player.video", DEFAULT_PLAYER_VIDEO),
             master_background: color(&root, "master.background", DEFAULT_MASTER_BACKGROUND),
             master_noise: media(&root, "master.noise", DEFAULT_MASTER_NOISE),
@@ -99,13 +105,25 @@ impl Config {
     }
 }
 
+// Reads a line of text at the specified path. If the
+// path isn't found, returns what is passed as default.
+fn text(root: &toml::Table, path: &str, default: &str) -> String {
+    lookup(root, path)
+        .map(|value| value.trim().to_string())
+        .unwrap_or_else(|| default.to_string())
+}
+
 /// Reads a color, falling back to `default` when it's invalid.
 /// A leading `#` is accepted but not required.
 fn color(root: &toml::Table, path: &str, default: &str) -> String {
-    lookup(root, path)
-        .map(|value| value.trim().trim_start_matches('#').to_string())
-        .filter(|value| is_hex(value))
-        .unwrap_or_else(|| default.to_string())
+    let value = text(root, path, default);
+    let value = value.trim_start_matches('#');
+
+    if is_hex(value) {
+        value.to_string()
+    } else {
+        default.to_string()
+    }
 }
 
 /// Reads a path to a media file, falling back to `default` when the key is

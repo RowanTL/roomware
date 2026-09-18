@@ -226,7 +226,17 @@ impl SimpleComponent for Player {
                 self.remaining = remaining;
             }
             PlayerMsg::UpdateOutcome(outcome) => {
-                self.outcome = outcome;
+                if self.outcome != outcome {
+                    self.outcome = outcome;
+                    self.hint_image = None;
+                    self.hint = match outcome {
+                        // Back to an undecided game, so back to a blank screen.
+                        Outcome::Undecided => String::new(),
+                        Outcome::Won => config().player_win_text.clone(),
+                        Outcome::Lost => config().player_lose_text.clone(),
+                    };
+                    self.show_hint = !self.hint.is_empty();
+                }
             }
             PlayerMsg::PlayVideo => {
                 // Without a video there is nothing to end the playback, so the
