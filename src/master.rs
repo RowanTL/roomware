@@ -4,7 +4,7 @@ use relm4::{
     SimpleComponent, gtk,
 };
 
-use crate::config::theme;
+use crate::config::config;
 use crate::hints::control::{HintControl, HintControlMsg, HintControlOutput};
 use crate::hints::menu::{HintMenu, HintMenuOutput};
 use crate::hints::{DEFAULT_HINT_AMT, Hints, HintsOutput};
@@ -134,7 +134,7 @@ impl SimpleComponent for GameMasterWindow {
 
         let widgets = view_output!();
 
-        let theme = theme();
+        let config = config();
         apply_css_style(&format!(
             "window.main-window {{ background-color: #{background}; }} \
              window.main-window frame {{ border: 2px solid #{frame_border}; padding: 6px; }} \
@@ -145,16 +145,16 @@ impl SimpleComponent for GameMasterWindow {
              window.main-window button {{ background-color: #{button_background}; color: #{button}; }} \
              window.main-window frame:not(.player-preview-frame) button label {{ color: #{button_label}; }} \
              window.main-window entry {{ background-color: #{entry_background}; color: #{entry_text}; }}",
-            background = theme.master_background,
-            frame_border = theme.frame_border,
-            frame_label = theme.frame_label,
-            expander = theme.expander_color,
-            expander_hovered = theme.expander_hovered_color,
-            button_background = theme.button_background_color,
-            button = theme.button_color,
-            button_label = theme.button_label_color,
-            entry_background = theme.entry_background_color,
-            entry_text = theme.entry_text_color,
+            background = config.master_background,
+            frame_border = config.frame_border,
+            frame_label = config.frame_label,
+            expander = config.expander_color,
+            expander_hovered = config.expander_hovered_color,
+            button_background = config.button_background_color,
+            button = config.button_color,
+            button_label = config.button_label_color,
+            entry_background = config.entry_background_color,
+            entry_text = config.entry_text_color,
         ));
 
         root.fullscreen();

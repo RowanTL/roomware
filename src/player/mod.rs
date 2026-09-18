@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::sync::OnceLock;
 
 use gtk::prelude::{
@@ -7,7 +6,7 @@ use gtk::prelude::{
 };
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
-use crate::config::theme;
+use crate::config::config;
 use crate::timer::format_time;
 use crate::utils::{apply_css_style, load_image};
 
@@ -19,8 +18,6 @@ pub(crate) const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
 pub(crate) const HINT_WRAP_WIDTH_CHARS: i32 = 30;
 pub(crate) const MIN_HINT_FONT_SIZE: usize = 16;
 pub(crate) const HINT_MARGIN: i32 = 5;
-const VIDEO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/video.mp4");
-const AUDIO_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/audio.ogg");
 
 pub struct Player {
     remaining: u32,
@@ -132,7 +129,7 @@ impl SimpleComponent for Player {
                 },
 
                 #[name = "video"]
-                gtk::Video::for_filename(Some(VIDEO_PATH)) {
+                gtk::Video::for_filename(config().player_video.as_ref()) {
                     #[watch]
                     set_visible: model.playing_video,
                     set_autoplay: true,
@@ -199,7 +196,7 @@ impl SimpleComponent for Player {
             timer_size = DEFAULT_TIMER_FONT_SIZE,
             hint_size = DEFAULT_HINT_FONT_SIZE,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE,
-            label = theme().player_label_color,
+            label = config().player_label_color,
         ));
 
         place_on_secondary_monitor(&root);
@@ -215,7 +212,9 @@ impl SimpleComponent for Player {
                 self.remaining = remaining;
             }
             PlayerMsg::PlayVideo => {
-                self.playing_video = true;
+                // Without a video there is nothing to end the playback, so the
+                // screen would sit on an empty video forever.
+                self.playing_video = self.video_stream.is_some();
             }
             PlayerMsg::PlayAudio => {
                 if let Some(stream) = &self.audio_stream {
@@ -346,12 +345,12 @@ fn fit_font_size_now(label: &gtk::Label, area: &gtk::Widget, max_size: usize) ->
     true
 }
 
-/// Loads audio if an audio file is found. Button does nothing
-/// if one isn't found.
+/// Loads the configured ping sound if there is one. Button does nothing
+/// if there isn't.
 fn load_audio() -> Option<gtk::MediaStream> {
-    Path::new(AUDIO_PATH)
-        .is_file()
-        .then(|| gtk::MediaFile::for_filename(AUDIO_PATH).upcast())
+    let path = config().master_noise.as_ref()?;
+
+    Some(gtk::MediaFile::for_filename(path).upcast())
 }
 
 /// If the user doesn't configure a background image to use, this function
@@ -359,11 +358,11 @@ fn load_audio() -> Option<gtk::MediaStream> {
 pub(crate) fn background_css() -> &'static str {
     static BACKGROUND_CSS: OnceLock<String> = OnceLock::new();
 
-    BACKGROUND_CSS.get_or_init(|| match &theme().player_background_image {
+    BACKGROUND_CSS.get_or_init(|| match &config().player_background_image {
         Some(uri) => format!(
             "background-image: url(\"{uri}\"); background-size: cover; background-position: center;"
         ),
-        None => format!("background-color: #{};", theme().player_background_color),
+        None => format!("background-color: #{};", config().player_background_color),
     })
 }
 

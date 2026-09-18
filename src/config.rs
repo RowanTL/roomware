@@ -1,12 +1,15 @@
 use std::fs;
+use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use crate::utils::image_uri;
+use crate::utils::{image_uri, resolve_path};
 
 const CONFIG_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/config.toml");
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 const DEFAULT_PLAYER_LABEL: &str = "1A1A1A";
+const DEFAULT_PLAYER_VIDEO: &str = "./video.mp4";
 const DEFAULT_MASTER_BACKGROUND: &str = "333333";
+const DEFAULT_MASTER_NOISE: &str = "./audio.ogg";
 const DEFAULT_FRAME_BORDER: &str = "D3D3D3";
 const DEFAULT_FRAME_LABEL: &str = "D3D3D3";
 const DEFAULT_EXPANDER: &str = "D3D3D3";
@@ -18,11 +21,13 @@ const DEFAULT_ENTRY_BACKGROUND: &str = "D3D3D3";
 const DEFAULT_ENTRY_TEXT: &str = "1A1A1A";
 
 /// Values pulled from config.toml
-pub struct Theme {
+pub struct Config {
     pub player_background_image: Option<String>,
     pub player_background_color: String,
     pub player_label_color: String,
+    pub player_video: Option<PathBuf>,
     pub master_background: String,
+    pub master_noise: Option<PathBuf>,
     pub frame_border: String,
     pub frame_label: String,
     pub expander_color: String,
@@ -34,15 +39,15 @@ pub struct Theme {
     pub entry_text_color: String,
 }
 
-/// The configured theme. Read from disk on first use and cache
-pub fn theme() -> &'static Theme {
-    static THEME: OnceLock<Theme> = OnceLock::new();
+/// The loaded configuration. Read from disk on first use and cached.
+pub fn config() -> &'static Config {
+    static CONFIG: OnceLock<Config> = OnceLock::new();
 
-    THEME.get_or_init(Theme::load)
+    CONFIG.get_or_init(Config::load)
 }
 
-impl Theme {
-    /// Reads config.toml, falling back to the `DEFAULT_*` colors key by key.
+impl Config {
+    /// Reads config.toml, falling back to the `DEFAULT_*` values key by key.
     fn load() -> Self {
         // TODO: Make this accept a path later :/
         let root = fs::read_to_string(CONFIG_TOML_PATH)
@@ -60,7 +65,9 @@ impl Theme {
                 DEFAULT_PLAYER_BACKGROUND,
             ),
             player_label_color: color(&root, "player.label.color", DEFAULT_PLAYER_LABEL),
+            player_video: media(&root, "player.video", DEFAULT_PLAYER_VIDEO),
             master_background: color(&root, "master.background", DEFAULT_MASTER_BACKGROUND),
+            master_noise: media(&root, "master.noise", DEFAULT_MASTER_NOISE),
             frame_border: color(&root, "frame.border", DEFAULT_FRAME_BORDER),
             frame_label: color(&root, "frame.label", DEFAULT_FRAME_LABEL),
             expander_color: color(&root, "expander.color", DEFAULT_EXPANDER),
@@ -93,6 +100,15 @@ fn color(root: &toml::Table, path: &str, default: &str) -> String {
         .map(|value| value.trim().trim_start_matches('#').to_string())
         .filter(|value| is_hex(value))
         .unwrap_or_else(|| default.to_string())
+}
+
+/// Reads a path to a media file, falling back to `default` when the key is
+/// missing. `None` means there is no file there to play, so whatever plays it
+/// does nothing.
+fn media(root: &toml::Table, path: &str, default: &str) -> Option<PathBuf> {
+    let configured = lookup(root, path);
+
+    resolve_path(configured.as_deref().unwrap_or(default))
 }
 
 /// CSS accepts hex colors of 3, 4, 6 or 8 digits.

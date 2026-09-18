@@ -20,8 +20,9 @@ pub fn image_uri(text: &str) -> Option<String> {
 }
 
 /// Relative paths are resolved against the project root so that `hints.toml`
-/// entries like `./picture.png` work no matter where the binary is run from.
-fn resolve_path(text: &str) -> Option<PathBuf> {
+/// and `config.toml` entries like `./picture.png` work no matter where the
+/// binary is run from.
+pub fn resolve_path(text: &str) -> Option<PathBuf> {
     let text = text.trim();
     if text.is_empty() {
         return None;

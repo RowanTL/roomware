@@ -1,7 +1,7 @@
 use gtk::prelude::{Cast, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
-use crate::config::theme;
+use crate::config::config;
 use crate::player::{
     DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_TIMER_FONT_SIZE,
     HINT_WRAP_WIDTH_CHARS, PlayerState, background_css, fit_font_size,
@@ -139,7 +139,7 @@ impl SimpleComponent for PlayerPreview {
             timer_size = DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             hint_size = DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
-            label = theme().player_label_color,
+            label = config().player_label_color,
         ));
 
         ComponentParts { model, widgets }
