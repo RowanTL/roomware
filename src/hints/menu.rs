@@ -3,14 +3,11 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 
 use crate::utils::read_toml;
 
-struct Hint {
-    key: String,
-    value: String,
-}
+const MENU_MAX_HEIGHT: i32 = 200;
 
 struct HintTable {
     name: String,
-    hints: Vec<Hint>,
+    hints: Vec<String>,
 }
 
 pub struct HintMenu {
@@ -39,8 +36,8 @@ impl SimpleComponent for HintMenu {
     view! {
         gtk::ScrolledWindow {
             set_hexpand: true,
-            set_vexpand: true,
-            set_hscrollbar_policy: gtk::PolicyType::Never,
+            set_propagate_natural_height: true,
+            set_max_content_height: MENU_MAX_HEIGHT,
 
             #[name = "list"]
             gtk::Box {
@@ -68,12 +65,11 @@ impl SimpleComponent for HintMenu {
 
             let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
             for hint in &table.hints {
-                let label = gtk::Label::new(Some(&hint.key));
+                let label = gtk::Label::new(Some(hint));
                 label.set_halign(gtk::Align::Start);
-                label.set_wrap(true);
 
                 let click = gtk::GestureClick::new();
-                let value = hint.value.clone();
+                let value = hint.clone();
                 let input_sender = sender.input_sender().clone();
                 click.connect_pressed(move |_, n_press, _, _| {
                     if n_press == 1 {
@@ -118,13 +114,8 @@ fn load_hint_tables() -> Vec<HintTable> {
             let table = value.as_table()?;
 
             let hints = table
-                .iter()
-                .filter_map(|(key, value)| {
-                    Some(Hint {
-                        key: key.clone(),
-                        value: value.as_str()?.to_string(),
-                    })
-                })
+                .values()
+                .filter_map(|value| value.as_str().map(str::to_string))
                 .collect();
 
             Some(HintTable {

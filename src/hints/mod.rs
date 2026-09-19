@@ -4,12 +4,11 @@ use std::sync::OnceLock;
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
+use crate::config::config;
 use crate::utils::base_dir;
 
 pub mod control;
 pub mod menu;
-
-pub const DEFAULT_HINT_AMT: u8 = 5;
 
 static HINTS_PATH: OnceLock<Option<PathBuf>> = OnceLock::new();
 
@@ -41,6 +40,7 @@ pub struct Hints {
 pub enum HintsMsg {
     Increment,
     Decrement,
+    Reset,
 }
 
 #[derive(Debug)]
@@ -50,7 +50,7 @@ pub enum HintsOutput {
 
 #[relm4::component(pub)]
 impl SimpleComponent for Hints {
-    type Init = u8;
+    type Init = ();
 
     type Input = HintsMsg;
     type Output = HintsOutput;
@@ -69,15 +69,21 @@ impl SimpleComponent for Hints {
             gtk::Button::with_label("Decrement") {
                 connect_clicked => HintsMsg::Decrement
             },
+
+            gtk::Button::with_label("Reset") {
+                connect_clicked => HintsMsg::Reset
+            },
         }
     }
 
     fn init(
-        counter: Self::Init,
+        _init: Self::Init,
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = Hints { counter };
+        let model = Hints {
+            counter: config().hints_default_amount,
+        };
 
         let widgets = view_output!();
 
@@ -93,6 +99,9 @@ impl SimpleComponent for Hints {
             }
             HintsMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
+            }
+            HintsMsg::Reset => {
+                self.counter = config().hints_default_amount;
             }
         }
 

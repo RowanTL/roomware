@@ -14,8 +14,8 @@ roomware --config config.toml --hints hints.toml
 Both flags are optional. Without `--config` every setting falls back to its
 built in default, and without `--hints` the hint menu is empty.
 
-When you click on a hint in the hint menu, the long version will appear in
-typeable hint box. You can send them with the send button after this.
+When you click on a hint in the hint menu, it will appear in the typeable hint
+box underneath. You can send them with the send button after this.
 
 ## Configuration
 

@@ -26,6 +26,7 @@ const DEFAULT_BUTTON_BACKGROUND: &str = "D3D3D3";
 const DEFAULT_BUTTON_LABEL: &str = "1A1A1A";
 const DEFAULT_ENTRY_BACKGROUND: &str = "D3D3D3";
 const DEFAULT_ENTRY_TEXT: &str = "1A1A1A";
+const DEFAULT_HINTS_AMOUNT: u8 = 5;
 
 /// Values pulled from config.toml
 pub struct Config {
@@ -49,6 +50,7 @@ pub struct Config {
     pub button_label_color: String,
     pub entry_background_color: String,
     pub entry_text_color: String,
+    pub hints_default_amount: u8,
 }
 
 /// Points the configuration at a file. Has to be called before the first
@@ -113,6 +115,7 @@ impl Config {
                 DEFAULT_ENTRY_BACKGROUND,
             ),
             entry_text_color: color(&root, "entry.text.color", DEFAULT_ENTRY_TEXT),
+            hints_default_amount: amount(&root, "hints.default.amount", DEFAULT_HINTS_AMOUNT),
         }
     }
 }
@@ -133,6 +136,15 @@ fn seconds(root: &toml::Table, path: &str, default: u32) -> u32 {
         .and_then(toml::Value::as_integer)
         .and_then(|value| u32::try_from(value).ok())
         .filter(|seconds| *seconds > 0)
+        .unwrap_or(default)
+}
+
+/// Reads a count of something, falling back to `default` when the key isn't
+/// there or isn't a whole number from 0 to 255.
+fn amount(root: &toml::Table, path: &str, default: u8) -> u8 {
+    lookup(root, path)
+        .and_then(toml::Value::as_integer)
+        .and_then(|value| u8::try_from(value).ok())
         .unwrap_or(default)
 }
 

@@ -7,14 +7,12 @@ use relm4::{
 use crate::config::config;
 use crate::hints::control::{HintControl, HintControlMsg, HintControlOutput};
 use crate::hints::menu::{HintMenu, HintMenuOutput};
-use crate::hints::{DEFAULT_HINT_AMT, Hints, HintsOutput};
+use crate::hints::{Hints, HintsOutput};
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
 use crate::timer::{Timer, TimerOutput};
 use crate::utils::apply_css_style;
 
-/// The game master's control window: every control the operator uses, plus the
-/// player screen it drives.
 pub struct GameMasterWindow {
     // dead_code here to keep these Controllers alive; their widgets are pulled out
     // into frames before the struct is built, so the fields themselves are never read
@@ -67,7 +65,7 @@ impl SimpleComponent for GameMasterWindow {
                 PlayerOutput::StateChanged(state) => PlayerPreviewMsg::Sync(state),
             });
         let hints = Hints::builder()
-            .launch(DEFAULT_HINT_AMT)
+            .launch(())
             .forward(player.sender(), |output| match output {
                 HintsOutput::CounterChanged(remaining) => {
                     PlayerMsg::UpdateHintsRemaining(remaining)
@@ -108,21 +106,20 @@ impl SimpleComponent for GameMasterWindow {
         let timer_frame = gtk::Frame::new(Some("Timer Controls"));
         timer_frame.set_child(Some(timer.widget()));
 
-        let hint_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
-        hint_box.append(hints.widget());
-        hint_box.append(hint_control.widget());
-
         let hint_frame = gtk::Frame::new(Some("Hint Controls"));
-        hint_frame.set_child(Some(&hint_box));
+        hint_frame.set_child(Some(hints.widget()));
 
         let player_preview_frame = gtk::Frame::new(Some("Player View"));
         player_preview_frame.set_child(Some(player_preview.widget()));
         player_preview_frame.set_hexpand(true);
         player_preview_frame.add_css_class("player-preview-frame");
 
+        let hint_menu_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
+        hint_menu_box.append(hint_menu.widget());
+        hint_menu_box.append(hint_control.widget());
+
         let hint_menu_frame = gtk::Frame::new(Some("Hint Selection"));
-        hint_menu_frame.set_child(Some(hint_menu.widget()));
-        hint_menu_frame.set_hexpand(false);
+        hint_menu_frame.set_child(Some(&hint_menu_box));
 
         let model = GameMasterWindow {
             hints,
@@ -161,10 +158,10 @@ impl SimpleComponent for GameMasterWindow {
         root.fullscreen();
 
         widgets.grid.attach(&timer_frame, 0, 0, 1, 1);
-        widgets.grid.attach(&hint_frame, 1, 0, 1, 1);
+        widgets.grid.attach(&hint_menu_frame, 1, 0, 1, 1);
         widgets.grid.attach(&play_video_button, 0, 1, 1, 1);
         widgets.grid.attach(&play_audio_button, 1, 1, 1, 1);
-        widgets.grid.attach(&hint_menu_frame, 0, 2, 1, 1);
+        widgets.grid.attach(&hint_frame, 0, 2, 1, 1);
         widgets.grid.attach(&player_preview_frame, 1, 2, 1, 1);
 
         ComponentParts { model, widgets }
