@@ -17,6 +17,20 @@ built in default, and without `--hints` the hint menu is empty.
 When you click on a hint in the hint menu, it will appear in the typeable hint
 box underneath. You can send them with the send button after this.
 
+## Building for Windows
+
+```
+nix build .#windows
+```
+
+This cross compiles the program and leaves it in `./result` together with the
+GTK and GStreamer DLLs it needs. Copy that whole directory over to the Windows
+machine and run `bin/roomware.exe` from inside it.
+
+Those DLLs are MSYS2's Windows builds, pinned in `nix/msys2-packages.json`,
+because nixpkgs cannot build GTK for Windows itself. To move to their current
+versions, run `nix run .#update-msys2` and build again.
+
 ## Configuration
 
 There are two different files used for configuration:
