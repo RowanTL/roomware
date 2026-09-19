@@ -1,3 +1,6 @@
+// Keeps Windows from opening a console window beside the game master's.
+#![windows_subsystem = "windows"]
+
 use std::path::PathBuf;
 
 use clap::{Arg, Command, value_parser};
