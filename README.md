@@ -5,6 +5,15 @@ There are many configuration options available via two toml files.
 
 ## Usage
 
+Run it with the toml files you want it to read:
+
+```
+roomware --config config.toml --hints hints.toml
+```
+
+Both flags are optional. Without `--config` every setting falls back to its
+built in default, and without `--hints` the hint menu is empty.
+
 When you click on a hint in the hint menu, the long version will appear in
 typeable hint box. You can send them with the send button after this.
 
@@ -20,3 +29,7 @@ you want to change the background color of the player's view to black instead of
 where you can change it.
 
 `hints.toml` holds pre-typed hints for the room read in order they are found in the file.
+
+Paths inside either file, such as a video, a ping sound or a picture hint, are relative to the file
+they are written in. A `./picture.png` in `hints.toml` is the picture sitting next to `hints.toml`,
+wherever you keep it. Absolute paths work too.

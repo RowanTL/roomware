@@ -7,6 +7,7 @@ use gtk::prelude::{
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::config::config;
+use crate::hints;
 use crate::timer::{Outcome, format_time};
 use crate::utils::{apply_css_style, load_image};
 
@@ -260,7 +261,7 @@ impl SimpleComponent for Player {
             PlayerMsg::ShowHint(hint) => {
                 let hint = hint.trim().to_string();
                 self.show_hint = !hint.is_empty();
-                self.hint_image = load_image(&hint);
+                self.hint_image = load_image(hints::base(), &hint);
                 // A picture stands on its own; don't put its path on screen too.
                 self.hint = if self.hint_image.is_some() {
                     String::new()

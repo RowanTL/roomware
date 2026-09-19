@@ -1,9 +1,7 @@
-use std::fs;
-
 use gtk::prelude::{BoxExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
-const HINTS_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/hints.toml");
+use crate::utils::read_toml;
 
 struct Hint {
     key: String,
@@ -108,17 +106,14 @@ impl SimpleComponent for HintMenu {
     }
 }
 
-/// Loads the hints from a hints.toml file
+/// Loads the hints from the hints file the CLI was given, if it was given one.
 fn load_hint_tables() -> Vec<HintTable> {
-    let Ok(contents) = fs::read_to_string(HINTS_TOML_PATH) else {
+    let Some(path) = super::path() else {
         return Vec::new();
     };
 
-    let Ok(root) = contents.parse::<toml::Table>() else {
-        return Vec::new();
-    };
-
-    root.iter()
+    read_toml(path)
+        .iter()
         .filter_map(|(name, value)| {
             let table = value.as_table()?;
 

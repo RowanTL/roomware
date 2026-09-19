@@ -1,10 +1,11 @@
-use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
-use crate::utils::{image_uri, resolve_path};
+use crate::utils::{base_dir, image_uri, read_toml, resolve_path};
 
-const CONFIG_TOML_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/config.toml");
+/// The file `config()` reads, as handed over by the CLI. Never set means no
+/// config file at all, which leaves every value at its default.
+static CONFIG_PATH: OnceLock<Option<PathBuf>> = OnceLock::new();
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
 const DEFAULT_PLAYER_LABEL: &str = "1A1A1A";
 const DEFAULT_PLAYER_WIN_COLOR: &str = "89D154";
@@ -50,6 +51,13 @@ pub struct Config {
     pub entry_text_color: String,
 }
 
+/// Points the configuration at a file. Has to be called before the first
+/// `config()`, which is why it belongs at the very start of `main`. Without
+/// it, or with `None`, everything falls back to the `DEFAULT_*` values.
+pub fn set_path(path: Option<PathBuf>) {
+    let _ = CONFIG_PATH.set(path);
+}
+
 /// The loaded configuration. Read from disk on first use and cached.
 pub fn config() -> &'static Config {
     static CONFIG: OnceLock<Config> = OnceLock::new();
@@ -58,18 +66,18 @@ pub fn config() -> &'static Config {
 }
 
 impl Config {
-    /// Reads config.toml, falling back to the `DEFAULT_*` values key by key.
+    /// Reads the configured file, falling back to the `DEFAULT_*` values key
+    /// by key.
     fn load() -> Self {
-        // TODO: Make this accept a path later :/
-        let root = fs::read_to_string(CONFIG_TOML_PATH)
-            .ok()
-            .and_then(|contents| contents.parse::<toml::Table>().ok())
-            .unwrap_or_default();
+        let path = CONFIG_PATH.get().and_then(Option::as_ref);
+        let root = path.map(|path| read_toml(path)).unwrap_or_default();
+        // Paths in the file are written relative to the file itself.
+        let base = base_dir(path.map(PathBuf::as_path));
 
         Self {
             player_background_image: lookup(&root, "player.background.image")
                 .and_then(toml::Value::as_str)
-                .and_then(image_uri),
+                .and_then(|value| image_uri(&base, value)),
             player_background_color: color(
                 &root,
                 "player.background.color",
@@ -80,9 +88,9 @@ impl Config {
             player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE_COLOR),
             player_win_text: text(&root, "player.win.text", DEFAULT_PLAYER_WIN_TEXT),
             player_lose_text: text(&root, "player.lose.text", DEFAULT_PLAYER_LOSE_TEXT),
-            player_video: media(&root, "player.video", DEFAULT_PLAYER_VIDEO),
+            player_video: media(&root, &base, "player.video", DEFAULT_PLAYER_VIDEO),
             master_background: color(&root, "master.background", DEFAULT_MASTER_BACKGROUND),
-            master_noise: media(&root, "master.noise", DEFAULT_MASTER_NOISE),
+            master_noise: media(&root, &base, "master.noise", DEFAULT_MASTER_NOISE),
             master_time: seconds(&root, "master.time", DEFAULT_MASTER_TIME),
             frame_border: color(&root, "frame.border", DEFAULT_FRAME_BORDER),
             frame_label: color(&root, "frame.label", DEFAULT_FRAME_LABEL),
@@ -143,10 +151,10 @@ fn color(root: &toml::Table, path: &str, default: &str) -> String {
 
 /// Reads a path to a media file, falling back to `default` when the key is
 /// missing. `None` means there is no file there to play.
-fn media(root: &toml::Table, path: &str, default: &str) -> Option<PathBuf> {
+fn media(root: &toml::Table, base: &Path, path: &str, default: &str) -> Option<PathBuf> {
     let configured = lookup(root, path).and_then(toml::Value::as_str);
 
-    resolve_path(configured.unwrap_or(default))
+    resolve_path(base, configured.unwrap_or(default))
 }
 
 /// CSS accepts hex colors of 3, 4, 6 or 8 digits.
