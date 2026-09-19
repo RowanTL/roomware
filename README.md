@@ -20,12 +20,17 @@ box underneath. You can send them with the send button after this.
 ## Building for Windows
 
 ```
-nix build .#windows
+nix build .#windows-installer
 ```
 
-This cross compiles the program and leaves it in `./result` together with the
-GTK and GStreamer DLLs it needs. Copy that whole directory over to the Windows
-machine and run `bin/roomware.exe` from inside it.
+This cross compiles the program and packs it, along with the GTK and GStreamer
+DLLs it needs, into a single `setup.exe` in `./result`. Copy that one file over
+to the Windows machine and run it. It installs into `Program Files`, adds a
+Start Menu shortcut and can be removed again from Add or Remove Programs.
+
+`nix build .#windows` gives the same build as a plain directory instead, for
+running it off a stick without installing. Copy the whole directory over,
+keeping its layout, and run `bin\roomware.exe` from inside it.
 
 Those DLLs are MSYS2's Windows builds, pinned in `nix/msys2-packages.json`,
 because nixpkgs cannot build GTK for Windows itself. To move to their current

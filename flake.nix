@@ -22,8 +22,7 @@
           extensions = [ "clippy" "rust-src" ];
         };
 
-        # The same nixpkgs, building for 64-bit Windows. MSYS2's libraries are
-        # built against the UCRT, so this has to be as well.
+        # MSYS2's libraries are built against the UCRT
         pkgsWindows = import nixpkgs {
           localSystem = system;
           crossSystem = {
@@ -31,15 +30,20 @@
             libc = "ucrt";
           };
         };
-      in
-      {
-        # `nix build .#windows` leaves the Windows build in ./result.
-        packages.windows = pkgsWindows.callPackage ./nix/windows.nix {
+        windows = pkgsWindows.callPackage ./nix/windows.nix {
           # A flake output can't be cross compiled on its own, so the toolchain
           # is built from the Windows package set rather than an overlay. It
           # picks up that target's std on its own.
           rustToolchain =
             (rust-overlay.lib.mkRustBin { } pkgsWindows.buildPackages).stable.latest.minimal;
+        };
+      in
+      {
+        packages.windows = windows;
+
+        # `nix build .#windows-installer` leaves one setup.exe in ./result.
+        packages.windows-installer = pkgs.callPackage ./nix/installer.nix {
+          bundle = windows;
         };
 
         # `nix run .#update-msys2` re-pins the Windows libraries.
