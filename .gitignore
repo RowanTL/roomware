@@ -9,3 +9,6 @@ hints.toml
 *.mp3
 *.wav
 *.ogg
+
+# nix directories
+result
