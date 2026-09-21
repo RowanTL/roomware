@@ -1,4 +1,4 @@
-use gtk::prelude::{Cast, OrientableExt, WidgetExt};
+use gtk::prelude::{BoxExt, Cast, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::config::config;
@@ -49,18 +49,30 @@ impl SimpleComponent for PlayerPreview {
                 add_css_class: "timer-label-preview",
             },
 
-            gtk::Label {
+            gtk::Box {
                 #[watch]
                 set_visible: !model.state.playing_video,
-                #[watch]
-                set_label: &format_time(model.state.remaining),
-                set_halign: gtk::Align::Center,
-                set_valign: gtk::Align::Start,
-                add_css_class: "timer-label-preview",
-                #[watch]
-                set_class_active: ("win", model.state.outcome == Outcome::Won),
-                #[watch]
-                set_class_active: ("lose", model.state.outcome == Outcome::Lost),
+                set_orientation: gtk::Orientation::Vertical,
+                set_spacing: 1,
+
+                gtk::Label {
+                    set_label: "Time Remaining:",
+                    set_halign: gtk::Align::Center,
+                    set_valign: gtk::Align::Start,
+                    add_css_class: "time-remaining-label-preview",
+                },
+
+                gtk::Label {
+                    #[watch]
+                    set_label: &format_time(model.state.remaining),
+                    set_halign: gtk::Align::Center,
+                    set_valign: gtk::Align::Start,
+                    add_css_class: "timer-label-preview",
+                    #[watch]
+                    set_class_active: ("win", model.state.outcome == Outcome::Won),
+                    #[watch]
+                    set_class_active: ("lose", model.state.outcome == Outcome::Lost),
+                },
             },
 
             #[name = "hint_area"]
@@ -139,10 +151,12 @@ impl SimpleComponent for PlayerPreview {
             "box.player-preview-box {{ {background} }} \
              box.player-preview-box scrolledwindow, \
              box.player-preview-box scrolledwindow viewport {{ background: none; }} \
-             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; color: #{label}; }} \
+             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; line-height: 0.55; color: #{label}; }} \
              box.player-preview-box label.timer-label-preview.win {{ color: #{win}; }} \
              box.player-preview-box label.timer-label-preview.lose {{ color: #{lose}; }} \
              box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{label}; }} \
+             box.player-preview-box label.time-remaining-label-preview {{ line-height: 0.55; }} \
+             box.player-preview-box label.time-remaining-label-preview, \
              box.player-preview-box label.hints-remaining-label-preview {{ font-size: {remaining_size}px; color: #{label}; }}",
             background = background_css(),
             timer_size = DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,

@@ -84,11 +84,24 @@ impl SimpleComponent for Player {
                     set_vexpand: true,
 
                     gtk::Label {
+                        set_label: "Time Remaining:",
+                        set_halign: gtk::Align::Center,
+                        set_valign: gtk::Align::Start,
+                        set_margin_top: 5,
+                        set_margin_start: 5,
+                        set_margin_end: 5,
+                        set_margin_bottom: 1,
+                        add_css_class: "time-remaining-label",
+                    },
+
+                    gtk::Label {
                         #[watch]
                         set_label: &format_time(model.remaining),
                         set_halign: gtk::Align::Center,
                         set_valign: gtk::Align::Start,
-                        set_margin_all: 5,
+                        set_margin_start: 5,
+                        set_margin_end: 5,
+                        set_margin_bottom: 5,
                         add_css_class: "timer-label",
                         #[watch]
                         set_class_active: ("win", model.outcome == Outcome::Won),
@@ -200,10 +213,12 @@ impl SimpleComponent for Player {
             "window.player-window {{ {background} }} \
              window.player-window scrolledwindow, \
              window.player-window scrolledwindow viewport {{ background: none; }} \
-             label.timer-label {{ font-size: {timer_size}px; color: #{label}; }} \
+             label.timer-label {{ font-size: {timer_size}px; line-height: 0.55; color: #{label}; }} \
              label.timer-label.win {{ color: #{win}; }} \
              label.timer-label.lose {{ color: #{lose}; }} \
              label.message-label {{ font-size: {hint_size}px; color: #{label}; }} \
+             label.time-remaining-label {{ line-height: 0.55; }} \
+             label.time-remaining-label, \
              label.hints-remaining-label {{ font-size: {remaining_size}px; color: #{label}; }}",
             background = background_css(),
             timer_size = DEFAULT_TIMER_FONT_SIZE,
