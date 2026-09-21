@@ -19,6 +19,9 @@ pub(crate) const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
 pub(crate) const HINT_WRAP_WIDTH_CHARS: i32 = 30;
 pub(crate) const MIN_HINT_FONT_SIZE: usize = 16;
 pub(crate) const HINT_MARGIN: i32 = 5;
+pub(crate) const TIMER_LINE_HEIGHT: f32 = 0.55;
+pub(crate) const TIME_REMAINING_LINE_HEIGHT: f32 = 0.55;
+pub(crate) const TIME_REMAINING_GAP: i32 = 1;
 
 pub struct Player {
     remaining: u32,
@@ -90,7 +93,7 @@ impl SimpleComponent for Player {
                         set_margin_top: 5,
                         set_margin_start: 5,
                         set_margin_end: 5,
-                        set_margin_bottom: 1,
+                        set_margin_bottom: TIME_REMAINING_GAP,
                         add_css_class: "time-remaining-label",
                     },
 
@@ -213,15 +216,17 @@ impl SimpleComponent for Player {
             "window.player-window {{ {background} }} \
              window.player-window scrolledwindow, \
              window.player-window scrolledwindow viewport {{ background: none; }} \
-             label.timer-label {{ font-size: {timer_size}px; line-height: 0.55; color: #{label}; }} \
+             label.timer-label {{ font-size: {timer_size}px; line-height: {timer_line_height}; color: #{label}; }} \
              label.timer-label.win {{ color: #{win}; }} \
              label.timer-label.lose {{ color: #{lose}; }} \
              label.message-label {{ font-size: {hint_size}px; color: #{label}; }} \
-             label.time-remaining-label {{ line-height: 0.55; }} \
+             label.time-remaining-label {{ line-height: {time_remaining_line_height}; }} \
              label.time-remaining-label, \
              label.hints-remaining-label {{ font-size: {remaining_size}px; color: #{label}; }}",
             background = background_css(),
             timer_size = DEFAULT_TIMER_FONT_SIZE,
+            timer_line_height = TIMER_LINE_HEIGHT,
+            time_remaining_line_height = TIME_REMAINING_LINE_HEIGHT,
             hint_size = DEFAULT_HINT_FONT_SIZE,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE,
             label = config().player_label_color,

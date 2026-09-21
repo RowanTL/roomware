@@ -4,16 +4,14 @@ use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk
 use crate::config::config;
 use crate::player::{
     DEFAULT_HINT_FONT_SIZE, DEFAULT_HINTS_REMAINING_FONT_SIZE, DEFAULT_TIMER_FONT_SIZE,
-    HINT_WRAP_WIDTH_CHARS, PlayerState, background_css, fit_font_size,
+    HINT_WRAP_WIDTH_CHARS, PlayerState, TIME_REMAINING_GAP, TIME_REMAINING_LINE_HEIGHT,
+    TIMER_LINE_HEIGHT, background_css, fit_font_size,
 };
 use crate::timer::{Outcome, format_time};
 use crate::utils::apply_css_style;
 
 const PREVIEW_WIDTH: i32 = 300;
 const PREVIEW_HEIGHT: i32 = 100;
-
-// Player's fonts are sized for a fullscreen monitor; shrink them to fit the preview box.
-// Here just in case now.
 const PREVIEW_FONT_SCALE_DIVISOR: usize = 1;
 
 pub struct PlayerPreview {
@@ -53,7 +51,7 @@ impl SimpleComponent for PlayerPreview {
                 #[watch]
                 set_visible: !model.state.playing_video,
                 set_orientation: gtk::Orientation::Vertical,
-                set_spacing: 1,
+                set_spacing: TIME_REMAINING_GAP,
 
                 gtk::Label {
                     set_label: "Time Remaining:",
@@ -151,15 +149,17 @@ impl SimpleComponent for PlayerPreview {
             "box.player-preview-box {{ {background} }} \
              box.player-preview-box scrolledwindow, \
              box.player-preview-box scrolledwindow viewport {{ background: none; }} \
-             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; line-height: 0.55; color: #{label}; }} \
+             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; line-height: {timer_line_height}; color: #{label}; }} \
              box.player-preview-box label.timer-label-preview.win {{ color: #{win}; }} \
              box.player-preview-box label.timer-label-preview.lose {{ color: #{lose}; }} \
              box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{label}; }} \
-             box.player-preview-box label.time-remaining-label-preview {{ line-height: 0.55; }} \
+             box.player-preview-box label.time-remaining-label-preview {{ line-height: {time_remaining_line_height}; }} \
              box.player-preview-box label.time-remaining-label-preview, \
              box.player-preview-box label.hints-remaining-label-preview {{ font-size: {remaining_size}px; color: #{label}; }}",
             background = background_css(),
             timer_size = DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
+            timer_line_height = TIMER_LINE_HEIGHT,
+            time_remaining_line_height = TIME_REMAINING_LINE_HEIGHT,
             hint_size = DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             label = config().player_label_color,
