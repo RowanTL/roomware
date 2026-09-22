@@ -5,12 +5,12 @@
 
 [player]
 # background.image = "./background.jpg"
-background.color = "BF9560" # Does nothing if image is set
-clock.color = "1A1A1A"
-clock.remaining.color = "1A1A1A"
-hint.remaining.color = "1A1A1A"
-hint.amount.color = "1A1A1A"
-hint.color = "1A1A1A"
+background.color = "000000" # Does nothing if image is set
+clock.color = "FF0000" # Color of the actual minute:second counter text
+clock.remaining.color = "FFFFFF" # Color of the "Time Remaining" text
+hint.remaining.color = "FFFFFF" # Color of "Hints Remaining" text
+hint.amount.color = "FF0000" # Color of the number next to "Hints Remaining: "
+hint.color = "FFFFFF" # Color of the hints when they appear
 win.color = "89D154"
 win.text = "You win!"
 lose.color = "E32D2D"
