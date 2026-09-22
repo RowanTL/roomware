@@ -3,11 +3,14 @@ use std::sync::OnceLock;
 
 use crate::utils::{base_dir, image_uri, read_toml, resolve_path};
 
-/// The file `config()` reads, as handed over by the CLI. Never set means no
-/// config file at all, which leaves every value at its default.
+/// If no path found, uses the defaults found in this folder.
 static CONFIG_PATH: OnceLock<Option<PathBuf>> = OnceLock::new();
 const DEFAULT_PLAYER_BACKGROUND: &str = "BF9560";
-const DEFAULT_PLAYER_LABEL: &str = "1A1A1A";
+const DEFAULT_PLAYER_CLOCK_COLOR: &str = "1A1A1A";
+const DEFAULT_PLAYER_CLOCK_REMAINING_COLOR: &str = "1A1A1A";
+const DEFAULT_PLAYER_HINT_REMAINING_COLOR: &str = "1A1A1A";
+const DEFAULT_PLAYER_HINT_AMOUNT_COLOR: &str = "1A1A1A";
+const DEFAULT_PLAYER_HINT_COLOR: &str = "1A1A1A";
 const DEFAULT_PLAYER_WIN_COLOR: &str = "89D154";
 const DEFAULT_PLAYER_LOSE_COLOR: &str = "E32D2D";
 const DEFAULT_PLAYER_WIN_TEXT: &str = "You win!";
@@ -32,7 +35,11 @@ const DEFAULT_HINTS_AMOUNT: u8 = 5;
 pub struct Config {
     pub player_background_image: Option<String>,
     pub player_background_color: String,
-    pub player_label_color: String,
+    pub player_clock_color: String,
+    pub player_clock_remaining_color: String,
+    pub player_hint_remaining_color: String,
+    pub player_hint_amount_color: String,
+    pub player_hint_color: String,
     pub player_win_color: String,
     pub player_lose_color: String,
     pub player_win_text: String,
@@ -85,7 +92,23 @@ impl Config {
                 "player.background.color",
                 DEFAULT_PLAYER_BACKGROUND,
             ),
-            player_label_color: color(&root, "player.label.color", DEFAULT_PLAYER_LABEL),
+            player_clock_color: color(&root, "player.clock.color", DEFAULT_PLAYER_CLOCK_COLOR),
+            player_clock_remaining_color: color(
+                &root,
+                "player.clock.remaining.color",
+                DEFAULT_PLAYER_CLOCK_REMAINING_COLOR,
+            ),
+            player_hint_remaining_color: color(
+                &root,
+                "player.hint.remaining.color",
+                DEFAULT_PLAYER_HINT_REMAINING_COLOR,
+            ),
+            player_hint_amount_color: color(
+                &root,
+                "player.hint.amount.color",
+                DEFAULT_PLAYER_HINT_AMOUNT_COLOR,
+            ),
+            player_hint_color: color(&root, "player.hint.color", DEFAULT_PLAYER_HINT_COLOR),
             player_win_color: color(&root, "player.win.color", DEFAULT_PLAYER_WIN_COLOR),
             player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE_COLOR),
             player_win_text: text(&root, "player.win.text", DEFAULT_PLAYER_WIN_TEXT),

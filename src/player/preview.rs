@@ -114,14 +114,23 @@ impl SimpleComponent for PlayerPreview {
                 }
             },
 
-            gtk::Label {
+            gtk::Box {
                 #[watch]
                 set_visible: !model.state.playing_video,
-                #[watch]
-                set_label: &format!("Hints Remaining: {}", model.state.hints_remaining),
+                set_orientation: gtk::Orientation::Horizontal,
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::End,
-                add_css_class: "hints-remaining-label-preview",
+
+                gtk::Label {
+                    set_label: "Hints Remaining: ",
+                    add_css_class: "hints-remaining-label-preview",
+                },
+
+                gtk::Label {
+                    #[watch]
+                    set_label: &model.state.hints_remaining.to_string(),
+                    add_css_class: "hints-amount-label-preview",
+                },
             },
         }
     }
@@ -149,20 +158,27 @@ impl SimpleComponent for PlayerPreview {
             "box.player-preview-box {{ {background} }} \
              box.player-preview-box scrolledwindow, \
              box.player-preview-box scrolledwindow viewport {{ background: none; }} \
-             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; line-height: {timer_line_height}; color: #{label}; }} \
+             box.player-preview-box label.timer-label-preview {{ font-size: {timer_size}px; line-height: {timer_line_height}; color: #{clock}; }} \
              box.player-preview-box label.timer-label-preview.win {{ color: #{win}; }} \
              box.player-preview-box label.timer-label-preview.lose {{ color: #{lose}; }} \
-             box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{label}; }} \
-             box.player-preview-box label.time-remaining-label-preview {{ line-height: {time_remaining_line_height}; }} \
+             box.player-preview-box label.message-label-preview {{ font-size: {hint_size}px; color: #{hint}; }} \
+             box.player-preview-box label.time-remaining-label-preview {{ line-height: {time_remaining_line_height}; color: #{clock_remaining}; }} \
              box.player-preview-box label.time-remaining-label-preview, \
-             box.player-preview-box label.hints-remaining-label-preview {{ font-size: {remaining_size}px; color: #{label}; }}",
+             box.player-preview-box label.hints-remaining-label-preview, \
+             box.player-preview-box label.hints-amount-label-preview {{ font-size: {remaining_size}px; }} \
+             box.player-preview-box label.hints-remaining-label-preview {{ color: #{hint_remaining}; }} \
+             box.player-preview-box label.hints-amount-label-preview {{ color: #{hint_amount}; }}",
             background = background_css(),
             timer_size = DEFAULT_TIMER_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             timer_line_height = TIMER_LINE_HEIGHT,
             time_remaining_line_height = TIME_REMAINING_LINE_HEIGHT,
             hint_size = DEFAULT_HINT_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
             remaining_size = DEFAULT_HINTS_REMAINING_FONT_SIZE / PREVIEW_FONT_SCALE_DIVISOR,
-            label = config().player_label_color,
+            clock = config().player_clock_color,
+            clock_remaining = config().player_clock_remaining_color,
+            hint = config().player_hint_color,
+            hint_remaining = config().player_hint_remaining_color,
+            hint_amount = config().player_hint_amount_color,
             win = config().player_win_color,
             lose = config().player_lose_color,
         ));
