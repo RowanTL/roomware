@@ -1,0 +1,23 @@
+[step-test]
+long_hint = "This is a very long sentence containing many words that will surely prank this program. Gottem coach. On Josh. I need more words to test this so what 9 + 10? 21 lol"
+
+[step-1]
+hint1 = "hint1"
+hint2 = "hint2"
+hint3 = "gaming"
+
+[step-2]
+hint1 = "hint1_2"
+
+[step-3]
+hint1 = "hint1_3"
+someHint = "plz"
+
+[step-4]
+
+[step-5]
+hint1 = "yes"
+hint2 = "no"
+
+[step-png]
+pic1 = "./picture.png"
