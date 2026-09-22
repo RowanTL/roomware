@@ -6,6 +6,8 @@ SetCompressor /SOLID lzma
 
 Name "RoomWare ${VERSION}"
 OutFile "${OUTFILE}"
+Icon "escapeonmain.ico"
+UninstallIcon "escapeonmain.ico"
 InstallDir "$PROGRAMFILES64\RoomWare"
 InstallDirRegKey HKLM "Software\RoomWare" "InstallDir"
 ; Writing to Program Files and HKLM needs it.

@@ -65,6 +65,9 @@ let
         ../Cargo.toml
         ../Cargo.lock
         ../src
+        ../build.rs
+        ../nix/roomware.rc
+        ../nix/escapeonmain.ico
       ];
     };
     cargoLock.lockFile = ../Cargo.lock;
