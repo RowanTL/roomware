@@ -24,8 +24,8 @@ Section "RoomWare"
   SetOutPath "$INSTDIR"
   File /r "${BUNDLE}/*"
 
-  ; The shortcut takes its working directory from the last SetOutPath, so hints
-  ; and config files written as relative paths resolve against the install.
+  ; roomware.exe looks for config.toml/hints.toml on whichever user's own
+  ; desktop launches it, so the shortcut needs no arguments here.
   CreateShortcut "$SMPROGRAMS\RoomWare.lnk" "$INSTDIR\bin\roomware.exe"
 
   WriteRegStr HKLM "Software\RoomWare" "InstallDir" "$INSTDIR"

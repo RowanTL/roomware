@@ -30,9 +30,28 @@ fn main() {
         )
         .get_matches();
 
-    config::set_path(matches.get_one::<PathBuf>("config").cloned());
-    hints::set_path(matches.get_one::<PathBuf>("hints").cloned());
+    config::set_path(
+        matches
+            .get_one::<PathBuf>("config")
+            .cloned()
+            .or_else(|| desktop_file("config.toml")),
+    );
+    hints::set_path(
+        matches
+            .get_one::<PathBuf>("hints")
+            .cloned()
+            .or_else(|| desktop_file("hints.toml")),
+    );
 
     let app = RelmApp::new("EscapeOnMain.RoomWare.Monitor").with_args(Vec::new());
     app.run::<GameMasterWindow>(());
+}
+
+/// Falls back to a file on the current user's desktop when no `-c`/`-i` flag
+/// is passed.
+fn desktop_file(name: &str) -> Option<PathBuf> {
+    let home = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME"))?;
+    let path = PathBuf::from(home).join("Desktop").join(name);
+
+    path.is_file().then_some(path)
 }
