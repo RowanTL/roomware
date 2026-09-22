@@ -52,3 +52,7 @@ where you can change it.
 Paths inside either file, such as a video, a ping sound or a picture hint, are relative to the file
 they are written in. A `./picture.png` in `hints.toml` is the picture sitting next to `hints.toml`,
 wherever you keep it. Absolute paths work too.
+
+## Other
+
+Link to escape on main image used and resized with imagemagick: https://www.escapeonmain.com/wp-content/uploads/2019/07/escapeonmainfavicon.png
