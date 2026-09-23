@@ -113,13 +113,20 @@ fn load_hint_tables() -> Vec<HintTable> {
         .filter_map(|(name, value)| {
             let table = value.as_table()?;
 
+            let box_name = table.get("box_name").and_then(|v| v.as_str()).unwrap_or("");
+            let box_contents = table
+                .get("box_contents")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+
             let hints = table
-                .values()
-                .filter_map(|value| value.as_str().map(str::to_string))
+                .iter()
+                .filter(|(key, _)| *key != "box_name" && *key != "box_contents")
+                .filter_map(|(_, value)| value.as_str().map(str::to_string))
                 .collect();
 
             Some(HintTable {
-                name: name.clone(),
+                name: format!("{box_name}({name}):{box_contents}"),
                 hints,
             })
         })

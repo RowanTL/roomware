@@ -1,4 +1,6 @@
-[Tin_Box]
+[No_Code]
+box_name = "Tin Box"
+box_contents = "Tones paper, dry erase marker"
 hint_1 = "Look around the room for a box without a lock"
 
 [TONES]

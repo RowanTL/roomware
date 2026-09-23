@@ -19,3 +19,6 @@
 - [x] Make timer amount configurable in seconds in config.toml
 - [x] Add +1 and -1 minute buttons
 - [x] Make cli with arguments to config and hints file path
+- [x] Add special box_name and box_contents key/value pair
+  - These should appear next to the code as the header for the dropdown menu
+- [ ] Make all dropdown menus re-expand when reset is clicked
