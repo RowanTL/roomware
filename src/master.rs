@@ -6,7 +6,7 @@ use relm4::{
 
 use crate::config::config;
 use crate::hints::control::{HintControl, HintControlMsg, HintControlOutput};
-use crate::hints::menu::{HintMenu, HintMenuOutput};
+use crate::hints::menu::{HintMenu, HintMenuMsg, HintMenuOutput};
 use crate::hints::{Hints, HintsOutput};
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
@@ -71,12 +71,6 @@ impl SimpleComponent for GameMasterWindow {
                     PlayerMsg::UpdateHintsRemaining(remaining)
                 }
             });
-        let timer = Timer::builder()
-            .launch(())
-            .forward(player.sender(), |output| match output {
-                TimerOutput::TimeChanged(remaining) => PlayerMsg::UpdateTime(remaining),
-                TimerOutput::OutcomeChanged(outcome) => PlayerMsg::UpdateOutcome(outcome),
-            });
         let hint_control = HintControl::builder()
             .launch(())
             .forward(player.sender(), |output| match output {
@@ -87,6 +81,21 @@ impl SimpleComponent for GameMasterWindow {
             .forward(hint_control.sender(), |output| match output {
                 HintMenuOutput::HintSelected(value) => HintControlMsg::SetText(value),
                 HintMenuOutput::HintActivated(value) => HintControlMsg::ShowValue(value),
+            });
+        let player_sender = player.sender().clone();
+        let hint_menu_sender = hint_menu.sender().clone();
+        let timer = Timer::builder()
+            .launch(())
+            .connect_receiver(move |_, output| match output {
+                TimerOutput::TimeChanged(remaining) => {
+                    player_sender.emit(PlayerMsg::UpdateTime(remaining));
+                }
+                TimerOutput::OutcomeChanged(outcome) => {
+                    player_sender.emit(PlayerMsg::UpdateOutcome(outcome));
+                }
+                TimerOutput::Reset => {
+                    hint_menu_sender.emit(HintMenuMsg::ExpandAll);
+                }
             });
 
         player.widget().present();

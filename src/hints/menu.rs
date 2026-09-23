@@ -12,12 +12,14 @@ struct HintTable {
 
 pub struct HintMenu {
     tables: Vec<HintTable>,
+    expanders: Vec<gtk::Expander>,
 }
 
 #[derive(Debug)]
 pub enum HintMenuMsg {
     HintClicked(String),
     HintActivated(String),
+    ExpandAll,
 }
 
 #[derive(Debug)]
@@ -53,8 +55,9 @@ impl SimpleComponent for HintMenu {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = HintMenu {
+        let mut model = HintMenu {
             tables: load_hint_tables(),
+            expanders: Vec::new(),
         };
 
         let widgets = view_output!();
@@ -62,6 +65,7 @@ impl SimpleComponent for HintMenu {
         for table in &model.tables {
             let expander = gtk::Expander::new(Some(&table.name));
             expander.set_expanded(true);
+            model.expanders.push(expander.clone());
 
             let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
             for hint in &table.hints {
@@ -97,6 +101,11 @@ impl SimpleComponent for HintMenu {
             }
             HintMenuMsg::HintActivated(value) => {
                 let _ = sender.output(HintMenuOutput::HintActivated(value));
+            }
+            HintMenuMsg::ExpandAll => {
+                for expander in &self.expanders {
+                    expander.set_expanded(true);
+                }
             }
         }
     }

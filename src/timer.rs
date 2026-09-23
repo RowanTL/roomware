@@ -36,6 +36,7 @@ pub enum TimerMsg {
 pub enum TimerOutput {
     TimeChanged(u32),
     OutcomeChanged(Outcome),
+    Reset,
 }
 
 #[relm4::component(pub)]
@@ -108,6 +109,7 @@ impl SimpleComponent for Timer {
                 self.stop();
                 self.remaining = config().master_time;
                 self.outcome = Outcome::Undecided;
+                let _ = sender.output(TimerOutput::Reset);
             }
             TimerMsg::Win => {
                 self.stop();
