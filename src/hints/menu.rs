@@ -135,7 +135,7 @@ fn load_hint_tables() -> Vec<HintTable> {
                 .collect();
 
             Some(HintTable {
-                name: format!("{box_name}({name}):{box_contents}"),
+                name: format!("{box_name}({name}): {box_contents}"),
                 hints,
             })
         })
