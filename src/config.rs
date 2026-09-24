@@ -100,15 +100,15 @@ impl Config {
             ),
             player_hint_remaining_color: color(
                 &root,
-                "player.hint.remaining.color",
+                "hint.remaining.color",
                 DEFAULT_PLAYER_HINT_REMAINING_COLOR,
             ),
             player_hint_amount_color: color(
                 &root,
-                "player.hint.amount.color",
+                "hint.amount.color",
                 DEFAULT_PLAYER_HINT_AMOUNT_COLOR,
             ),
-            player_hint_color: color(&root, "player.hint.color", DEFAULT_PLAYER_HINT_COLOR),
+            player_hint_color: color(&root, "hint.color", DEFAULT_PLAYER_HINT_COLOR),
             player_win_color: color(&root, "player.win.color", DEFAULT_PLAYER_WIN_COLOR),
             player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE_COLOR),
             player_win_text: text(&root, "player.win.text", DEFAULT_PLAYER_WIN_TEXT),
@@ -138,7 +138,7 @@ impl Config {
                 DEFAULT_ENTRY_BACKGROUND,
             ),
             entry_text_color: color(&root, "entry.text.color", DEFAULT_ENTRY_TEXT),
-            hints_default_amount: amount(&root, "hints.default.amount", DEFAULT_HINTS_AMOUNT),
+            hints_default_amount: amount(&root, "hint.default.amount", DEFAULT_HINTS_AMOUNT),
         }
     }
 }
