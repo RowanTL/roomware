@@ -12,11 +12,11 @@ win.color = "89D154"
 win.text = "You win!"
 lose.color = "E32D2D"
 lose.text = "You lose!"
-video = "./video.mp4"
+video = "./../../video.mp4"
 
 [master]
 background = "333333"
-noise = "./audio.ogg" # Sound to play when pinging
+noise = "./../../audio.ogg" # Sound to play when pinging
 time = 3600 # Must be a positive number in seconds
 
 [frame]
