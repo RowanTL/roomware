@@ -4,21 +4,30 @@ box_contents = "Tones paper, dry erase marker"
 hint_1 = "Look around the room for a box without a lock"
 
 [TONES]
+box_name = "Small Rectangle Box"
+box_contents = "Word Search"
 hint_1 = "Nine = N, One = O, etc... The number = the first letter of their spelling. What word could that number equal?"
 hint_2 = "Nine = N, One = O, etc... The number = the first letter of their spelling. What letter does 3 start with?"
 
 [GORE]
+box_name = "TODO"
+box_contnets = "Headless Teddy Bear"
 hint_1 = "Find ALL words on the word searches from the word bank then stand back to see a code."
 
 [254]
+box_name = "Violin Case"
+box_contents = "1 Monster Card, Drawn Faces"
 hint_1 = "Squeeze the teddy bear. Match the correct sound to their pictures hanging above the bell to open the violin case."
 hint_unstuck = "254 is correct for the violin case. This wont count as a clue."
 hint_special = "Match the feet to the animals above the bell."
 
 [261]
+box_name = "Square Box"
+box_contents = "1 Monster Card, Crack the Code"
 hint_1 = "Find the matching mask to the expressions drawn in the violin case. Make sure the eyes and mouth both match."
 
 [386]
+box_name = "Wall Door"
 hint_1 = "The second number is 8 for cracking the code. Crossing out numbers you know are incorrect will help."
 
 [7095]
