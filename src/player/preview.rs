@@ -1,3 +1,5 @@
+//! The preview screen in the game master view.
+
 use gtk::prelude::{BoxExt, Cast, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 

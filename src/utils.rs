@@ -1,3 +1,5 @@
+//! General utility functions found around the repo.
+
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 

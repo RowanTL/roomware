@@ -1,3 +1,6 @@
+//! Holds timer information. Declares the timer control buttons as well. Also, this
+//! is where the countdown logic is stored.
+
 use gtk::glib;
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
@@ -149,6 +152,7 @@ impl Timer {
         self.running = true;
 
         let input_sender = sender.input_sender().clone();
+        // Every 1 second, this function calls whatever is inside of the closure
         let source = glib::timeout_add_seconds_local(1, move || {
             input_sender.emit(TimerMsg::Tick);
             glib::ControlFlow::Continue
@@ -169,7 +173,7 @@ impl Timer {
     }
 }
 
-/// Takes a time in seconds and generates a nice output string from it.
+/// Output format as {minutes:02}:{seconds:02}
 pub(crate) fn format_time(total_seconds: u32) -> String {
     let minutes = total_seconds / 60;
     let seconds = total_seconds % 60;

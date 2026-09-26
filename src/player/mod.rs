@@ -1,3 +1,6 @@
+//! Holds logic for the screen the player sees in this of the room. Also is where
+//! the logic for playing a video to the players is held.
+
 use std::sync::OnceLock;
 
 use gtk::prelude::{

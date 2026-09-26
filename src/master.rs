@@ -1,3 +1,6 @@
+//! The main screen the game master sees. Combines controls for the time, hints, audio, and
+//! video.
+
 use gtk::prelude::{BoxExt, ButtonExt, FrameExt, GridExt, GtkWindowExt, WidgetExt};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
@@ -51,8 +54,6 @@ impl SimpleComponent for GameMasterWindow {
         }
     }
 
-    /// Launches every child component, wires their outputs together, and lays
-    /// the whole control panel out in the grid.
     fn init(
         _init: Self::Init,
         root: Self::Root,

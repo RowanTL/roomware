@@ -1,3 +1,6 @@
+//! Reads the config file and stores a reference to the values held in it.
+//! The big function in this file used everywhere is the config() function.
+
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 

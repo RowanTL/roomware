@@ -1,3 +1,5 @@
+//! This file holds the text entry box and the show/clear hint buttons.
+
 use gtk::prelude::{BoxExt, ButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
@@ -71,6 +73,8 @@ impl SimpleComponent for HintControl {
                 let _ = sender.output(HintControlOutput::ShowHint(entry.text().to_string()));
                 entry.set_text("");
             }
+            // Happens whenever user clicks enter on their keyboard
+            // Apparently this functionality is baked into gtk's Entry widget
             HintControlMsg::Submit => {
                 let hint = entry.text().to_string();
 
