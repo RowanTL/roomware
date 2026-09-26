@@ -17,7 +17,7 @@ video = "./../../video.mp4"
 [master]
 background = "333333"
 noise = "./../../audio.ogg" # Sound to play when pinging
-time = 2 # Must be a positive number in seconds
+time = 3600 # Must be a positive number in seconds
 
 [frame]
 border = "D3D3D3"
