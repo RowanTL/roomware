@@ -1,0 +1,90 @@
+[No_Code]
+box_name = "Room 1; Pie Box"
+box_contents = "Braille Decoder"
+hint_1 = "Open up the blueberry pie."
+
+[POSE]
+box_name = "Room 1; Top Left Drawer on Oven"
+box_contents = "Key for 1st door"
+hint_1 = "Look through the glass door. Use the braille to decode the word from the candy buttons."
+
+[no_lock]
+box_name = "Room 1; Middle Left Drawer on Oven"
+box_contents = "Calculator, Paper, Pen Inside Chocolate Bag"
+
+[317]
+box_name = "Room 2; Pink Cake Box"
+box_contents = "Gum Drop Clue"
+hint_1 = "The cube shelf in the second room reveals a code. Look at the white to see."
+
+[355]
+box_name = "Room 2; Small Blue Box"
+box_contents = "Cookie Rope Magnet"
+hint_1 = "The gumdrops spell an equation. Go around the door and each color will spell a word. Use the gumdrop paper to put the words in order."
+hint_2 = "The yellow gumdrops spell out FIVE"
+
+[Short_Lock]
+box_name = "Room 1; Green Chest"
+box_contents = "Rainbow Ribbon Clue, Heart Shape Cookie Cutter"
+hint_1 = "The choolate wafer straws hold something you need. The cookie with a magnet will help you retrieve those items."
+hint_2 = "You found a key in one wafer. Is there something in the other too?"
+
+[Long_Lock]
+box_name = "Room 1; Brown Cake Box"
+box_contents = "4 ribbons with circle hooks, cookbook"
+
+[4619]
+box_name = "Room 2; Tall Cake Box"
+box_contents = "Grandma Gingers Letter, Star Cookie Cutter"
+hint_1 = "Hang the ribbons on the coat rack according to the ribbon clue."
+hint_2 = "The longest ribbon will hang on the dark blue and point to the number 9."
+
+[3741]
+box_name = "Room 2; Orange Chest"
+box_contents = "Bottom Half of Cipher, Circle and Flower Cookie Cutters"
+hint_1 = "Flip the spice jars upside down."
+hint_2 = "Grandma Ginger's letter tells you what recipe to make. Find the spices that are needed and flip them upside down."
+
+[8413]
+box_name = "Room 2; Cherry Cake Box"
+box_contents = "Cake Clue, Blacklight"
+hint_1 = "Order the cookie cutters found throughout the room according to the sheetpan hanging above the blue chair."
+
+[7018]
+box_name = "Room 1; Big Right Drawer on Oven"
+box_contents = "Cipher Alphabet"
+hint_1 = "Use the blacklight to reveal something on the cake table. Use the cake picture for the order."
+hint_2 = "Use the colored cake layers to put the cake numbers in order."
+
+[BART]
+box_name = "Room 2; Pink Box"
+box_contents = "Connect Clue, Dry Erase Marker"
+hint_1 = "Layer the clear paper with letters over the paper with symbols to make a decoder."
+hint_2 = "Use the decoder to decode the messages on the gingerbread houses."
+hint_3 = "! = C. Line up the decoders correctly then decode the sides of the gingerbread house."
+hint_4 = "One side of a gingerbread house will decode to: First comes B."
+hint_5 = "The first house will decode to \"First Comes B. T sits last.\" Decode the other house to get the rest of the code (B _ _ T)."
+hint_6 = "GINGERBREAD HOUSE DECODED: First comes B. T sits last. Third wall always be R. Second is A."
+
+[563]
+box_name = "Room 2; Blue Chest"
+box_contents = "4 Weighted Candies, Do Not Open Clue"
+hint_1 = "Use the connect paper to connect the numbers on the calendar."
+
+[scale]
+box_name = "Room 1; Right Drawer on Oven"
+box_contents = "Scale"
+
+[electric_puzzle]
+box_name = "Electric Puzzle"
+box_contents = "Key to Oven"
+hint_1 = "Use the scale and weigh the candy boxes in grams and then place them lightest to heaviest on the white cupboard."
+hint_2 = "Once you hear the beep, pull down on the trap door."
+hint_3 = "Be sure to turn the scale on when it is on a flat surface and nothing is on the scale."
+hint_4 = "To change the units to grams, keep pressing the units button until the g is highlighted."
+hint_5 = "Place the candy boxes in their correct spots on the white cupboard according to their weights."
+hint_6 = "M&Ms, Raisinets, Crunch, then Good & Plenty is the correct order. Pull the knob on the trap door."
+
+[final_box]
+box_name = "Oven"
+box_contents = "Gingerbread People Key to Way Out"

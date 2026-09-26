@@ -1,0 +1,43 @@
+# This website can help select a good color
+# https://htmlcolorcodes.com/
+#
+# A # may be prepended to any of the color values.
+
+[player]
+# background.image = "./background.jpg"
+background.color = "D08A3E" # Does nothing if image is set
+clock.color = "FE81F8" # Color of the actual minute:second counter text
+clock.remaining.color = "FFFFFF" # Color of the "Time Remaining" text
+win.color = "89D154"
+win.text = "You win!"
+lose.color = "E32D2D"
+lose.text = "You lose!"
+video = "./../../video.mp4"
+
+[master]
+background = "333333"
+noise = "./../../audio.ogg" # Sound to play when pinging
+time = 2 # Must be a positive number in seconds
+
+[frame]
+border = "D3D3D3"
+label = "D3D3D3"
+
+[expander]
+color = "D3D3D3"
+hovered.color = "FFFFFF"
+
+[button]
+color = "1A1A1A"
+background.color = "D3D3D3"
+label.color = "1A1A1A"
+
+[entry]
+background.color = "D3D3D3"
+text.color = "1A1A1A"
+
+[hint]
+default.amount = 5
+remaining.color = "FFFFFF" # Color of "Hints Remaining" text
+amount.color = "FFFFFF" # Color of the number next to "Hints Remaining: "
+color = "FFFFFF" # Color of the hints when they appear
