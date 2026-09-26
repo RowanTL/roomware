@@ -44,6 +44,12 @@ fn main() {
     );
 
     let app = RelmApp::new("EscapeOnMain.RoomWare.Monitor").with_args(Vec::new());
+
+    // Stops annoying empty hint entry box backspace noise on windows.
+    if let Some(settings) = relm4::gtk::Settings::default() {
+        settings.set_gtk_error_bell(false);
+    }
+
     app.run::<GameMasterWindow>(());
 }
 
