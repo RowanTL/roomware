@@ -14,6 +14,8 @@ pub struct Timer {
     remaining: u32,
     running: bool,
     outcome: Outcome,
+    // Seconds the clock has actually run since the last reset
+    elapsed: u32,
     source: Option<glib::SourceId>,
 }
 
@@ -39,6 +41,11 @@ pub enum TimerMsg {
 pub enum TimerOutput {
     TimeChanged(u32),
     OutcomeChanged(Outcome),
+    GameOver {
+        outcome: Outcome,
+        remaining: u32,
+        elapsed: u32,
+    },
     Reset,
 }
 
@@ -88,6 +95,7 @@ impl SimpleComponent for Timer {
             remaining: config().master_time,
             running: false,
             outcome: Outcome::Undecided,
+            elapsed: 0,
             source: None,
         };
 
@@ -100,6 +108,8 @@ impl SimpleComponent for Timer {
     }
 
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
+        let previous = self.outcome;
+
         match msg {
             TimerMsg::Toggle => {
                 if self.running {
@@ -112,6 +122,7 @@ impl SimpleComponent for Timer {
                 self.stop();
                 self.remaining = config().master_time;
                 self.outcome = Outcome::Undecided;
+                self.elapsed = 0;
                 let _ = sender.output(TimerOutput::Reset);
             }
             TimerMsg::Win => {
@@ -133,6 +144,7 @@ impl SimpleComponent for Timer {
             }
             TimerMsg::Tick => {
                 self.remaining = self.remaining.saturating_sub(1);
+                self.elapsed = self.elapsed.saturating_add(1);
                 if self.remaining == 0 {
                     self.time_up();
                 }
@@ -141,6 +153,14 @@ impl SimpleComponent for Timer {
 
         let _ = sender.output(TimerOutput::TimeChanged(self.remaining));
         let _ = sender.output(TimerOutput::OutcomeChanged(self.outcome));
+
+        if self.outcome != previous && self.outcome != Outcome::Undecided {
+            let _ = sender.output(TimerOutput::GameOver {
+                outcome: self.outcome,
+                remaining: self.remaining,
+                elapsed: self.elapsed,
+            });
+        }
     }
 }
 

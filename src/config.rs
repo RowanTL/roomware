@@ -51,6 +51,7 @@ pub struct Config {
     pub master_background: String,
     pub master_noise: Option<PathBuf>,
     pub master_time: u32,
+    pub master_log_path: Option<PathBuf>,
     pub frame_border: String,
     pub frame_label: String,
     pub expander_color: String,
@@ -63,9 +64,7 @@ pub struct Config {
     pub hints_default_amount: u8,
 }
 
-/// Points the configuration at a file. Has to be called before the first
-/// `config()`, which is why it belongs at the very start of `main`. Without
-/// it, or with `None`, everything falls back to the `DEFAULT_*` values.
+/// Points the configuration at a file.
 pub fn set_path(path: Option<PathBuf>) {
     let _ = CONFIG_PATH.set(path);
 }
@@ -120,6 +119,7 @@ impl Config {
             master_background: color(&root, "master.background", DEFAULT_MASTER_BACKGROUND),
             master_noise: media(&root, &base, "master.noise", DEFAULT_MASTER_NOISE),
             master_time: seconds(&root, "master.time", DEFAULT_MASTER_TIME),
+            master_log_path: output(&root, &base, "master.log.path"),
             frame_border: color(&root, "frame.border", DEFAULT_FRAME_BORDER),
             frame_label: color(&root, "frame.label", DEFAULT_FRAME_LABEL),
             expander_color: color(&root, "expander.color", DEFAULT_EXPANDER),
@@ -193,6 +193,16 @@ fn media(root: &toml::Table, base: &Path, path: &str, default: &str) -> Option<P
     let configured = lookup(root, path).and_then(toml::Value::as_str);
 
     resolve_path(base, configured.unwrap_or(default))
+}
+
+/// Reads a path to a file RoomWare writes to, so it may not exist yet. `None`
+/// when the key is missing or empty.
+fn output(root: &toml::Table, base: &Path, path: &str) -> Option<PathBuf> {
+    lookup(root, path)
+        .and_then(toml::Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(|value| base.join(value))
 }
 
 /// CSS accepts hex colors of 3, 4, 6 or 8 digits.

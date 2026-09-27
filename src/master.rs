@@ -4,16 +4,17 @@
 use gtk::prelude::{BoxExt, ButtonExt, FrameExt, GridExt, GtkWindowExt, WidgetExt};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
-    SimpleComponent, gtk,
+    SimpleComponent, WorkerController, gtk,
 };
 
 use crate::config::config;
 use crate::hints::control::{HintControl, HintControlMsg, HintControlOutput};
 use crate::hints::menu::{HintMenu, HintMenuMsg, HintMenuOutput};
 use crate::hints::{Hints, HintsOutput};
-use crate::misc::Misc;
+use crate::misc::{Misc, MiscMsg, MiscOutput};
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
+use crate::stats::{Stats, StatsMsg};
 use crate::timer::{Timer, TimerOutput};
 use crate::utils::apply_css_style;
 
@@ -34,6 +35,8 @@ pub struct GameMasterWindow {
     player: Controller<Player>,
     #[allow(dead_code)]
     misc: Controller<Misc>,
+    #[allow(dead_code)]
+    stats: WorkerController<Stats>,
 }
 
 #[relm4::component(pub)]
@@ -68,11 +71,15 @@ impl SimpleComponent for GameMasterWindow {
             .forward(player_preview.sender(), |output| match output {
                 PlayerOutput::StateChanged(state) => PlayerPreviewMsg::Sync(state),
             });
+        let stats = Stats::builder().detach_worker(()).detach();
+        let player_sender = player.sender().clone();
+        let stats_sender = stats.sender().clone();
         let hints = Hints::builder()
             .launch(())
-            .forward(player.sender(), |output| match output {
+            .connect_receiver(move |_, output| match output {
                 HintsOutput::CounterChanged(remaining) => {
-                    PlayerMsg::UpdateHintsRemaining(remaining)
+                    player_sender.emit(PlayerMsg::UpdateHintsRemaining(remaining));
+                    stats_sender.emit(StatsMsg::HintsChanged(remaining));
                 }
             });
         let hint_control = HintControl::builder()
@@ -86,8 +93,15 @@ impl SimpleComponent for GameMasterWindow {
                 HintMenuOutput::HintSelected(value) => HintControlMsg::SetText(value),
                 HintMenuOutput::HintActivated(value) => HintControlMsg::ShowValue(value),
             });
+        let misc = Misc::builder()
+            .launch(())
+            .forward(stats.sender(), |output| match output {
+                MiscOutput::ForceLoss(force_loss) => StatsMsg::ForceLoss(force_loss),
+            });
         let player_sender = player.sender().clone();
         let hint_menu_sender = hint_menu.sender().clone();
+        let stats_sender = stats.sender().clone();
+        let misc_sender = misc.sender().clone();
         let timer = Timer::builder()
             .launch(())
             .connect_receiver(move |_, output| match output {
@@ -97,8 +111,21 @@ impl SimpleComponent for GameMasterWindow {
                 TimerOutput::OutcomeChanged(outcome) => {
                     player_sender.emit(PlayerMsg::UpdateOutcome(outcome));
                 }
+                TimerOutput::GameOver {
+                    outcome,
+                    remaining,
+                    elapsed,
+                } => {
+                    stats_sender.emit(StatsMsg::GameOver {
+                        outcome,
+                        remaining,
+                        elapsed,
+                    });
+                }
                 TimerOutput::Reset => {
                     hint_menu_sender.emit(HintMenuMsg::ExpandAll);
+                    stats_sender.emit(StatsMsg::Reset);
+                    misc_sender.emit(MiscMsg::ResetForceLoss);
                 }
             });
 
@@ -122,7 +149,6 @@ impl SimpleComponent for GameMasterWindow {
         let hint_frame = gtk::Frame::new(Some("Hint Controls"));
         hint_frame.set_child(Some(hints.widget()));
 
-        let misc = Misc::builder().launch(()).detach();
         let misc_frame = gtk::Frame::new(Some("Misc"));
         misc_frame.set_child(Some(misc.widget()));
 
@@ -146,6 +172,7 @@ impl SimpleComponent for GameMasterWindow {
             hint_menu,
             player,
             misc,
+            stats,
         };
 
         let widgets = view_output!();
