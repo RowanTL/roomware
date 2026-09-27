@@ -11,6 +11,7 @@ use crate::config::config;
 use crate::hints::control::{HintControl, HintControlMsg, HintControlOutput};
 use crate::hints::menu::{HintMenu, HintMenuMsg, HintMenuOutput};
 use crate::hints::{Hints, HintsOutput};
+use crate::misc::Misc;
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
 use crate::timer::{Timer, TimerOutput};
@@ -31,6 +32,8 @@ pub struct GameMasterWindow {
     hint_menu: Controller<HintMenu>,
     #[allow(dead_code)]
     player: Controller<Player>,
+    #[allow(dead_code)]
+    misc: Controller<Misc>,
 }
 
 #[relm4::component(pub)]
@@ -119,6 +122,10 @@ impl SimpleComponent for GameMasterWindow {
         let hint_frame = gtk::Frame::new(Some("Hint Controls"));
         hint_frame.set_child(Some(hints.widget()));
 
+        let misc = Misc::builder().launch(()).detach();
+        let misc_frame = gtk::Frame::new(Some("Misc"));
+        misc_frame.set_child(Some(misc.widget()));
+
         let player_preview_frame = gtk::Frame::new(Some("Player View"));
         player_preview_frame.set_child(Some(player_preview.widget()));
         player_preview_frame.set_hexpand(true);
@@ -138,6 +145,7 @@ impl SimpleComponent for GameMasterWindow {
             player_preview,
             hint_menu,
             player,
+            misc,
         };
 
         let widgets = view_output!();
@@ -172,7 +180,8 @@ impl SimpleComponent for GameMasterWindow {
         widgets.grid.attach(&play_video_button, 0, 1, 1, 1);
         widgets.grid.attach(&play_audio_button, 1, 1, 1, 1);
         widgets.grid.attach(&hint_frame, 0, 2, 1, 1);
-        widgets.grid.attach(&player_preview_frame, 1, 2, 1, 1);
+        widgets.grid.attach(&player_preview_frame, 1, 2, 1, 2);
+        widgets.grid.attach(&misc_frame, 0, 3, 1, 1);
 
         ComponentParts { model, widgets }
     }
