@@ -19,6 +19,7 @@ background = "333333"
 noise = "./../../audio.ogg" # Sound to play when pinging
 time = 3600 # Must be a positive number in seconds
 log.path = "./../../game_stats.csv" # This is optional
+room.name = "Gingerbread"
 
 [frame]
 border = "D3D3D3"

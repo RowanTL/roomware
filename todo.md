@@ -22,4 +22,4 @@
 - [x] Add special box_name and box_contents key/value pair
   - These should appear next to the code as the header for the dropdown menu
 - [x] Make all dropdown menus re-expand when reset is clicked
-- [ ] Add win/loss logging
+- [x] Add win/loss logging with room name

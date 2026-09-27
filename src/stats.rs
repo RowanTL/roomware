@@ -10,7 +10,7 @@ use relm4::{ComponentSender, Worker};
 use crate::config::config;
 use crate::timer::Outcome;
 
-const HEADER: &str = "outcome,time_left,initial_time,hints_left,initial_hints";
+const HEADER: &str = "room,outcome,time_left,initial_time,hints_left,initial_hints";
 const MIN_GAME_LENGTH: u32 = 15;
 
 pub struct Stats {
@@ -75,6 +75,7 @@ impl Worker for Stats {
                 }
 
                 let record = Record {
+                    room: &config().master_room_name,
                     won: outcome == Outcome::Won,
                     time_left: remaining,
                     initial_time: config().master_time,
@@ -127,6 +128,7 @@ impl Stats {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Record {
+    room: &'static str,
     won: bool,
     time_left: u32,
     initial_time: u32,
@@ -137,13 +139,23 @@ struct Record {
 impl Record {
     fn to_csv(self) -> String {
         format!(
-            "{},{},{},{},{}",
+            "{},{},{},{},{},{}",
+            csv_field(self.room),
             if self.won { "win" } else { "loss" },
             self.time_left,
             self.initial_time,
             self.hints_left,
             self.initial_hints,
         )
+    }
+}
+
+/// Quotes text that would otherwise break the row apart, doubling any quotes inside it.
+fn csv_field(text: &str) -> String {
+    if text.contains([',', '"', '\n', '\r']) {
+        format!("\"{}\"", text.replace('"', "\"\""))
+    } else {
+        text.to_string()
     }
 }
 
@@ -183,6 +195,7 @@ mod tests {
     use super::*;
 
     const RECORD: Record = Record {
+        room: "Museum",
         won: true,
         time_left: 600,
         initial_time: 3600,
@@ -222,8 +235,21 @@ mod tests {
 
         assert_eq!(
             fs::read_to_string(&path).unwrap(),
-            format!("{HEADER}\nwin,600,3600,2,5\nloss,600,3600,2,5\n")
+            format!("{HEADER}\nMuseum,win,600,3600,2,5\nMuseum,loss,600,3600,2,5\n")
         );
         fs::remove_file(&path).unwrap();
+    }
+
+    #[test]
+    fn room_names_with_commas_or_quotes_are_quoted() {
+        let record = Record {
+            room: "Bob's \"Big\", Room",
+            ..RECORD
+        };
+
+        assert_eq!(
+            record.to_csv(),
+            "\"Bob's \"\"Big\"\", Room\",win,600,3600,2,5"
+        );
     }
 }
