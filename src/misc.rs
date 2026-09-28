@@ -35,7 +35,7 @@ impl SimpleComponent for Misc {
             set_spacing: 5,
             set_valign: gtk::Align::Start,
 
-            gtk::Button::with_label("Show Version") {
+            gtk::Button::with_label("About") {
                 connect_clicked => MiscMsg::ShowVersion,
             },
 
@@ -72,7 +72,10 @@ impl SimpleComponent for Misc {
 
                 gtk::AlertDialog::builder()
                     .message("RoomWare")
-                    .detail(format!("Version {}", env!("CARGO_PKG_VERSION")))
+                    .detail(format!(
+                        "Version {}\nDeveloped by: Rowan Torbitzky-Lane",
+                        env!("CARGO_PKG_VERSION")
+                    ))
                     .modal(true)
                     .build()
                     .show(window.as_ref());
