@@ -14,9 +14,9 @@ pub struct Timer {
     remaining: u32,
     running: bool,
     outcome: Outcome,
-    // Seconds the clock has actually run since the last reset
     elapsed: u32,
     source: Option<glib::SourceId>,
+    start_time: Option<glib::DateTime>,
 }
 
 /// How the game ended.
@@ -45,6 +45,8 @@ pub enum TimerOutput {
         outcome: Outcome,
         remaining: u32,
         elapsed: u32,
+        start_time: String,
+        end_time: String,
     },
     Reset,
 }
@@ -97,6 +99,7 @@ impl SimpleComponent for Timer {
             outcome: Outcome::Undecided,
             elapsed: 0,
             source: None,
+            start_time: None,
         };
 
         let widgets = view_output!();
@@ -123,6 +126,7 @@ impl SimpleComponent for Timer {
                 self.remaining = config().master_time;
                 self.outcome = Outcome::Undecided;
                 self.elapsed = 0;
+                self.start_time = None;
                 let _ = sender.output(TimerOutput::Reset);
             }
             TimerMsg::Win => {
@@ -155,10 +159,13 @@ impl SimpleComponent for Timer {
         let _ = sender.output(TimerOutput::OutcomeChanged(self.outcome));
 
         if self.outcome != previous && self.outcome != Outcome::Undecided {
+            let end_time = glib::DateTime::now_local().ok();
             let _ = sender.output(TimerOutput::GameOver {
                 outcome: self.outcome,
                 remaining: self.remaining,
                 elapsed: self.elapsed,
+                start_time: format_datetime(self.start_time.as_ref()),
+                end_time: format_datetime(end_time.as_ref()),
             });
         }
     }
@@ -170,6 +177,9 @@ impl Timer {
             return;
         }
         self.running = true;
+        if self.start_time.is_none() {
+            self.start_time = glib::DateTime::now_local().ok();
+        }
 
         let input_sender = sender.input_sender().clone();
         // Every 1 second, this function calls whatever is inside of the closure
@@ -198,4 +208,11 @@ pub(crate) fn format_time(total_seconds: u32) -> String {
     let minutes = total_seconds / 60;
     let seconds = total_seconds % 60;
     format!("{minutes:02}:{seconds:02}")
+}
+
+/// Renders a datetime for the stats csv, or an empty field if it couldn't be read.
+fn format_datetime(dt: Option<&glib::DateTime>) -> String {
+    dt.and_then(|dt| dt.format("%Y-%m-%dT%H:%M:%S%z").ok())
+        .map(|s| s.to_string())
+        .unwrap_or_default()
 }

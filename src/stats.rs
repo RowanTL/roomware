@@ -10,7 +10,8 @@ use relm4::{ComponentSender, Worker};
 use crate::config::config;
 use crate::timer::Outcome;
 
-const HEADER: &str = "room,outcome,time_left,initial_time,hints_left,initial_hints";
+const HEADER: &str =
+    "room,outcome,time_left,initial_time,hints_left,initial_hints,start_time,end_time";
 const MIN_GAME_LENGTH: u32 = 15;
 
 pub struct Stats {
@@ -29,6 +30,8 @@ pub enum StatsMsg {
         outcome: Outcome,
         remaining: u32,
         elapsed: u32,
+        start_time: String,
+        end_time: String,
     },
     ForceLoss(bool),
     Reset,
@@ -69,6 +72,8 @@ impl Worker for Stats {
                 outcome,
                 remaining,
                 elapsed,
+                start_time,
+                end_time,
             } => {
                 if elapsed < MIN_GAME_LENGTH {
                     return;
@@ -81,6 +86,8 @@ impl Worker for Stats {
                     initial_time: config().master_time,
                     hints_left: self.hints_remaining,
                     initial_hints: config().hints_default_amount,
+                    start_time,
+                    end_time,
                 };
                 // The outcome can change mid-game (e.g. a loss undone by +1 minute),
                 // so a game only ever owns one row
@@ -92,7 +99,7 @@ impl Worker for Stats {
                 self.force_loss = force_loss;
 
                 // A loss reads the same either way, so only a recorded win needs rewriting
-                if let Some(record) = self.recorded.filter(|record| record.won) {
+                if let Some(record) = self.recorded.clone().filter(|record| record.won) {
                     self.write(&record, true);
                 }
             }
@@ -110,10 +117,8 @@ impl Stats {
             return;
         };
 
-        let record = Record {
-            won: record.won && !self.force_loss,
-            ..*record
-        };
+        let mut record = record.clone();
+        record.won = record.won && !self.force_loss;
         let result = if replace {
             log.replace_last(&record)
         } else {
@@ -126,7 +131,7 @@ impl Stats {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct Record {
     room: &'static str,
     won: bool,
@@ -134,18 +139,22 @@ struct Record {
     initial_time: u32,
     hints_left: u8,
     initial_hints: u8,
+    start_time: String,
+    end_time: String,
 }
 
 impl Record {
-    fn to_csv(self) -> String {
+    fn to_csv(&self) -> String {
         format!(
-            "{},{},{},{},{},{}",
+            "{},{},{},{},{},{},{},{}",
             csv_field(self.room),
             if self.won { "win" } else { "loss" },
             self.time_left,
             self.initial_time,
             self.hints_left,
             self.initial_hints,
+            csv_field(&self.start_time),
+            csv_field(&self.end_time),
         )
     }
 }
@@ -194,14 +203,18 @@ impl GameLog {
 mod tests {
     use super::*;
 
-    const RECORD: Record = Record {
-        room: "Museum",
-        won: true,
-        time_left: 600,
-        initial_time: 3600,
-        hints_left: 2,
-        initial_hints: 5,
-    };
+    fn record() -> Record {
+        Record {
+            room: "Museum",
+            won: true,
+            time_left: 600,
+            initial_time: 3600,
+            hints_left: 2,
+            initial_hints: 5,
+            start_time: "2024-01-01T10:00:00+0000".to_string(),
+            end_time: "2024-01-01T11:00:00+0000".to_string(),
+        }
+    }
 
     fn temp_csv(name: &str) -> PathBuf {
         let path = std::env::temp_dir().join(format!("roomware-{name}-{}.csv", std::process::id()));
@@ -225,17 +238,21 @@ mod tests {
         let path = temp_csv("replace");
         let log = GameLog::open(&path).unwrap();
 
-        log.append(&RECORD).unwrap();
-        log.append(&RECORD).unwrap();
+        log.append(&record()).unwrap();
+        log.append(&record()).unwrap();
         log.replace_last(&Record {
             won: false,
-            ..RECORD
+            ..record()
         })
         .unwrap();
 
         assert_eq!(
             fs::read_to_string(&path).unwrap(),
-            format!("{HEADER}\nMuseum,win,600,3600,2,5\nMuseum,loss,600,3600,2,5\n")
+            format!(
+                "{HEADER}\n\
+                 Museum,win,600,3600,2,5,2024-01-01T10:00:00+0000,2024-01-01T11:00:00+0000\n\
+                 Museum,loss,600,3600,2,5,2024-01-01T10:00:00+0000,2024-01-01T11:00:00+0000\n"
+            )
         );
         fs::remove_file(&path).unwrap();
     }
@@ -244,12 +261,13 @@ mod tests {
     fn room_names_with_commas_or_quotes_are_quoted() {
         let record = Record {
             room: "Bob's \"Big\", Room",
-            ..RECORD
+            ..record()
         };
 
         assert_eq!(
             record.to_csv(),
-            "\"Bob's \"\"Big\"\", Room\",win,600,3600,2,5"
+            "\"Bob's \"\"Big\"\", Room\",win,600,3600,2,5,\
+             2024-01-01T10:00:00+0000,2024-01-01T11:00:00+0000"
         );
     }
 }

@@ -115,11 +115,15 @@ impl SimpleComponent for GameMasterWindow {
                     outcome,
                     remaining,
                     elapsed,
+                    start_time,
+                    end_time,
                 } => {
                     stats_sender.emit(StatsMsg::GameOver {
                         outcome,
                         remaining,
                         elapsed,
+                        start_time,
+                        end_time,
                     });
                 }
                 TimerOutput::Reset => {
