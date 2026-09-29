@@ -44,8 +44,8 @@ hint_6 = "The first set of symbols will trace out a 7. Start at H then follow E,
 [9410]
 box_name = "Small Rectangle Box"
 box_contents = "Scent Tubes, 9410 = 9276 + 134"
-hint_1 = "Solve the butterfly and square puzzle separately then add them together. The squares go with the animal shelves. 9 _ _ _ + 1 _ _ = _ _ _ _"
-hint_2 = "Solve the butterfly and square puzzle separately then add them together. _ _ _ _ + _ _ _ = _ _ _ _"
+hint_1 = "Solve the butterfly and square puzzle separately then add them together. The squares go with the animal shelves.\n9 _ _ _ + 1 _ _ = _ _ _ _"
+hint_2 = "Solve the butterfly and square puzzle separately then add them together.\n_ _ _ _ + _ _ _ = _ _ _ _"
 hint_3 = "The animal shelves are the cube shelves to the right of the butterflies. How many jars are in the bold boxes?"
 
 [904]
