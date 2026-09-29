@@ -23,3 +23,6 @@
   - These should appear next to the code as the header for the dropdown menu
 - [x] Make all dropdown menus re-expand when reset is clicked
 - [x] Add win/loss logging with room name
+- [x] Combine reset buttons and make reset button clear hint from screen
+- [ ] Use math to correct the hint selection menu size
+  - hint selection height = timer controls height - hint control bar height
