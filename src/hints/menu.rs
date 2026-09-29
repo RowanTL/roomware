@@ -69,7 +69,7 @@ impl SimpleComponent for HintMenu {
 
             let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
             for hint in &table.hints {
-                let label = gtk::Label::new(Some(hint));
+                let label = gtk::Label::new(Some(&format!("• {hint}")));
                 label.set_halign(gtk::Align::Start);
 
                 let click = gtk::GestureClick::new();
