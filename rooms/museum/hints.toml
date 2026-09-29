@@ -18,7 +18,7 @@ hint_1 = "Find ALL words on the word searches from the word bank then stand back
 box_name = "Violin Case"
 box_contents = "1 Monster Card, Faces"
 hint_1 = "Squeeze the teddy bear. Match the correct sound to their pictures hanging above the bell to open the violin case."
-hint_unstuck = "254 is correct for the violin case. This wont count as a clue."
+hint_unstuck = "254 is correct for the violin case. This wont count as a hint."
 hint_special = "Match the feet to the animals above the bell."
 
 [261]
