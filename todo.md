@@ -27,3 +27,5 @@
 - [ ] Use math to correct the hint selection menu size
   - hint selection height = timer controls height - hint control bar height
 - [x] Use bullet points to denote selectable hints
+- [ ] Remove uneeded windows install bloat
+  - Icons and images that don't really need to be downloaded :/
