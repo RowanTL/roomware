@@ -10,12 +10,12 @@ use relm4::{
 use crate::config::config;
 use crate::hints::control::{HintControl, HintControlMsg, HintControlOutput};
 use crate::hints::menu::{HintMenu, HintMenuMsg, HintMenuOutput};
-use crate::hints::{Hints, HintsOutput};
-use crate::misc::{Misc, MiscMsg, MiscOutput};
+use crate::hints::{Hints, HintsMsg, HintsOutput};
+use crate::misc::{Misc, MiscOutput};
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
 use crate::stats::{Stats, StatsMsg};
-use crate::timer::{Timer, TimerOutput};
+use crate::timer::{Timer, TimerMsg, TimerOutput};
 use crate::utils::apply_css_style;
 
 pub struct GameMasterWindow {
@@ -93,15 +93,8 @@ impl SimpleComponent for GameMasterWindow {
                 HintMenuOutput::HintSelected(value) => HintControlMsg::SetText(value),
                 HintMenuOutput::HintActivated(value) => HintControlMsg::ShowValue(value),
             });
-        let misc = Misc::builder()
-            .launch(())
-            .forward(stats.sender(), |output| match output {
-                MiscOutput::ForceLoss(force_loss) => StatsMsg::ForceLoss(force_loss),
-            });
         let player_sender = player.sender().clone();
-        let hint_menu_sender = hint_menu.sender().clone();
         let stats_sender = stats.sender().clone();
-        let misc_sender = misc.sender().clone();
         let timer = Timer::builder()
             .launch(())
             .connect_receiver(move |_, output| match output {
@@ -126,10 +119,24 @@ impl SimpleComponent for GameMasterWindow {
                         end_time,
                     });
                 }
-                TimerOutput::Reset => {
+            });
+        let timer_sender = timer.sender().clone();
+        let hints_sender = hints.sender().clone();
+        let hint_control_sender = hint_control.sender().clone();
+        let hint_menu_sender = hint_menu.sender().clone();
+        let stats_sender = stats.sender().clone();
+        let misc = Misc::builder()
+            .launch(())
+            .connect_receiver(move |_, output| match output {
+                MiscOutput::ForceLoss(force_loss) => {
+                    stats_sender.emit(StatsMsg::ForceLoss(force_loss));
+                }
+                MiscOutput::Reset => {
+                    timer_sender.emit(TimerMsg::Reset);
+                    hints_sender.emit(HintsMsg::Reset);
+                    hint_control_sender.emit(HintControlMsg::Clear);
                     hint_menu_sender.emit(HintMenuMsg::ExpandAll);
                     stats_sender.emit(StatsMsg::Reset);
-                    misc_sender.emit(MiscMsg::ResetForceLoss);
                 }
             });
 

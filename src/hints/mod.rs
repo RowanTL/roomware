@@ -69,10 +69,6 @@ impl SimpleComponent for Hints {
             gtk::Button::with_label("Decrement") {
                 connect_clicked => HintsMsg::Decrement
             },
-
-            gtk::Button::with_label("Reset") {
-                connect_clicked => HintsMsg::Reset
-            },
         }
     }
 

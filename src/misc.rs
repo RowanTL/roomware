@@ -13,13 +13,13 @@ pub struct Misc {
 pub enum MiscMsg {
     ShowVersion,
     ToggleForceLoss,
-    // The stats worker clears its own copy on reset, so this only updates the label
-    ResetForceLoss,
+    Reset,
 }
 
 #[derive(Debug)]
 pub enum MiscOutput {
     ForceLoss(bool),
+    Reset,
 }
 
 #[relm4::component(pub)]
@@ -43,6 +43,10 @@ impl SimpleComponent for Misc {
                 #[watch]
                 set_label: &format!("Force Loss: {}", if model.force_loss { "True" } else { "False" }),
                 connect_clicked => MiscMsg::ToggleForceLoss,
+            },
+
+            gtk::Button::with_label("Reset") {
+                connect_clicked => MiscMsg::Reset,
             },
         }
     }
@@ -84,8 +88,10 @@ impl SimpleComponent for Misc {
                 self.force_loss = !self.force_loss;
                 let _ = sender.output(MiscOutput::ForceLoss(self.force_loss));
             }
-            MiscMsg::ResetForceLoss => {
+            MiscMsg::Reset => {
+                // The stats worker clears its own copy on reset, so no ForceLoss output here
                 self.force_loss = false;
+                let _ = sender.output(MiscOutput::Reset);
             }
         }
     }

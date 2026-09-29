@@ -48,7 +48,6 @@ pub enum TimerOutput {
         start_time: String,
         end_time: String,
     },
-    Reset,
 }
 
 #[relm4::component(pub)]
@@ -68,10 +67,6 @@ impl SimpleComponent for Timer {
                 #[watch]
                 set_label: if model.running { "Stop" } else { "Start" },
                 connect_clicked => TimerMsg::Toggle,
-            },
-
-            gtk::Button::with_label("Reset") {
-                connect_clicked => TimerMsg::Reset,
             },
 
             gtk::Button::with_label("Win") {
@@ -127,7 +122,6 @@ impl SimpleComponent for Timer {
                 self.outcome = Outcome::Undecided;
                 self.elapsed = 0;
                 self.start_time = None;
-                let _ = sender.output(TimerOutput::Reset);
             }
             TimerMsg::Win => {
                 self.stop();
