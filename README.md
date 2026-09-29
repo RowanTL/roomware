@@ -25,8 +25,11 @@ nix build .#windows-installer
 
 This cross compiles the program and packs it, along with the GTK and GStreamer
 DLLs it needs, into a single `setup.exe` in `./result`. Copy that one file over
-to the Windows machine and run it. It installs into `Program Files`, adds a
-Start Menu shortcut and can be removed again from Add or Remove Programs.
+to the Windows machine and run it. It asks which room that machine runs, out of
+the folders in `rooms/`, installs into `Program Files` alongside that room's
+`config.toml` and `hints.toml`, and adds a RoomWare Start Menu shortcut that
+opens with them. Running it again with a different room swaps the room over. It
+can be removed again from Add or Remove Programs.
 
 `nix build .#windows` gives the same build as a plain directory instead, for
 running it off a stick without installing. Copy the whole directory over,
