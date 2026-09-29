@@ -29,3 +29,5 @@
 - [x] Use bullet points to denote selectable hints
 - [ ] Remove uneeded windows install bloat
   - Icons and images that don't really need to be downloaded :/
+- [ ] Move `Time Remaining` label down a little
+- [ ] Make time label a little bigger on the player screen
