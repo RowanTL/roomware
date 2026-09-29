@@ -68,6 +68,7 @@ let
         ../build.rs
         ../nix/roomware.rc
         ../nix/escapeonmain.ico
+        ../nix/escapeonmain.png
       ];
     };
     cargoLock.lockFile = ../Cargo.lock;

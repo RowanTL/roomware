@@ -1,7 +1,7 @@
 //! This file serves as a hub for various useful options that don't fit in anywhere else.
 
 use gtk::glib::object::Cast;
-use gtk::prelude::{BoxExt, ButtonExt, OrientableExt, WidgetExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 pub struct Misc {
@@ -74,15 +74,23 @@ impl SimpleComponent for Misc {
                     .root()
                     .and_then(|root| root.downcast::<gtk::Window>().ok());
 
-                gtk::AlertDialog::builder()
-                    .message("RoomWare")
-                    .detail(format!(
-                        "Version {}\nDeveloped by: Rowan Torbitzky-Lane",
-                        env!("CARGO_PKG_VERSION")
-                    ))
+                let logo = gtk::gdk::Texture::from_bytes(&gtk::glib::Bytes::from_static(
+                    include_bytes!("../nix/escapeonmain.png"),
+                ))
+                .ok();
+
+                let dialog = gtk::AboutDialog::builder()
+                    .program_name("RoomWare")
+                    .version(env!("CARGO_PKG_VERSION"))
+                    .comments("Author: Rowan Torbitzky-Lane")
+                    .website("https://rowantl.github.io")
+                    .website_label("rowantl.github.io")
                     .modal(true)
-                    .build()
-                    .show(window.as_ref());
+                    .hide_on_close(false)
+                    .build();
+                dialog.set_logo(logo.as_ref());
+                dialog.set_transient_for(window.as_ref());
+                dialog.present();
             }
             MiscMsg::ToggleForceLoss => {
                 self.force_loss = !self.force_loss;

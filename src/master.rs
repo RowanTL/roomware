@@ -196,6 +196,7 @@ impl SimpleComponent for GameMasterWindow {
              window.main-window frame > label {{ color: #{frame_label}; font-weight: bold; }} \
              window.main-window expander-widget > box > title > expander {{ color: #{expander}; }} \
              window.main-window expander-widget > box > title:hover > expander {{ color: #{expander_hovered}; }} \
+             window.main-window expander-widget > box > title > label {{ font-size: 1.1em; font-weight: bold; }} \
              window.main-window button {{ background-color: #{button_background}; color: #{button}; }} \
              window.main-window frame:not(.player-preview-frame) button label {{ color: #{button_label}; }} \
              window.main-window entry {{ background-color: #{entry_background}; color: #{entry_text}; }}",
