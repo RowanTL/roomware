@@ -16,7 +16,7 @@ use crate::utils::{apply_css_style, load_image};
 
 pub mod preview;
 
-pub(crate) const DEFAULT_TIMER_FONT_SIZE: usize = 100;
+pub(crate) const DEFAULT_TIMER_FONT_SIZE: usize = 130;
 pub(crate) const DEFAULT_HINT_FONT_SIZE: usize = 50;
 pub(crate) const DEFAULT_HINTS_REMAINING_FONT_SIZE: usize = 50;
 pub(crate) const HINT_WRAP_WIDTH_CHARS: i32 = 30;
@@ -93,7 +93,7 @@ impl SimpleComponent for Player {
                         set_label: "Time Remaining:",
                         set_halign: gtk::Align::Center,
                         set_valign: gtk::Align::Start,
-                        set_margin_top: 5,
+                        set_margin_top: 30,
                         set_margin_start: 5,
                         set_margin_end: 5,
                         set_margin_bottom: TIME_REMAINING_GAP,
