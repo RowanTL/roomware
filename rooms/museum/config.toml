@@ -12,7 +12,7 @@ win.color = "89D154"
 win.text = "You win!"
 lose.color = "E32D2D"
 lose.text = "You lose!"
-video = "./../../video.mp4"
+video = "./museum.mp4"
 
 [master]
 background = "333333"
