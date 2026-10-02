@@ -33,3 +33,4 @@
 - [x] Make time label a little bigger on the player screen
 - [ ] Make intro button togglable
   - When intro is playing, have button shift text to "stop playing"
+- [ ] Add quit button
