@@ -1,7 +1,7 @@
 //! This file serves as a hub for various useful options that don't fit in anywhere else.
 
 use gtk::glib::object::Cast;
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
+use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 pub struct Misc {
@@ -14,6 +14,7 @@ pub enum MiscMsg {
     ShowVersion,
     ToggleForceLoss,
     Reset,
+    Quit,
 }
 
 #[derive(Debug)]
@@ -47,6 +48,10 @@ impl SimpleComponent for Misc {
 
             gtk::Button::with_label("Reset") {
                 connect_clicked => MiscMsg::Reset,
+            },
+
+            gtk::Button::with_label("Quit") {
+                connect_clicked => MiscMsg::Quit,
             },
         }
     }
@@ -101,6 +106,7 @@ impl SimpleComponent for Misc {
                 self.force_loss = false;
                 let _ = sender.output(MiscOutput::Reset);
             }
+            MiscMsg::Quit => relm4::main_application().quit(),
         }
     }
 }
