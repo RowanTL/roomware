@@ -66,10 +66,20 @@ impl SimpleComponent for GameMasterWindow {
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let player_preview = PlayerPreview::builder().launch(()).detach();
+        let play_video_button = gtk::Button::with_label("Play Intro");
+        let player_preview_sender = player_preview.sender().clone();
+        let video_button = play_video_button.clone();
         let player = Player::builder()
             .launch(())
-            .forward(player_preview.sender(), |output| match output {
-                PlayerOutput::StateChanged(state) => PlayerPreviewMsg::Sync(state),
+            .connect_receiver(move |_, output| match output {
+                PlayerOutput::StateChanged(state) => {
+                    video_button.set_label(if state.playing_video {
+                        "Stop Intro"
+                    } else {
+                        "Play Intro"
+                    });
+                    player_preview_sender.emit(PlayerPreviewMsg::Sync(state));
+                }
             });
         let stats = Stats::builder().detach_worker(()).detach();
         let player_sender = player.sender().clone();
@@ -142,10 +152,9 @@ impl SimpleComponent for GameMasterWindow {
 
         player.widget().present();
 
-        let play_video_button = gtk::Button::with_label("Play Intro");
         let player_sender = player.sender().clone();
         play_video_button.connect_clicked(move |_| {
-            player_sender.emit(PlayerMsg::PlayVideo);
+            player_sender.emit(PlayerMsg::ToggleVideo);
         });
 
         let play_audio_button = gtk::Button::with_label("Ping Player");

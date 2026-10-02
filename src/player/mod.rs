@@ -43,7 +43,7 @@ pub struct Player {
 pub enum PlayerMsg {
     UpdateTime(u32),
     UpdateOutcome(Outcome),
-    PlayVideo,
+    ToggleVideo,
     PlayAudio,
     VideoFinished,
     ShowHint(String),
@@ -278,10 +278,14 @@ impl SimpleComponent for Player {
                     self.show_hint = !self.hint.is_empty();
                 }
             }
-            PlayerMsg::PlayVideo => {
-                // Without a video there is nothing to end the playback, so the
-                // screen would sit on an empty video forever.
-                self.playing_video = self.video_stream.is_some();
+            PlayerMsg::ToggleVideo => {
+                if self.playing_video {
+                    self.stop_video();
+                } else {
+                    // Without a video there is nothing to end the playback, so the
+                    // screen would sit on an empty video forever.
+                    self.playing_video = self.video_stream.is_some();
+                }
             }
             PlayerMsg::PlayAudio => {
                 if let Some(stream) = &self.audio_stream {
@@ -291,12 +295,7 @@ impl SimpleComponent for Player {
                     stream.play();
                 }
             }
-            PlayerMsg::VideoFinished => {
-                self.playing_video = false;
-                if let Some(stream) = &self.video_stream {
-                    stream.pause();
-                }
-            }
+            PlayerMsg::VideoFinished => self.stop_video(),
             PlayerMsg::ShowHint(hint) => {
                 let hint = hint.trim().to_string();
                 self.show_hint = !hint.is_empty();
@@ -326,6 +325,13 @@ impl SimpleComponent for Player {
 }
 
 impl Player {
+    fn stop_video(&mut self) {
+        self.playing_video = false;
+        if let Some(stream) = &self.video_stream {
+            stream.pause();
+        }
+    }
+
     /// Helps with updating the preview in the game master view.
     fn to_state(&self) -> PlayerState {
         PlayerState {
