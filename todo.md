@@ -31,3 +31,5 @@
   - Icons and images that don't really need to be downloaded :/
 - [x] Move `Time Remaining` label down a little
 - [x] Make time label a little bigger on the player screen
+- [ ] Make intro button togglable
+  - When intro is playing, have button shift text to "stop playing"
