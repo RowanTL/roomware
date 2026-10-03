@@ -8,7 +8,7 @@
 - [x] Comment all functions
 - [x] Make hint send when clicking the enter button (Don't do anything if its empty)
 - [x] Make background colors configurable rather than be hardcoded constants (in config.toml)
-- [ ] Make a readme
+- [x] Make a readme
 - [x] Fix long hints fucking up the screen
 - [x] Add a ping button that plays a sound
 - [x] Add configurable paths to played audio and video
@@ -34,3 +34,7 @@
 - [x] Make intro button togglable
   - When intro is playing, have button shift text to "stop playing"
 - [x] Add quit button
+- [ ] Automatically update hints when start program
+  - [ ] Create a github runner that auto builds the installer and releases it
+  - [ ] Auto release the hints and config with their own names as well
+    - For each room in rooms, release hints_<room>.toml and config_<room>.toml
