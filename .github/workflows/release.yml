@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      - run: nix build .#windows-installer
+
+      # Fixed names so releases/latest/download/<name> always resolves.
+      - name: Collect assets
+        run: |
+          mkdir dist
+          cp -L result dist/roomware-setup.exe
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
