@@ -3,45 +3,53 @@
 
 use std::path::PathBuf;
 
-use clap::{Arg, Command, value_parser};
+use clap::{Arg, ArgAction, Command};
 use relm4::RelmApp;
-use roomware::config;
-use roomware::hints;
 use roomware::master::GameMasterWindow;
+use roomware::{config, hints, rooms};
 
 fn main() {
     let matches = Command::new("roomware")
         .about("Escape room game master and player displays")
         .arg(
-            Arg::new("config")
-                .short('c')
-                .long("config")
-                .value_name("FILE")
-                .value_parser(value_parser!(PathBuf))
-                .help("TOML file to read the configuration from"),
+            Arg::new("room")
+                .value_name("ROOM")
+                .required(true)
+                .help("Room to download and run, named as in the rooms repo"),
         )
         .arg(
-            Arg::new("hints")
-                .short('i')
-                .long("hints")
-                .value_name("FILE")
-                .value_parser(value_parser!(PathBuf))
-                .help("TOML file to read the pre-written hints from"),
+            Arg::new("force")
+                .short('f')
+                .long("force")
+                .action(ArgAction::SetTrue)
+                .help("Download every file of the room again, even unchanged ones"),
+        )
+        .arg(
+            Arg::new("local")
+                .short('l')
+                .long("local")
+                .action(ArgAction::SetTrue)
+                .conflicts_with("force")
+                .help("Read the room from ./rooms without downloading anything"),
         )
         .get_matches();
 
-    config::set_path(
-        matches
-            .get_one::<PathBuf>("config")
-            .cloned()
-            .or_else(|| desktop_file("config.toml")),
-    );
-    hints::set_path(
-        matches
-            .get_one::<PathBuf>("hints")
-            .cloned()
-            .or_else(|| desktop_file("hints.toml")),
-    );
+    let room = matches.get_one::<String>("room").expect("room is required");
+    let dir = if matches.get_flag("local") {
+        PathBuf::from("rooms").join(room)
+    } else {
+        let dir = rooms::installed_dir().join(room);
+        rooms::sync(room, &dir, matches.get_flag("force"));
+        dir
+    };
+
+    if !dir.is_dir() {
+        eprintln!("roomware: no room at {}", dir.display());
+        std::process::exit(1);
+    }
+
+    config::set_path(Some(dir.join(rooms::CONFIG_FILE)));
+    hints::set_path(Some(dir.join(rooms::HINTS_FILE)));
 
     let app = RelmApp::new("EscapeOnMain.RoomWare.Monitor").with_args(Vec::new());
 
@@ -51,13 +59,4 @@ fn main() {
     }
 
     app.run::<GameMasterWindow>(());
-}
-
-/// Falls back to a file on the current user's desktop when no `-c`/`-i` flag
-/// is passed.
-fn desktop_file(name: &str) -> Option<PathBuf> {
-    let home = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME"))?;
-    let path = PathBuf::from(home).join("Desktop").join(name);
-
-    path.is_file().then_some(path)
 }

@@ -1,3 +1,5 @@
+//! Holds the hint dropdown menus and the logic for reading hints in.
+
 use gtk::prelude::{BoxExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
@@ -111,11 +113,13 @@ impl SimpleComponent for HintMenu {
     }
 }
 
-/// Loads the hints from the hints file the CLI was given, if it was given one.
+/// Fetches the room's latest hints, then loads them from its hints file.
 fn load_hint_tables() -> Vec<HintTable> {
     let Some(path) = super::path() else {
         return Vec::new();
     };
+
+    crate::rooms::update_hints();
 
     read_toml(path)
         .iter()
