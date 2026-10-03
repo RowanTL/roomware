@@ -1,0 +1,3 @@
+[submodule "rooms"]
+	path = rooms
+	url = git@github.com:RowanTL/rooms.git
