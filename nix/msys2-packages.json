@@ -184,12 +184,12 @@
     "sha256": "eedfe01d226496699b95b065b3ec2a4fb3c51979b2fd649541a560d1f949ae18"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-gtk4-4.24.0-1-any.pkg.tar.zst",
-    "sha256": "5a5fb4996f3a41ffa4888c352f6fcf52152bfb1d774d6323f4900eaee1c63f9e"
+    "filename": "mingw-w64-ucrt-x86_64-gtk4-4.24.1-1-any.pkg.tar.zst",
+    "sha256": "03e6fd251437d50ea8c53b90e2ece1879064fdc30d0c7675da64f1d0ce3bcde8"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-harfbuzz-14.5.0-1-any.pkg.tar.zst",
-    "sha256": "e011726c446ad91c28eb8e6d4c456498bf9eae59408c15377d1d4165eb60aa52"
+    "filename": "mingw-w64-ucrt-x86_64-harfbuzz-14.5.1-1-any.pkg.tar.zst",
+    "sha256": "4142715428ba12f0482447b168dc013987acf0112bd605172a0d7bbcdc22709e"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-hicolor-icon-theme-0.18-1-any.pkg.tar.zst",
@@ -532,8 +532,8 @@
     "sha256": "4c01b986563d2b5f7ad6fcec2d0ec9915d2f242ddac5eacddc19971964241cc5"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-python-3.14.7-1-any.pkg.tar.zst",
-    "sha256": "f409676214aa3d65260761826e1cc4bc356f05bd2d1ccabc8497d513ff86c425"
+    "filename": "mingw-w64-ucrt-x86_64-python-3.14.8-1-any.pkg.tar.zst",
+    "sha256": "d6542336430039a7cb75f107b713332887665a26a0c9c51e82d8d772c7770b5e"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-python-packaging-26.3-1-any.pkg.tar.zst",
@@ -564,12 +564,12 @@
     "sha256": "0e6997193ba7be890e2ccc80a3cfa8a7a46af53e76a8b355d474a0bb59d260e4"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-spirv-cross-1~1.4.357.0-1-any.pkg.tar.zst",
-    "sha256": "78f74990ac05623ebbefea310cb9ab96f4058f5c88d68255fc102b89077503d9"
+    "filename": "mingw-w64-ucrt-x86_64-spirv-cross-1~1.4.363.0-1-any.pkg.tar.zst",
+    "sha256": "246759d1a8391c67a4180ad4d103a78219182ef7057d70469394fa6c40851187"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-spirv-tools-3~1.4.357.0-1-any.pkg.tar.zst",
-    "sha256": "ba11b4bad606f6ececc5bf5910f97077071624851c81a25fafc6b0ec88c58b84"
+    "filename": "mingw-w64-ucrt-x86_64-spirv-tools-3~1.4.363.0-1-any.pkg.tar.zst",
+    "sha256": "d31d67fe918aeee21d1e930fd96360856a60146d23094e4ae8baf071a4049aaa"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-sqlite3-3.53.4-1-any.pkg.tar.zst",
@@ -608,8 +608,8 @@
     "sha256": "fc41ab627a97fe11dd53ccfd3feea9e0cd859f59c11aec929d13d1f84393ed06"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-vulkan-loader-1~1.4.357.0-1-any.pkg.tar.zst",
-    "sha256": "4d34983aea34116582700b285279df21cd0ee8519025330e7ac0650bb02f138f"
+    "filename": "mingw-w64-ucrt-x86_64-vulkan-loader-1~1.4.363.0-1-any.pkg.tar.zst",
+    "sha256": "065076fe13d39ab97eea4740596426d5ae741b5044e48e1c9495d04835c92dbe"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-wavpack-5.9.0-1-any.pkg.tar.zst",
