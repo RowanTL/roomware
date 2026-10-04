@@ -34,7 +34,8 @@
 - [x] Make intro button togglable
   - When intro is playing, have button shift text to "stop playing"
 - [x] Add quit button
-- [ ] Automatically update hints when start program
-  - [ ] Create a github runner that auto builds the installer and releases it
-  - [ ] Auto release the hints and config with their own names as well
+- [x] Automatically update hints when start program
+  - [x] Create a github runner that auto builds the installer and releases it
+  - [x] Auto release the hints and config with their own names as well
     - For each room in rooms, release hints_<room>.toml and config_<room>.toml
+- [ ] Scroll hints back to top on room reset
