@@ -44,6 +44,7 @@ pub enum PlayerMsg {
     UpdateTime(u32),
     UpdateOutcome(Outcome),
     ToggleVideo,
+    PlayVideo,
     PlayAudio,
     VideoFinished,
     ShowHint(String),
@@ -286,6 +287,9 @@ impl SimpleComponent for Player {
                     // screen would sit on an empty video forever.
                     self.playing_video = self.video_stream.is_some();
                 }
+            }
+            PlayerMsg::PlayVideo => {
+                self.playing_video = self.video_stream.is_some();
             }
             PlayerMsg::PlayAudio => {
                 if let Some(stream) = &self.audio_stream {

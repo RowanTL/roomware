@@ -14,6 +14,8 @@ toml = { version = "1.1.6", features = ["preserve_order"] }
 reqwest = { version = "0.13.5", features = ["blocking", "json"] }
 serde_json = "1.0.150"
 sha1_smol = "1.0.1"
+actix-web = "4"
+rand = "0.10"
 
 [build-dependencies]
 embed-resource = "3.0.11"
@@ -23,3 +25,6 @@ lto = "fat"
 codegen-units = 1
 panic = "abort"
 strip = true
+
+[dev-dependencies]
+actix-http = "3"
