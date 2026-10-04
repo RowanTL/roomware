@@ -1,7 +1,12 @@
 //! This file holds the text entry box and the show/clear hint buttons.
 
-use gtk::prelude::{BoxExt, ButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt};
+use gtk::prelude::{
+    BoxExt, ButtonExt, Cast, EditableExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt,
+};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
+
+use crate::hints;
+use crate::utils::load_image;
 
 pub struct HintControl {
     entry: Option<gtk::Entry>,
@@ -10,6 +15,7 @@ pub struct HintControl {
 #[derive(Debug)]
 pub enum HintControlMsg {
     Show,
+    PreviewImage,
     Submit,
     Clear,
     SetText(String),
@@ -37,6 +43,10 @@ impl SimpleComponent for HintControl {
             gtk::Entry {
                 set_hexpand: true,
                 connect_activate => HintControlMsg::Submit,
+            },
+
+            gtk::Button::with_label("Preview Image") {
+                connect_clicked => HintControlMsg::PreviewImage,
             },
 
             gtk::Button::with_label("Show Hint") {
@@ -73,7 +83,34 @@ impl SimpleComponent for HintControl {
                 let _ = sender.output(HintControlOutput::ShowHint(entry.text().to_string()));
                 entry.set_text("");
             }
-            // Happens whenever user clicks enter on their keyboard
+            HintControlMsg::PreviewImage => {
+                let text = entry.text();
+                if text.trim().is_empty() {
+                    return;
+                }
+
+                let window = entry
+                    .root()
+                    .and_then(|root| root.downcast::<gtk::Window>().ok());
+
+                let Some(texture) = load_image(hints::base(), &text) else {
+                    gtk::AlertDialog::builder()
+                        .message("this is text stupid head")
+                        .build()
+                        .show(window.as_ref());
+                    return;
+                };
+
+                let preview = gtk::Window::builder()
+                    .title("Image preview")
+                    .default_width(640)
+                    .default_height(480)
+                    .child(&gtk::Picture::for_paintable(&texture))
+                    .build();
+                preview.set_transient_for(window.as_ref());
+                preview.present();
+            }
+            // Happens whenever user clicks enter on their keyboard.
             // Apparently this functionality is baked into gtk's Entry widget
             HintControlMsg::Submit => {
                 let hint = entry.text().to_string();
