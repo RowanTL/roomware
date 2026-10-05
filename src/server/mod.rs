@@ -1,14 +1,16 @@
-//! Tiny HTTP server so something outside the game master window can start the intro video.
+//! Tiny HTTPS server so something outside the game master window can start the intro video.
 
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-use actix_web::cookie::{Cookie, time};
+use actix_web::cookie::{Cookie, SameSite, time};
 use actix_web::{App, HttpRequest, HttpResponse, HttpServer, web};
 use relm4::Sender;
 
 use crate::player::PlayerMsg;
+
+mod cert;
 
 const PORT: u16 = 8080;
 const PASSCODE: &str = "1717";
@@ -53,6 +55,14 @@ pub fn spawn(player: Sender<PlayerMsg>) {
         let player = web::Data::new(player);
         let sessions = web::Data::new(Sessions::new(SESSION_LIFETIME));
 
+        let tls = match cert::server_config(&cert::dir()) {
+            Ok(tls) => tls,
+            Err(error) => {
+                eprintln!("roomware: web server not started, no certificate: {error}");
+                return;
+            }
+        };
+
         let result = actix_web::rt::System::new().block_on(async move {
             HttpServer::new(move || {
                 App::new()
@@ -61,7 +71,7 @@ pub fn spawn(player: Sender<PlayerMsg>) {
                     .configure(routes)
             })
             .disable_signals()
-            .bind(("0.0.0.0", PORT))?
+            .bind_rustls_0_23(("0.0.0.0", PORT), tls)?
             .run()
             .await
         });
@@ -91,6 +101,8 @@ async fn login(body: String, sessions: web::Data<Sessions>) -> HttpResponse {
             Cookie::build(COOKIE_NAME, sessions.start())
                 .path("/")
                 .http_only(true)
+                .secure(true)
+                .same_site(SameSite::Strict)
                 .max_age(max_age)
                 .finish(),
         )
@@ -215,6 +227,8 @@ mod tests {
         assert_eq!(cookie.name(), COOKIE_NAME);
         assert_eq!(cookie.path(), Some("/"));
         assert_eq!(cookie.http_only(), Some(true));
+        assert_eq!(cookie.secure(), Some(true));
+        assert_eq!(cookie.same_site(), Some(SameSite::Strict));
         assert!(!cookie.value().is_empty());
     }
 

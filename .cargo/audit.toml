@@ -1,0 +1,3 @@
+[advisories]
+# h2 0.3 is pinned by actix-http, which has no release on h2 0.4 yet. Drop this once it does.
+ignore = ["RUSTSEC-2026-0258"]

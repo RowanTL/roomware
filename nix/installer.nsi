@@ -34,6 +34,10 @@ Section "-RoomWare"
   SetOutPath "$INSTDIR"
   File /r "${BUNDLE}/*"
 
+  ; RoomWare saves its web server certificate here on first run, without admin rights.
+  CreateDirectory "$INSTDIR\certs"
+  nsExec::Exec 'icacls "$INSTDIR\certs" /grant *S-1-5-32-545:(OI)(CI)M /T'
+
   WriteRegStr HKLM "Software\RoomWare" "InstallDir" "$INSTDIR"
   WriteRegStr HKLM "${UNINSTALL_KEY}" "DisplayName" "RoomWare"
   WriteRegStr HKLM "${UNINSTALL_KEY}" "DisplayVersion" "${VERSION}"
