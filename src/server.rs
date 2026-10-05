@@ -1,9 +1,10 @@
 //! Tiny HTTP server so something outside the game master window can start the intro video.
 
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
-use actix_web::cookie::Cookie;
+use actix_web::cookie::{Cookie, time};
 use actix_web::{App, HttpRequest, HttpResponse, HttpServer, web};
 use relm4::Sender;
 
@@ -12,15 +13,45 @@ use crate::player::PlayerMsg;
 const PORT: u16 = 8080;
 const PASSCODE: &str = "1717";
 const COOKIE_NAME: &str = "roomware_session";
+const SESSION_LIFETIME: Duration = Duration::from_secs(2 * 60 * 60); // 2 Hours
 
-// Lost on restart, which just means everyone logs in again.
-type Sessions = Mutex<HashSet<String>>;
+struct Sessions {
+    lifetime: Duration,
+    expiries: Mutex<HashMap<String, Instant>>,
+}
+
+impl Sessions {
+    fn new(lifetime: Duration) -> Self {
+        Self {
+            lifetime,
+            expiries: Mutex::default(),
+        }
+    }
+
+    fn start(&self) -> String {
+        let token = format!("{:032x}", rand::random::<u128>());
+        let now = Instant::now();
+
+        let mut expiries = self.expiries.lock().unwrap();
+        expiries.retain(|_, expiry| *expiry > now);
+        expiries.insert(token.clone(), now + self.lifetime);
+
+        token
+    }
+
+    fn is_valid(&self, token: &str) -> bool {
+        let expiries = self.expiries.lock().unwrap();
+        expiries
+            .get(token)
+            .is_some_and(|expiry| *expiry > Instant::now())
+    }
+}
 
 /// Runs on its own thread because GTK owns the main one.
 pub fn spawn(player: Sender<PlayerMsg>) {
     std::thread::spawn(move || {
         let player = web::Data::new(player);
-        let sessions = web::Data::new(Sessions::default());
+        let sessions = web::Data::new(Sessions::new(SESSION_LIFETIME));
 
         let result = actix_web::rt::System::new().block_on(async move {
             HttpServer::new(move || {
@@ -53,14 +84,14 @@ async fn login(body: String, sessions: web::Data<Sessions>) -> HttpResponse {
         return HttpResponse::Unauthorized().finish();
     }
 
-    let token = format!("{:032x}", rand::random::<u128>());
-    sessions.lock().unwrap().insert(token.clone());
+    let max_age = time::Duration::try_from(sessions.lifetime).unwrap_or(time::Duration::MAX);
 
     HttpResponse::NoContent()
         .cookie(
-            Cookie::build(COOKIE_NAME, token)
+            Cookie::build(COOKIE_NAME, sessions.start())
                 .path("/")
                 .http_only(true)
+                .max_age(max_age)
                 .finish(),
         )
         .finish()
@@ -73,7 +104,7 @@ async fn play_video(
 ) -> HttpResponse {
     let logged_in = request
         .cookie(COOKIE_NAME)
-        .is_some_and(|cookie| sessions.lock().unwrap().contains(cookie.value()));
+        .is_some_and(|cookie| sessions.is_valid(cookie.value()));
     if !logged_in {
         return HttpResponse::Unauthorized().finish();
     }
@@ -94,10 +125,19 @@ mod tests {
         impl Service<actix_http::Request, Response = ServiceResponse, Error = actix_web::Error>,
         relm4::Receiver<PlayerMsg>,
     ) {
+        service_with_lifetime(SESSION_LIFETIME).await
+    }
+
+    async fn service_with_lifetime(
+        lifetime: Duration,
+    ) -> (
+        impl Service<actix_http::Request, Response = ServiceResponse, Error = actix_web::Error>,
+        relm4::Receiver<PlayerMsg>,
+    ) {
         let (sender, receiver) = relm4::channel();
         let app = App::new()
             .app_data(web::Data::new(sender))
-            .app_data(web::Data::new(Sessions::default()))
+            .app_data(web::Data::new(Sessions::new(lifetime)))
             .configure(routes);
 
         (test::init_service(app).await, receiver)
@@ -224,5 +264,38 @@ mod tests {
         }
 
         assert_eq!(emitted(service, receiver).len(), 2);
+    }
+
+    #[actix_web::test]
+    async fn cookie_max_age_is_the_session_lifetime() {
+        let (service, _receiver) = service().await;
+
+        let cookie = logged_in_cookie(&service).await;
+
+        let lifetime = time::Duration::try_from(SESSION_LIFETIME).unwrap();
+        assert_eq!(cookie.max_age(), Some(lifetime));
+    }
+
+    #[actix_web::test]
+    async fn play_with_an_expired_cookie_is_unauthorized() {
+        let (service, receiver) = service_with_lifetime(Duration::ZERO).await;
+        let cookie = logged_in_cookie(&service).await;
+
+        let status = test::call_service(&service, play_request().cookie(cookie).to_request())
+            .await
+            .status();
+
+        assert_eq!(status, StatusCode::UNAUTHORIZED);
+        assert!(emitted(service, receiver).is_empty());
+    }
+
+    #[test]
+    fn starting_a_session_forgets_expired_ones() {
+        let sessions = Sessions::new(Duration::ZERO);
+
+        sessions.start();
+        sessions.start();
+
+        assert_eq!(sessions.expiries.lock().unwrap().len(), 1);
     }
 }
