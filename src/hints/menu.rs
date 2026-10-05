@@ -1,6 +1,6 @@
 //! Holds the hint dropdown menus and the logic for reading hints in.
 
-use gtk::prelude::{BoxExt, OrientableExt, WidgetExt};
+use gtk::prelude::{AdjustmentExt, BoxExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::utils::read_toml;
@@ -15,6 +15,7 @@ struct HintTable {
 pub struct HintMenu {
     tables: Vec<HintTable>,
     expanders: Vec<gtk::Expander>,
+    root: gtk::ScrolledWindow,
 }
 
 #[derive(Debug)]
@@ -60,6 +61,7 @@ impl SimpleComponent for HintMenu {
         let mut model = HintMenu {
             tables: load_hint_tables(),
             expanders: Vec::new(),
+            root: root.clone(),
         };
 
         let widgets = view_output!();
@@ -108,6 +110,8 @@ impl SimpleComponent for HintMenu {
                 for expander in &self.expanders {
                     expander.set_expanded(true);
                 }
+                // scroll hint menu back to top
+                self.root.vadjustment().set_value(0.0);
             }
         }
     }

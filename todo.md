@@ -38,4 +38,4 @@
   - [x] Create a github runner that auto builds the installer and releases it
   - [x] Auto release the hints and config with their own names as well
     - For each room in rooms, release hints_<room>.toml and config_<room>.toml
-- [ ] Scroll hints back to top on room reset
+- [x] Scroll hints back to top on room reset
