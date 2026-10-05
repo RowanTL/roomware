@@ -3,19 +3,23 @@
 This is basic escape room management software. The UI is self-explanatory.
 There are many configuration options available via two toml files.
 
+This program automatically downloads the latest version of hints/config found in
+the [rooms](https://github.com/RowanTL/rooms) repo.
+
 ## Usage
 
-Run it with the toml files you want it to read:
-
 ```
-roomware --config config.toml --hints hints.toml
+roomware <room_name> <optional flag>
 ```
 
-Both flags are optional. Without `--config` every setting falls back to its
-built in default, and without `--hints` the hint menu is empty.
+`<room_name>`: Grabs the configuration for a specific room (typically the one downloaded with the installer)
+found in the `rooms` directory.  
 
-When you click on a hint in the hint menu, it will appear in the typeable hint
-box underneath. You can send them with the send button after this.
+`-f, --force`: Force redownloads everything for the specified room  
+`-l, --local`: Will download nothing on startup
+
+The typical behavior is to pass no flags and simply run `roomware <room_name>`. These two flags
+exist in case something goes horribly wrong or for development reasons.
 
 ## Building for Windows
 
@@ -54,7 +58,7 @@ where you can change it.
 
 Paths inside either file, such as a video, a ping sound or a picture hint, are relative to the file
 they are written in. A `./picture.png` in `hints.toml` is the picture sitting next to `hints.toml`,
-wherever you keep it. Absolute paths work too.
+wherever you keep it. Absolute paths work too. (There's even a button to preview the image).
 
 ## Other
 
