@@ -66,6 +66,7 @@
             desktop-file-utils
             glib
             gcc
+            cargo-audit
           ];
 
           buildInputs = with pkgs; [
