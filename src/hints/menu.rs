@@ -1,11 +1,15 @@
 //! Holds the hint dropdown menus and the logic for reading hints in.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use gtk::prelude::{AdjustmentExt, BoxExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 use crate::utils::read_toml;
 
 const MENU_MAX_HEIGHT: i32 = 200;
+const SELECTED_CLASS: &str = "hint-selected";
 
 struct HintTable {
     name: String,
@@ -16,6 +20,7 @@ pub struct HintMenu {
     tables: Vec<HintTable>,
     expanders: Vec<gtk::Expander>,
     root: gtk::ScrolledWindow,
+    selected: Rc<RefCell<Option<gtk::Label>>>,
 }
 
 #[derive(Debug)]
@@ -62,6 +67,7 @@ impl SimpleComponent for HintMenu {
             tables: load_hint_tables(),
             expanders: Vec::new(),
             root: root.clone(),
+            selected: Rc::default(),
         };
 
         let widgets = view_output!();
@@ -79,8 +85,14 @@ impl SimpleComponent for HintMenu {
                 let click = gtk::GestureClick::new();
                 let value = hint.clone();
                 let input_sender = sender.input_sender().clone();
+                let selected = model.selected.clone();
+                let this = label.clone();
                 click.connect_pressed(move |_, n_press, _, _| {
                     if n_press == 1 {
+                        if let Some(previous) = selected.replace(Some(this.clone())) {
+                            previous.remove_css_class(SELECTED_CLASS);
+                        }
+                        this.add_css_class(SELECTED_CLASS);
                         input_sender.emit(HintMenuMsg::HintClicked(value.clone()));
                     } else if n_press == 2 {
                         input_sender.emit(HintMenuMsg::HintActivated(value.clone()));
@@ -109,6 +121,9 @@ impl SimpleComponent for HintMenu {
             HintMenuMsg::ExpandAll => {
                 for expander in &self.expanders {
                     expander.set_expanded(true);
+                }
+                if let Some(label) = self.selected.take() {
+                    label.remove_css_class(SELECTED_CLASS);
                 }
                 // scroll hint menu back to top
                 self.root.vadjustment().set_value(0.0);

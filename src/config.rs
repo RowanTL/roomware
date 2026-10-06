@@ -14,6 +14,7 @@ const DEFAULT_PLAYER_CLOCK_REMAINING_COLOR: &str = "1A1A1A";
 const DEFAULT_PLAYER_HINT_REMAINING_COLOR: &str = "1A1A1A";
 const DEFAULT_PLAYER_HINT_AMOUNT_COLOR: &str = "1A1A1A";
 const DEFAULT_PLAYER_HINT_COLOR: &str = "1A1A1A";
+const DEFAULT_HINT_SELECT_COLOR: &str = "4FC6E0";
 const DEFAULT_PLAYER_WIN_COLOR: &str = "89D154";
 const DEFAULT_PLAYER_LOSE_COLOR: &str = "E32D2D";
 const DEFAULT_PLAYER_WIN_TEXT: &str = "You win!";
@@ -43,6 +44,7 @@ pub struct Config {
     pub player_hint_remaining_color: String,
     pub player_hint_amount_color: String,
     pub player_hint_color: String,
+    pub hint_select_color: String,
     pub player_win_color: String,
     pub player_lose_color: String,
     pub player_win_text: String,
@@ -112,6 +114,7 @@ impl Config {
                 DEFAULT_PLAYER_HINT_AMOUNT_COLOR,
             ),
             player_hint_color: color(&root, "hint.color", DEFAULT_PLAYER_HINT_COLOR),
+            hint_select_color: color(&root, "hint.select.color", DEFAULT_HINT_SELECT_COLOR),
             player_win_color: color(&root, "player.win.color", DEFAULT_PLAYER_WIN_COLOR),
             player_lose_color: color(&root, "player.lose.color", DEFAULT_PLAYER_LOSE_COLOR),
             player_win_text: text(&root, "player.win.text", DEFAULT_PLAYER_WIN_TEXT),

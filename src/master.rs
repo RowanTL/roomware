@@ -210,7 +210,8 @@ impl SimpleComponent for GameMasterWindow {
              window.main-window expander-widget > box > title > label {{ font-size: 1.1em; font-weight: bold; }} \
              window.main-window button {{ background-color: #{button_background}; color: #{button}; }} \
              window.main-window frame:not(.player-preview-frame) button label {{ color: #{button_label}; }} \
-             window.main-window entry {{ background-color: #{entry_background}; color: #{entry_text}; }}",
+             window.main-window entry {{ background-color: #{entry_background}; color: #{entry_text}; }} \
+             window.main-window frame:not(.player-preview-frame) label.hint-selected {{ color: #{hint_select}; }}",
             background = config.master_background,
             frame_border = config.frame_border,
             frame_label = config.frame_label,
@@ -221,6 +222,7 @@ impl SimpleComponent for GameMasterWindow {
             button_label = config.button_label_color,
             entry_background = config.entry_background_color,
             entry_text = config.entry_text_color,
+            hint_select = config.hint_select_color,
         ));
 
         root.fullscreen();
