@@ -39,3 +39,4 @@
   - [x] Auto release the hints and config with their own names as well
     - For each room in rooms, release hints_<room>.toml and config_<room>.toml
 - [x] Scroll hints back to top on room reset
+- [ ] Highlight hint when selected after one click
