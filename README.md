@@ -6,6 +6,10 @@ There are many configuration options available via two toml files.
 This program automatically downloads the latest version of hints/config found in
 the [rooms](https://github.com/RowanTL/rooms) repo.
 
+## Cloning the Repo
+
+`git clone --recursive git@github.com:RowanTL/roomware.git`
+
 ## Usage
 
 ```
