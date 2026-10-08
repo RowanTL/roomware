@@ -98,6 +98,7 @@ in
 runCommand "roomware-windows-${roomware.version}" { nativeBuildInputs = [ binutils ]; } ''
   mkdir -p $out/bin $out/lib $out/share/glib-2.0/schemas
   cp ${roomware}/bin/roomware.exe $out/bin
+  cp -r ${../web} $out/web
 
   # GTK and GStreamer find their modules and data relative to where they were
   # loaded from, so the layout beside the exe has to match MSYS2's.

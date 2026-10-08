@@ -1,14 +1,19 @@
 //! Tiny HTTPS server so something outside the game master window can start the intro video.
 
 use std::collections::HashMap;
+use std::net::{IpAddr, Ipv4Addr};
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
+use actix_files::Files;
 use actix_web::cookie::{Cookie, SameSite, time};
+use actix_web::http::header;
 use actix_web::{App, HttpRequest, HttpResponse, HttpServer, web};
 use relm4::Sender;
 
 use crate::player::PlayerMsg;
+use crate::rooms;
 
 mod cert;
 
@@ -16,6 +21,8 @@ const PORT: u16 = 8080;
 const PASSCODE: &str = "1717";
 const COOKIE_NAME: &str = "roomware_session";
 const SESSION_LIFETIME: Duration = Duration::from_secs(2 * 60 * 60); // 2 Hours
+const MAX_FAILED_LOGINS: u32 = 5;
+const LOGIN_WINDOW: Duration = Duration::from_secs(15 * 60); // 15 Minutes
 
 struct Sessions {
     lifetime: Duration,
@@ -49,11 +56,60 @@ impl Sessions {
     }
 }
 
+struct Failures {
+    count: u32,
+    since: Instant,
+}
+
+/// Locks an address out of logging in once it has failed too often.
+struct LoginLimiter {
+    max_failures: u32,
+    window: Duration,
+    failures: Mutex<HashMap<IpAddr, Failures>>,
+}
+
+impl LoginLimiter {
+    fn new(max_failures: u32, window: Duration) -> Self {
+        Self {
+            max_failures,
+            window,
+            failures: Mutex::default(),
+        }
+    }
+
+    /// How long `ip` must wait before it may try again, if it is locked out.
+    fn locked_out_for(&self, ip: IpAddr) -> Option<Duration> {
+        let failures = self.failures.lock().unwrap();
+        let failed = failures.get(&ip).filter(|f| f.count >= self.max_failures)?;
+
+        (failed.since + self.window).checked_duration_since(Instant::now())
+    }
+
+    fn record_failure(&self, ip: IpAddr) {
+        let now = Instant::now();
+
+        let mut failures = self.failures.lock().unwrap();
+        failures.retain(|_, f| f.since + self.window > now);
+        failures
+            .entry(ip)
+            .or_insert(Failures {
+                count: 0,
+                since: now,
+            })
+            .count += 1;
+    }
+
+    fn clear(&self, ip: IpAddr) {
+        self.failures.lock().unwrap().remove(&ip);
+    }
+}
+
 /// Runs on its own thread because GTK owns the main one.
 pub fn spawn(player: Sender<PlayerMsg>) {
     std::thread::spawn(move || {
         let player = web::Data::new(player);
         let sessions = web::Data::new(Sessions::new(SESSION_LIFETIME));
+        let limiter = web::Data::new(LoginLimiter::new(MAX_FAILED_LOGINS, LOGIN_WINDOW));
 
         let tls = match cert::server_config(&cert::dir()) {
             Ok(tls) => tls,
@@ -63,12 +119,24 @@ pub fn spawn(player: Sender<PlayerMsg>) {
             }
         };
 
+        let web_dir = web_dir();
+        if web_dir.is_none() {
+            eprintln!("roomware: no web directory found, the control page is not served");
+        }
+
         let result = actix_web::rt::System::new().block_on(async move {
             HttpServer::new(move || {
                 App::new()
                     .app_data(player.clone())
                     .app_data(sessions.clone())
+                    .app_data(limiter.clone())
                     .configure(routes)
+                    // Last, since it matches every path the routes above didn't.
+                    .configure(|config| {
+                        if let Some(dir) = &web_dir {
+                            config.service(static_files(dir));
+                        }
+                    })
             })
             .disable_signals()
             .bind_rustls_0_23(("0.0.0.0", PORT), tls)?
@@ -82,6 +150,20 @@ pub fn spawn(player: Sender<PlayerMsg>) {
     });
 }
 
+/// The installed one beside `bin`, or `web` in the working directory when run from the repo.
+fn web_dir() -> Option<PathBuf> {
+    [
+        rooms::installed_dir().with_file_name("web"),
+        PathBuf::from("web"),
+    ]
+    .into_iter()
+    .find(|dir| dir.is_dir())
+}
+
+fn static_files(dir: &Path) -> Files {
+    Files::new("/", dir).index_file("index.html")
+}
+
 fn routes(config: &mut web::ServiceConfig) {
     config
         .route("/login", web::post().to(login))
@@ -89,10 +171,27 @@ fn routes(config: &mut web::ServiceConfig) {
 }
 
 /// The body is the passcode; a correct one is answered with a session cookie.
-async fn login(body: String, sessions: web::Data<Sessions>) -> HttpResponse {
+async fn login(
+    request: HttpRequest,
+    body: String,
+    sessions: web::Data<Sessions>,
+    limiter: web::Data<LoginLimiter>,
+) -> HttpResponse {
+    let ip = request
+        .peer_addr()
+        .map_or(Ipv4Addr::UNSPECIFIED.into(), |addr| addr.ip());
+
+    if let Some(wait) = limiter.locked_out_for(ip) {
+        return HttpResponse::TooManyRequests()
+            .insert_header((header::RETRY_AFTER, (wait.as_secs() + 1).to_string()))
+            .finish();
+    }
+
     if body.trim() != PASSCODE {
+        limiter.record_failure(ip);
         return HttpResponse::Unauthorized().finish();
     }
+    limiter.clear(ip);
 
     let max_age = time::Duration::try_from(sessions.lifetime).unwrap_or(time::Duration::MAX);
 
@@ -146,11 +245,27 @@ mod tests {
         impl Service<actix_http::Request, Response = ServiceResponse, Error = actix_web::Error>,
         relm4::Receiver<PlayerMsg>,
     ) {
+        let limiter = LoginLimiter::new(MAX_FAILED_LOGINS, LOGIN_WINDOW);
+        service_with(lifetime, limiter).await
+    }
+
+    async fn service_with(
+        lifetime: Duration,
+        limiter: LoginLimiter,
+    ) -> (
+        impl Service<actix_http::Request, Response = ServiceResponse, Error = actix_web::Error>,
+        relm4::Receiver<PlayerMsg>,
+    ) {
         let (sender, receiver) = relm4::channel();
         let app = App::new()
             .app_data(web::Data::new(sender))
             .app_data(web::Data::new(Sessions::new(lifetime)))
-            .configure(routes);
+            .app_data(web::Data::new(limiter))
+            .configure(routes)
+            .service(static_files(Path::new(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/web"
+            ))));
 
         (test::init_service(app).await, receiver)
     }
@@ -166,6 +281,26 @@ mod tests {
         TestRequest::post().uri("/login").set_payload(passcode)
     }
 
+    fn login_request_from(ip: &str, passcode: &'static str) -> TestRequest {
+        login_request(passcode).peer_addr(format!("{ip}:1234").parse().unwrap())
+    }
+
+    async fn fail_logins_from(
+        service: &impl Service<
+            actix_http::Request,
+            Response = ServiceResponse,
+            Error = actix_web::Error,
+        >,
+        ip: &str,
+        times: u32,
+    ) {
+        for _ in 0..times {
+            let request = login_request_from(ip, "0000").to_request();
+            let response = test::call_service(service, request).await;
+            assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+        }
+    }
+
     fn play_request() -> TestRequest {
         TestRequest::post().uri("/play-video")
     }
@@ -179,6 +314,28 @@ mod tests {
     ) -> Cookie<'static> {
         let response = test::call_service(service, login_request(PASSCODE).to_request()).await;
         response.response().cookies().next().unwrap().into_owned()
+    }
+
+    #[actix_web::test]
+    async fn the_control_page_is_served_at_the_root() {
+        let (service, _receiver) = service().await;
+
+        let request = TestRequest::get().uri("/").to_request();
+        let response = test::call_service(&service, request).await;
+
+        assert_eq!(response.status(), StatusCode::OK);
+        let content_type = response.headers().get(header::CONTENT_TYPE).unwrap();
+        assert!(content_type.to_str().unwrap().starts_with("text/html"));
+    }
+
+    #[actix_web::test]
+    async fn a_missing_file_is_not_found() {
+        let (service, _receiver) = service().await;
+
+        let request = TestRequest::get().uri("/nope.html").to_request();
+        let response = test::call_service(&service, request).await;
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -301,6 +458,63 @@ mod tests {
 
         assert_eq!(status, StatusCode::UNAUTHORIZED);
         assert!(emitted(service, receiver).is_empty());
+    }
+
+    #[actix_web::test]
+    async fn repeated_wrong_passcodes_lock_the_address_out() {
+        let (service, _receiver) = service().await;
+        fail_logins_from(&service, "10.0.0.1", MAX_FAILED_LOGINS).await;
+
+        let request = login_request_from("10.0.0.1", "0000").to_request();
+        let response = test::call_service(&service, request).await;
+
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert!(response.headers().contains_key(header::RETRY_AFTER));
+    }
+
+    #[actix_web::test]
+    async fn the_correct_passcode_is_refused_while_locked_out() {
+        let (service, _receiver) = service().await;
+        fail_logins_from(&service, "10.0.0.1", MAX_FAILED_LOGINS).await;
+
+        let request = login_request_from("10.0.0.1", PASSCODE).to_request();
+        let response = test::call_service(&service, request).await;
+
+        assert_eq!(response.status(), StatusCode::TOO_MANY_REQUESTS);
+        assert!(response.response().cookies().next().is_none());
+    }
+
+    #[actix_web::test]
+    async fn a_lockout_does_not_affect_other_addresses() {
+        let (service, _receiver) = service().await;
+        fail_logins_from(&service, "10.0.0.1", MAX_FAILED_LOGINS).await;
+
+        let request = login_request_from("10.0.0.2", PASSCODE).to_request();
+        let response = test::call_service(&service, request).await;
+
+        assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    }
+
+    #[actix_web::test]
+    async fn a_correct_passcode_resets_the_failure_count() {
+        let (service, _receiver) = service().await;
+        fail_logins_from(&service, "10.0.0.1", MAX_FAILED_LOGINS - 1).await;
+        let request = login_request_from("10.0.0.1", PASSCODE).to_request();
+        test::call_service(&service, request).await;
+
+        fail_logins_from(&service, "10.0.0.1", MAX_FAILED_LOGINS - 1).await;
+    }
+
+    #[actix_web::test]
+    async fn a_lockout_ends_when_the_window_does() {
+        let limiter = LoginLimiter::new(MAX_FAILED_LOGINS, Duration::ZERO);
+        let (service, _receiver) = service_with(SESSION_LIFETIME, limiter).await;
+        fail_logins_from(&service, "10.0.0.1", MAX_FAILED_LOGINS + 1).await;
+
+        let request = login_request_from("10.0.0.1", PASSCODE).to_request();
+        let response = test::call_service(&service, request).await;
+
+        assert_eq!(response.status(), StatusCode::NO_CONTENT);
     }
 
     #[test]
