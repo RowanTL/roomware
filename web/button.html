@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Escape on main video player</title>
+		 <link rel="icon" type="image/x-icon" href="img/bandLogo.svg">
+    <meta charset="UFT-8">
+    <meta name="viewport" content="width=device-width, intital-scale=1.0">	
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://use.typekit.net/ndj1bhb.css">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kanchenjunga:wght@400;500;600;700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body>
+<!--
+<form>
+<label for="Password">password:</label><br>
+  <input type="text" id="password" name="password"><br>
+
+
+
+
+</form>
+-->
+
+
+
+
+<button onclick="playVideo" style="position: absolute;left:40%;top:50%;border-style: groove;font-size:2em">Play video</button>
+
+<script>
+ function playVideo() {
+fetch("https://127.0.0.1:8080", {
+  method: "POST",
+  body: JSON.stringify({
+    userId: 1,
+    title: "Play Video",
+    completed: false
+  }),
+  headers: {
+    "Content-type": "application/json; charset=UTF-8"
+  }
+});
+
+ }
+
+
+
+
+</script>
+
+
+</body>
+</html>
