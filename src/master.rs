@@ -14,7 +14,7 @@ use crate::hints::{Hints, HintsMsg, HintsOutput};
 use crate::misc::{Misc, MiscOutput};
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
-use crate::server;
+use crate::{rooms, server};
 use crate::stats::{Stats, StatsMsg};
 use crate::timer::{Timer, TimerMsg, TimerOutput};
 use crate::utils::apply_css_style;
@@ -226,6 +226,21 @@ impl SimpleComponent for GameMasterWindow {
         ));
 
         root.fullscreen();
+
+        if rooms::update_failed() {
+            let window = root.clone();
+            // Waits until the window is up so the popup lands on top of it.
+            gtk::glib::idle_add_local_once(move || {
+                gtk::AlertDialog::builder()
+                    .message("Could not update the room")
+                    .detail(
+                        "Connect to the internet and restart RoomWare to get the latest \
+                         hints and settings. Until then, the copy on this computer is used.",
+                    )
+                    .build()
+                    .show(Some(&window));
+            });
+        }
 
         widgets.grid.attach(&timer_frame, 0, 0, 1, 1);
         widgets.grid.attach(&hint_menu_frame, 1, 0, 1, 1);

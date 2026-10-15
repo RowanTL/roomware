@@ -3,6 +3,7 @@
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use reqwest::blocking::Client;
@@ -17,6 +18,8 @@ pub const HINTS_FILE: &str = "hints.toml";
 
 /// Only set when the room is downloaded rather than read straight from disk.
 static ROOM: OnceLock<(String, PathBuf)> = OnceLock::new();
+
+static UPDATE_FAILED: AtomicBool = AtomicBool::new(false);
 
 type Error = Box<dyn std::error::Error>;
 
@@ -36,7 +39,13 @@ pub fn sync(name: &str, dir: &Path, force: bool) {
 
     if let Err(error) = try_sync(name, dir, force) {
         eprintln!("roomware: could not update room {name}: {error}");
+        UPDATE_FAILED.store(true, Ordering::Relaxed);
     }
+}
+
+/// Whether any part of the room couldn't be downloaded, so the files on disk may be stale.
+pub fn update_failed() -> bool {
+    UPDATE_FAILED.load(Ordering::Relaxed)
 }
 
 /// Fetches the latest hints for the downloaded room, if there is one.
@@ -48,9 +57,11 @@ pub fn update_hints() {
     let url = format!("{RAW_URL}/{name}/{HINTS_FILE}");
     if let Err(error) = download(&url, &dir.join(HINTS_FILE), Some(QUICK_TIMEOUT)) {
         eprintln!("roomware: could not update hints for {name}: {error}");
+        UPDATE_FAILED.store(true, Ordering::Relaxed);
     }
 }
 
+// Downloads the hints from the hints repo if needed.
 fn try_sync(name: &str, dir: &Path, force: bool) -> Result<(), Error> {
     let listing: Vec<Value> = client()
         .get(format!("{LISTING_URL}/{name}"))
