@@ -25,6 +25,11 @@ found in the `rooms` directory.
 The typical behavior is to pass no flags and simply run `roomware <room_name>`. These two flags
 exist in case something goes horribly wrong or for development reasons.
 
+### Testing the server
+
+If you want to test the server functionality locally and need to use the `\login` route, place a file at
+`target/password.txt` with a single line containing the password.
+
 ## Building for Windows
 
 ```
