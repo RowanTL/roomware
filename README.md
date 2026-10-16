@@ -39,9 +39,15 @@ the folders in `rooms/`, installs into `Program Files` alongside that room's
 opens with them. Running it again with a different room swaps the room over. It
 can be removed again from Add or Remove Programs.
 
+The installer also asks for the password used to log in on RoomWare's web page,
+and saves it to `password.txt` in the install directory. When running it again,
+leaving the password empty keeps the saved one. Without a `password.txt`, the web
+page isn't served.
+
 `nix build .#windows` gives the same build as a plain directory instead, for
 running it off a stick without installing. Copy the whole directory over,
-keeping its layout, and run `bin\roomware.exe` from inside it.
+keeping its layout, and run `bin\roomware.exe` from inside it. Put a
+`password.txt` beside `bin` for the web page.
 
 Those DLLs are MSYS2's Windows builds, pinned in `nix/msys2-packages.json`,
 because nixpkgs cannot build GTK for Windows itself. To move to their current

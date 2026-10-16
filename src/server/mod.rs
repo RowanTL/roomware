@@ -1,6 +1,7 @@
 //! Tiny HTTPS server so something outside the game master window can start the intro video.
 
 use std::collections::HashMap;
+use std::fs;
 use std::net::{IpAddr, Ipv4Addr};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -18,11 +19,14 @@ use crate::rooms;
 mod cert;
 
 const PORT: u16 = 8080;
-const PASSCODE: &str = "1717";
+const PASSWORD_FILE: &str = "password.txt";
 const COOKIE_NAME: &str = "roomware_session";
 const SESSION_LIFETIME: Duration = Duration::from_secs(2 * 60 * 60); // 2 Hours
 const MAX_FAILED_LOGINS: u32 = 5;
 const LOGIN_WINDOW: Duration = Duration::from_secs(15 * 60); // 15 Minutes
+
+/// What `/login` expects as its body.
+struct Password(String);
 
 struct Sessions {
     lifetime: Duration,
@@ -111,6 +115,16 @@ pub fn spawn(player: Sender<PlayerMsg>) {
         let sessions = web::Data::new(Sessions::new(SESSION_LIFETIME));
         let limiter = web::Data::new(LoginLimiter::new(MAX_FAILED_LOGINS, LOGIN_WINDOW));
 
+        let password_file = rooms::installed_dir().with_file_name(PASSWORD_FILE);
+        let Some(password) = read_password(&password_file) else {
+            eprintln!(
+                "roomware: web server not started, no password in {}",
+                password_file.display()
+            );
+            return;
+        };
+        let password = web::Data::new(Password(password));
+
         let tls = match cert::server_config(&cert::dir()) {
             Ok(tls) => tls,
             Err(error) => {
@@ -130,6 +144,7 @@ pub fn spawn(player: Sender<PlayerMsg>) {
                     .app_data(player.clone())
                     .app_data(sessions.clone())
                     .app_data(limiter.clone())
+                    .app_data(password.clone())
                     .configure(routes)
                     // Last, since it matches every path the routes above didn't.
                     .configure(|config| {
@@ -160,6 +175,29 @@ fn web_dir() -> Option<PathBuf> {
     .find(|dir| dir.is_dir())
 }
 
+/// A blank password counts as none, since it would let anyone in.
+fn read_password(path: &Path) -> Option<String> {
+    let password = decode(&fs::read(path).ok()?)?.trim().to_string();
+    (!password.is_empty()).then_some(password)
+}
+
+/// The installer writes UTF-16 so any password survives, but one saved from an editor is likely UTF-8.
+fn decode(bytes: &[u8]) -> Option<String> {
+    match bytes {
+        [0xFF, 0xFE, rest @ ..] => {
+            let units: Vec<u16> = rest
+                .as_chunks::<2>()
+                .0
+                .iter()
+                .map(|pair| u16::from_le_bytes(*pair))
+                .collect();
+            String::from_utf16(&units).ok()
+        }
+        [0xEF, 0xBB, 0xBF, rest @ ..] => String::from_utf8(rest.to_vec()).ok(),
+        _ => String::from_utf8(bytes.to_vec()).ok(),
+    }
+}
+
 fn static_files(dir: &Path) -> Files {
     Files::new("/", dir).index_file("index.html")
 }
@@ -170,12 +208,13 @@ fn routes(config: &mut web::ServiceConfig) {
         .route("/play-video", web::post().to(play_video));
 }
 
-/// The body is the passcode; a correct one is answered with a session cookie.
+/// The body is the password; a correct one is answered with a session cookie.
 async fn login(
     request: HttpRequest,
     body: String,
     sessions: web::Data<Sessions>,
     limiter: web::Data<LoginLimiter>,
+    password: web::Data<Password>,
 ) -> HttpResponse {
     let ip = request
         .peer_addr()
@@ -187,7 +226,7 @@ async fn login(
             .finish();
     }
 
-    if body.trim() != PASSCODE {
+    if body.trim() != password.0 {
         limiter.record_failure(ip);
         return HttpResponse::Unauthorized().finish();
     }
@@ -232,6 +271,8 @@ mod tests {
 
     use super::*;
 
+    const PASSCODE: &str = "1717";
+
     async fn service() -> (
         impl Service<actix_http::Request, Response = ServiceResponse, Error = actix_web::Error>,
         relm4::Receiver<PlayerMsg>,
@@ -261,6 +302,7 @@ mod tests {
             .app_data(web::Data::new(sender))
             .app_data(web::Data::new(Sessions::new(lifetime)))
             .app_data(web::Data::new(limiter))
+            .app_data(web::Data::new(Password(PASSCODE.to_string())))
             .configure(routes)
             .service(static_files(Path::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
@@ -515,6 +557,63 @@ mod tests {
         let response = test::call_service(&service, request).await;
 
         assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    }
+
+    fn password_file(name: &str, contents: &[u8]) -> PathBuf {
+        let path = std::env::temp_dir().join(format!(
+            "roomware-password-{name}-{}.txt",
+            std::process::id()
+        ));
+        fs::write(&path, contents).unwrap();
+        path
+    }
+
+    fn utf16_with_bom(text: &str) -> Vec<u8> {
+        let mut bytes = vec![0xFF, 0xFE];
+        bytes.extend(text.encode_utf16().flat_map(u16::to_le_bytes));
+        bytes
+    }
+
+    #[test]
+    fn no_password_file_is_no_password() {
+        let path = std::env::temp_dir().join("roomware-password-missing.txt");
+
+        assert_eq!(read_password(&path), None);
+    }
+
+    #[test]
+    fn the_installers_utf16_password_is_read() {
+        let path = password_file("utf16", &utf16_with_bom("pässwörd"));
+
+        assert_eq!(read_password(&path).as_deref(), Some("pässwörd"));
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn a_utf8_password_is_read_with_or_without_a_bom() {
+        let plain = password_file("utf8", "secret".as_bytes());
+        let with_bom = password_file("utf8-bom", "\u{feff}secret".as_bytes());
+
+        assert_eq!(read_password(&plain).as_deref(), Some("secret"));
+        assert_eq!(read_password(&with_bom).as_deref(), Some("secret"));
+        fs::remove_file(plain).unwrap();
+        fs::remove_file(with_bom).unwrap();
+    }
+
+    #[test]
+    fn whitespace_around_the_password_is_trimmed() {
+        let path = password_file("trimmed", b"  secret\r\n");
+
+        assert_eq!(read_password(&path).as_deref(), Some("secret"));
+        fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn a_blank_password_file_is_no_password() {
+        let path = password_file("blank", &utf16_with_bom("  \r\n"));
+
+        assert_eq!(read_password(&path), None);
+        fs::remove_file(path).unwrap();
     }
 
     #[test]
