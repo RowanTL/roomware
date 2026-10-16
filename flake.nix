@@ -67,6 +67,8 @@
             glib
             gcc
             cargo-audit
+
+            elmPackages.elm
           ];
 
           buildInputs = with pkgs; [
