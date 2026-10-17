@@ -108,6 +108,11 @@ impl LoginLimiter {
     }
 }
 
+/// Where other machines on the LAN reach the control page, if the LAN address is known.
+pub fn lan_url() -> Option<String> {
+    cert::local_ip().map(|ip| format!("https://{ip}:{PORT}"))
+}
+
 /// Runs on its own thread because GTK owns the main one.
 pub fn spawn(player: Sender<PlayerMsg>) {
     std::thread::spawn(move || {

@@ -4,6 +4,8 @@ use gtk::glib::object::Cast;
 use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
+use crate::server;
+
 pub struct Misc {
     root: gtk::Box,
     force_loss: bool,
@@ -84,10 +86,15 @@ impl SimpleComponent for Misc {
                 ))
                 .ok();
 
+                let mut comments = String::from("Author: Rowan Torbitzky-Lane");
+                if let Some(url) = server::lan_url() {
+                    comments.push_str(&format!("\nWeb page: {url}"));
+                }
+
                 let dialog = gtk::AboutDialog::builder()
                     .program_name("RoomWare")
                     .version(env!("CARGO_PKG_VERSION"))
-                    .comments("Author: Rowan Torbitzky-Lane")
+                    .comments(comments)
                     .website("https://rowantl.github.io")
                     .website_label("rowantl.github.io")
                     .modal(true)

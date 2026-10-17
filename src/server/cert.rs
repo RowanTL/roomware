@@ -71,7 +71,7 @@ fn generate() -> Result<(String, String), Error> {
 }
 
 /// The address other machines on the network reach this one at.
-fn local_ip() -> Option<IpAddr> {
+pub(super) fn local_ip() -> Option<IpAddr> {
     // Connecting a UDP socket only picks a route; nothing is sent.
     let socket = UdpSocket::bind(("0.0.0.0", 0)).ok()?;
     socket.connect(("8.8.8.8", 80)).ok()?;
