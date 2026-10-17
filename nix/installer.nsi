@@ -106,7 +106,7 @@ Function PasswordPage
   ${NSD_CreateLabel} 0 0 100% 24u $1
   Pop $0
 
-  ${NSD_CreatePassword} 0 30u 100% 12u $Password
+  ${NSD_CreateText} 0 30u 100% 12u $Password
   Pop $PasswordBox
   ${NSD_SetFocus} $PasswordBox
 
