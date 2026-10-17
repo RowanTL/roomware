@@ -420,8 +420,8 @@
     "sha256": "34ff8396c403d484c8777ad49ad0fc06dfb94fadf6f14bcf84d50c45bc6fd17e"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-libwinpthread-14.0.0.r426.g4564ee4b5-2-any.pkg.tar.zst",
-    "sha256": "a02f5e09d666d3be657c78c86fe67c975d04fe33b5211cd5ff1b23a91c118524"
+    "filename": "mingw-w64-ucrt-x86_64-libwinpthread-14.0.0.r495.g63ebe6cdb-1-any.pkg.tar.zst",
+    "sha256": "1f847f4f5d56d8f54cbc9b5ce339c36f4f208353e813d4b1e5648cf33138b9a2"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-libx264-0.165.r3222.b35605a-3-any.pkg.tar.zst",
@@ -432,8 +432,8 @@
     "sha256": "1678213c8acddcee2a393477c26cafcb7a4e47c2d611638c028853b502c7d662"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-llama.cpp-1~0.7.0-1-any.pkg.tar.zst",
-    "sha256": "8de70359a2515e018cf589d41e1fae5e2ce47500155a4fa9048027d5662f4146"
+    "filename": "mingw-w64-ucrt-x86_64-llama.cpp-1~0.7.0-2-any.pkg.tar.zst",
+    "sha256": "997b1a1fa1efc4b741591d740461ca68ee18518a5012d8c2b08e2f764cfd03b6"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-lzo2-2.10-3-any.pkg.tar.zst",
