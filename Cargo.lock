@@ -1987,7 +1987,7 @@ dependencies = [
 
 [[package]]
 name = "roomware"
-version = "3.4.0"
+version = "3.4.1"
 dependencies = [
  "actix-files",
  "actix-http",
