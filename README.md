@@ -111,4 +111,6 @@ Link to escape on main image used and resized with imagemagick: https://www.esca
 
 ## License
 
-RoomWare is licensed under the [MIT License](LICENSE).
+RoomWare is licensed under the [MIT License](LICENSE). This does not cover the
+Escape on Main videos, images, sounds and logos in this repo, such as those in
+`rooms/` and `nix/`. They are not free to reuse.
