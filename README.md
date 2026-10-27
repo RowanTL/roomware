@@ -1,12 +1,45 @@
 # RoomWare
 
-This is basic escape room management software. The UI is self-explanatory.
-There are many configuration options available via two toml files.
+This is escape room management software.
+
+What it does:
+- Displays hints to user
+  - Text and images
+- Controls the amount of time left
+- Controls the remaining hints
+- Logs wins and losses
+  - If configured, doesn't by default
+- Allows an introduction video to be played
+- Has a ping player button
+
+This program assumes you have a computer with a screen for the game master to
+control the game and another screen inside of the room to display information to the
+players.
 
 This program automatically downloads the latest version of hints/config found in
 the [rooms](rooms) folder of this repo.
 
-## Usage
+### Sample Pictures
+
+Game master view:
+![Game Master View](./images/game_master_view.png)
+
+Player view:
+![Player View](./images/player_view.png)
+
+## Installing on Windows
+
+Find the `releases` section on the right side of the Github repo. Click on the latest release.
+As of writing, the latest release is `v3.4.1`. Once in the releases section, download
+`roomware-setup.exe`.
+
+Once running the installer, select which room you would like to install and set a password
+for the remote video player webpage.
+
+# Development Usage
+
+This section is for more technical readers who are looking to modify the
+source code.
 
 ```
 roomware <room_name> <optional flag>
@@ -56,7 +89,7 @@ versions, run `nix run .#update-msys2` and build again.
 
 ## Configuration
 
-There are two different files used for configuration:
+There are two different files used for configuration found in `rooms/<room_name>/`:
 
 - `config.toml`
 - `hints.toml`
