@@ -34,7 +34,8 @@ As of writing, the latest release is `v3.4.1`. Once in the releases section, dow
 `roomware-setup.exe`.
 
 Once running the installer, select which room you would like to install and set a password
-for the remote video player webpage.
+for the remote video player webpage. There will be a little bit of lag between selecting
+the room and typing in a new password.
 
 # Development Usage
 
