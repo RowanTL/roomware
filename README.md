@@ -107,3 +107,7 @@ wherever you keep it. Absolute paths work too. (There's even a button to preview
 ## Other
 
 Link to escape on main image used and resized with imagemagick: https://www.escapeonmain.com/wp-content/uploads/2019/07/escapeonmainfavicon.png
+
+## License
+
+RoomWare is licensed under the [MIT License](LICENSE).

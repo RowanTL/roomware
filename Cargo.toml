@@ -4,6 +4,7 @@
 name = "roomware"
 version = "3.4.1"
 edition = "2024"
+license = "MIT"
 
 [dependencies]
 clap = "4.6.7"
