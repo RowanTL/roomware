@@ -1,4 +1,4 @@
-//! Downloads rooms from the public rooms repo and keeps them up to date.
+//! Downloads rooms from the `rooms` folder of the public RoomWare repo and keeps them up to date.
 
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
@@ -9,8 +9,8 @@ use std::time::Duration;
 use reqwest::blocking::Client;
 use serde_json::Value;
 
-const LISTING_URL: &str = "https://api.github.com/repos/RowanTL/rooms/contents";
-const RAW_URL: &str = "https://raw.githubusercontent.com/RowanTL/rooms/main";
+const LISTING_URL: &str = "https://api.github.com/repos/RowanTL/roomware/contents/rooms";
+const RAW_URL: &str = "https://raw.githubusercontent.com/RowanTL/roomware/main/rooms";
 const QUICK_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub const CONFIG_FILE: &str = "config.toml";

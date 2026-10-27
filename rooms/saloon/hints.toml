@@ -1,0 +1,76 @@
+[No_code_straw]
+box_name = "Straw Basket"
+box_contents = "Transparent Path Paper"
+hint_1 = "Search the room for a transparent paper."
+
+[MULE]
+box_name = "Big Grid Box"
+box_contents = "Hat Key, Cryptic Wood"
+hint_1 = "Lay the arrow over the grid on the box. Follow the arrow to spell a message. X marks my gold... finish the message, and it will tell you how to open the box."
+hint_2 = "X marks my gold mule opens this box"
+hint_3 = "X marks my gold M U L E opens this box"
+hint_4 = "M U L E opens this box"
+
+[4852]
+box_name = "Metal Corner Box"
+box_contents = "Red Tile Bag, 1 Battery, Metal Strip Decoder"
+hint_1 = "The belts on the hats have names and are ordered depending on how much they are wanted for."
+hint_2 = "The belts on the hats have names. Order the numbers inside the hats depending how much their reward money is. Order them least wanted to most wanted."
+
+[147]
+box_name = "Pretty Treasure Chest"
+box_contents = "Color Word Paper"
+hint_1 = "The numbers around the grid tells you how many red tiles are in each row and column. If there are multiple numbers, a gap of at least one square separates them. Fill in all the 10s first."
+hint_2 = "./picross_example.jpg"
+hint_3 = "./final_147.jpg"
+
+[STALE]
+box_name = "Tan Box"
+box_contents = "Outlaw Code Paper"
+hint_1 = "Find the colored letters in the photos around the room. Be sure to check they are the correct color."
+hint_2 = "Some of the colors are similar, Be sure you are checking it is the correct color."
+
+[587]
+box_name = "Big Brown Dot Chest"
+box_contents = "Wavy Line Paper, Small Pretty Box(JAIL)"
+hint_1 = "Use the metal strip to reveal a message on the wood plank. The first word is THIS. The message will tell you: Red _ = White C for the wheel cipher."
+hint_2 = "Use the metal strip to reveal words on the wood plank. If you don't see words, flip the metal piece. The first word will be THIS."
+hint_3 = "The wood plank will say, \"This law is old. West ends with C if you talk out-law code.\""
+hint_4 = "Make the red T = the white C on the wheel cipher to decode red to white."
+hint_5 = "The decoded message = \"FIVE EIGHT SEVEN\""
+
+[LNDEE]
+box_name = "Window Box"
+box_contents = "Red Jar, Red/Blue Message, 2 Coasters"
+hint_1 = "The wavy line matches the wavy line on the Wild and Free photo."
+hint_2 = "The wavy line matches the wavy line on the Wild and Free photo. The arrows point to certain letters to give you a code."
+
+[TRAIN]
+box_name = "Right Side of Bar"
+box_contents = "Black Light w/ no batteries (in secret drawer), Half of Jessies Letter, Snake Scales, 2 Brown Rods"
+hint_1 = "Use the red mason jar to see the hidden message on the static color paper."
+
+[5384]
+box_name = "White Box"
+box_contents = "2 Coasters"
+hint_1 = "Find all of the snakes in both rooms. Match the snakes to their scales."
+
+[No_code_wall]
+box_name = "Box on Wall"
+box_contents = "Silver Container w/ 1 Battery"
+hint_1 = "Use the two rods to retrieve the container that is stuck in the first room."
+
+[JAIL]
+box_name = "Small Pretty Box"
+box_contents = "1 Battery, Half of Jessies Letter"
+hint_1 = "Layer the four clear coasters on top of each other and line up the letters. Read/solve the riddle to get the code."
+hint_2 = "Be sure the letters are not upside down or backwards while layering the four clear coasters."
+hint_3 = "The coasters say \"I'm a place where outlaws are locked away. Behind iron bars, they can't run or stray. What am I?\""
+hint_4 = "The answer is another word for prison. \n_ _ _ _"
+
+[RLAL]
+box_name = "Left Side of Bar"
+box_contents = "Gold Bars, Boot Key"
+hint_1 = "There is a secret drawer in the right side of the bar you have unlocked."
+hint_2 = "There is a secret drawer in the right side of the bar you have unlocked. Jessie's letter is telling you his favorite alcohol bottles."
+hint_3 = "Put the batteries in the blacklight. Check out the alcohol bottle labels."

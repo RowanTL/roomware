@@ -8,7 +8,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
-    self.submodules = true;
   };
 
   outputs = { self, nixpkgs, rust-overlay, flake-utils }:
@@ -61,11 +60,6 @@
           nativeBuildInputs = with pkgs; [
             rustToolchain
             pkg-config
-            meson
-            ninja
-            desktop-file-utils
-            glib
-            gcc
             cargo-audit
 
             elmPackages.elm

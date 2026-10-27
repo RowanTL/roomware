@@ -15,7 +15,7 @@ fn main() {
             Arg::new("room")
                 .value_name("ROOM")
                 .required(true)
-                .help("Room to download and run, named as in the rooms repo"),
+                .help("Room to download and run, named as in the repo's rooms folder"),
         )
         .arg(
             Arg::new("force")

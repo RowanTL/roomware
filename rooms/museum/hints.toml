@@ -1,0 +1,84 @@
+[No_Code]
+box_name = "Tin Box"
+box_contents = "Nonsense Clue, Dry Erase Marker"
+hint_1 = "Look around the room for a box without a lock"
+
+[TONES]
+box_name = "Small Pretty Corner Brown Box"
+box_contents = "Word Bank"
+hint_1 = "Nine = N, One = O, etc... The number = the first letter of their spelling. What word could that number equal?"
+hint_2 = "Nine = N, One = O, etc... The number = the first letter of their spelling. What letter does 3 start with?"
+
+[GORE]
+box_name = "Dot Box"
+box_contents = "Headless Sound Bear"
+hint_1 = "Find ALL words on the word searches from the word bank then stand back to see a code."
+
+[254]
+box_name = "Violin Case"
+box_contents = "1 Monster Card, Faces"
+hint_1 = "Squeeze the teddy bear. Match the correct sound to their pictures hanging above the bell to open the violin case."
+hint_unstuck = "254 is correct for the violin case. This wont count as a hint."
+hint_special = "Match the feet to the animals above the bell."
+
+[261]
+box_name = "Cube Box"
+box_contents = "1 Monster Card, Crack the Code"
+hint_1 = "Find the matching mask to the expressions drawn in the violin case. Make sure the eyes and mouth both match."
+
+[386]
+box_name = "Wall Door"
+box_contents = "Cipher On Wall"
+hint_1 = "The second number is 8 for cracking the code. Crossing out numbers you know are incorrect will help."
+
+[7095]
+box_name = "Black Chest"
+box_contents = "Butterfly/Square Clue"
+hint_1 = "Have one person read the symbols from the wall while someone traces the path onto the cipher to reveal numbers. Each starting point is circled."
+hint_2 = "Be sure to trace both lines of symbols per set that have 2 lines to complete tracing the number."
+hint_3 = "Use the symbols to trace on the Zodiac's cipher. The starting points are circled for you. Follow the rest of the symbols to trace the numbers."
+hint_4 = "Each set of symbols on the wall will make a different number on the Zodiac cipher. The starting points are circled for you. Follow the rest of the symbols."
+hint_5 = "Trace all of the symbols for each set on the wall to complete a number on the cipher, starting points are circled. The next symbol must be touching the previous symbol listed."
+hint_6 = "The first set of symbols will trace out a 7. Start at H then follow E, R, >, etc... Trace them like connect the dot. The next symbol must be touching the previous symbol."
+
+[9410]
+box_name = "Small Rectangle Box"
+box_contents = "Scent Tubes, 9410 = 9276 + 134"
+hint_1 = "Solve the butterfly and square puzzle separately then add them together. The squares go with the animal shelves.\n9 _ _ _ + 1 _ _ = _ _ _ _"
+hint_2 = "Solve the butterfly and square puzzle separately then add them together.\n_ _ _ _ + _ _ _ = _ _ _ _"
+hint_3 = "The animal shelves are the cube shelves to the right of the butterflies. How many jars are in the bold boxes?"
+
+[904]
+box_name = "Gold Clock Box"
+box_contents = "Secret Compartment Prey Text"
+hint_1 = "Open and smell each jar, and put the numbers in order according to the jars hanging on the wall."
+
+[PREY]
+box_name = "Large Brown Box"
+box_contents = "1 Monster Card, Potions"
+hint_1 = "Pull the knob on the clock."
+
+[Electric_Puzzle]
+box_name = "Potion Door"
+box_contents = "Cage Door Key, Stake Clue"
+hint_1 = "Place the correct potion bottles next to their corresponding specimen on the X's"
+
+[4112]
+box_name = "Brown Chest"
+box_contents = "Small green box w/ 6859 lock"
+hint_1 = "A stake through the heart will kill a vampire. Use the stake pictures in the 2nd room."
+
+[1636]
+box_name = "Big Green Box"
+box_contents = "Number Cipher"
+hint_1 = "Find the 3 monsters from the cards you have collected on the folklore map in the 2nd room. Put them in order from lowest number to highest."
+
+[6859]
+box_name = "Small Green Box"
+box_contents = "Planchette"
+hint_1 = "Use the number cipher to decode the symbol hanging by the zodiac cipher. Use all place values. 6000 + 800 + ..."
+
+[BENT]
+box_name = "Cage"
+box_contents = "Vampire head, key for escape door"
+hint_1 = "Be sure the planchette is pointed upwards. Move it over the Ouija board. Read the circled letters left to right, top to bottom."
