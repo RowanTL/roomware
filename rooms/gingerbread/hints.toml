@@ -64,7 +64,7 @@ hint_2 = "Use the decoder to decode the messages on the gingerbread houses."
 hint_3 = "! = C. Line up the decoders correctly then decode the sides of the gingerbread house."
 hint_4 = "One side of a gingerbread house will decode to: First comes B."
 hint_5 = "The first house will decode to \"First Comes B. T sits last.\" Decode the other house to get the rest of the code (B _ _ T)."
-hint_6 = "GINGERBREAD HOUSE DECODED: First comes B. T sits last. Third wall always be R. Second is A."
+hint_6 = "GINGERBREAD HOUSE DECODED: First comes B. T sits last. Third will always be R. Second is A."
 
 [563]
 box_name = "Room 2; Blue Chest"
