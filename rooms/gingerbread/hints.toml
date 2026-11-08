@@ -78,7 +78,7 @@ box_contents = "Scale"
 [electric_puzzle]
 box_name = "Room 2; Electric Puzzle"
 box_contents = "Key to Oven"
-hint_1 = "Use the scale and weigh the candy boxes in grams and then place them lightest to heaviest on the white cupboard."
+hint_1 = "Use the scale to weigh the candy boxes in grams and then place them lightest to heaviest on the white cupboard."
 hint_2 = "Once you hear the beep, pull down on the trap door."
 hint_3 = "Be sure to turn the scale on when it is on a flat surface and nothing is on the scale."
 hint_4 = "To change the units to grams, keep pressing the units button until the g is highlighted."
