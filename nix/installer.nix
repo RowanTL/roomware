@@ -25,6 +25,23 @@ let
 
     !macro RoomRadioButtons
     ${lib.concatImapStrings (i: _: "  !insertmacro RadioButton \${${section i}}\n") rooms}!macroend
+
+    ; Leaves the name of the room an earlier install put in $INSTDIR, if any.
+    !macro InstalledRoom OUT
+      StrCpy ''${OUT} ""
+    ${lib.concatMapStrings (room: ''
+      ''${If} ''${FileExists} "$INSTDIR\rooms\${room}\*"
+          StrCpy ''${OUT} "${room}"
+        ''${EndIf}
+    '') rooms}!macroend
+
+    ; Leaves the section of the room called NAME, if there is one.
+    !macro RoomNamed NAME OUT
+    ${lib.concatImapStrings (i: room: ''
+      ''${If} ''${NAME} == "${room}"
+          StrCpy ''${OUT} ''${${section i}}
+        ''${EndIf}
+    '') rooms}!macroend
   '';
 in
 runCommand "roomware-setup-${version}.exe" { nativeBuildInputs = [ nsis ]; } ''

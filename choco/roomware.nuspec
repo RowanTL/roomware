@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The release workflow packs this with the version of the tag it runs for. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>roomware</id>
+    <version>0.0.0</version>
+    <title>RoomWare</title>
+    <authors>Rowan Torbitzky-Lane</authors>
+    <projectUrl>https://github.com/RowanTL/roomware</projectUrl>
+    <packageSourceUrl>https://github.com/RowanTL/roomware</packageSourceUrl>
+    <licenseUrl>https://github.com/RowanTL/roomware/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>roomware escape-room</tags>
+    <summary>Escape room game master and player displays</summary>
+    <description>Escape room game master and player displays.
+
+Pick the room the computer runs with a package parameter:
+
+    choco install roomware --params "'/Room:museum'"
+
+Without one, the room already installed is kept, or the first room is installed on a new computer.</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

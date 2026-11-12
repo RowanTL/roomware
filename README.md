@@ -39,6 +39,20 @@ little bit of lag after selecting the room.
 The remote video player webpage is off until you open `Settings` in RoomWare, enter a
 password, and turn the web server on.
 
+### With Chocolatey
+
+Each release also has a Chocolatey package, `roomware.<version>.nupkg`, which runs the same
+installer without any windows to click through. Download it, then from an administrator
+terminal in the folder it was saved to:
+
+```
+choco install roomware --source . --params "'/Room:museum'"
+```
+
+`/Room` is the room this computer runs. Without it, the room already installed is kept, or the
+first room is installed on a new computer. `choco upgrade roomware --source .` with a newer
+package updates it, and `choco uninstall roomware` removes it.
+
 # Development Usage
 
 This section is for more technical readers who are looking to modify the
@@ -75,6 +89,10 @@ the folders in `rooms/`, installs into `Program Files` alongside that room's
 `config.toml` and `hints.toml`, and adds a RoomWare Start Menu shortcut that
 opens with them. Running it again with a different room swaps the room over. It
 can be removed again from Add or Remove Programs.
+
+`setup.exe /S /ROOM=museum` installs without showing any pages, which is what the
+Chocolatey package in `choco/` does. The release workflow packs that package around
+the installer and installs it once on a Windows runner before releasing both.
 
 The web page is off until a password is set under `Settings` in the `Misc` box.
 RoomWare keeps the password and the on/off switch in `server.toml` in the install

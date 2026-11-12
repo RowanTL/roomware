@@ -8,18 +8,50 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  installer:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
       - run: nix build .#windows-installer
 
-      # Fixed names so releases/latest/download/<name> always resolves.
+      # Fixed name so releases/latest/download/roomware-setup.exe always resolves.
       - name: Collect assets
         run: |
           mkdir dist
           cp -L result dist/roomware-setup.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: dist/roomware-setup.exe
+
+  # On Windows, since that is where choco runs and where the package can be tried out.
+  release:
+    needs: installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer
+          path: choco/tools
+
+      - name: Pack the Chocolatey package
+        run: |
+          mkdir dist
+          Copy-Item choco/tools/roomware-setup.exe dist
+          choco pack choco/roomware.nuspec --version ($env:GITHUB_REF_NAME.TrimStart('v')) --outputdirectory dist
+
+      - name: Install the package
+        run: |
+          choco install roomware --source dist --yes --params "'/Room:museum'"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $installed = "$env:ProgramFiles\RoomWare"
+          foreach ($path in "bin\roomware.exe", "rooms\museum\config.toml") {
+            if (-not (Test-Path "$installed\$path")) { throw "$path was not installed" }
+          }
 
       - uses: softprops/action-gh-release@v2
         with:
