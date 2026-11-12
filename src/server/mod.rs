@@ -1,25 +1,27 @@
 //! Tiny HTTPS server so something outside the game master window can start the intro video.
 
 use std::collections::HashMap;
-use std::fs;
 use std::net::{IpAddr, Ipv4Addr};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Mutex, mpsc};
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use actix_files::Files;
 use actix_web::cookie::{Cookie, SameSite, time};
+use actix_web::dev::ServerHandle;
 use actix_web::http::header;
 use actix_web::{App, HttpRequest, HttpResponse, HttpServer, web};
 use relm4::Sender;
 
 use crate::player::PlayerMsg;
 use crate::rooms;
+use settings::Settings;
 
 mod cert;
+pub mod settings;
 
 const PORT: u16 = 8080;
-const PASSWORD_FILE: &str = "password.txt";
 const COOKIE_NAME: &str = "roomware_session";
 const SESSION_LIFETIME: Duration = Duration::from_secs(2 * 60 * 60); // 2 Hours
 const MAX_FAILED_LOGINS: u32 = 5;
@@ -113,38 +115,75 @@ pub fn lan_url() -> Option<String> {
     cert::local_ip().map(|ip| format!("https://{ip}:{PORT}"))
 }
 
+/// The web server, running or not as the settings say.
+pub struct Server {
+    player: Sender<PlayerMsg>,
+    running: Option<Running>,
+}
+
+struct Running {
+    handle: ServerHandle,
+    thread: JoinHandle<()>,
+}
+
+impl Server {
+    pub fn new(player: Sender<PlayerMsg>) -> Self {
+        Self {
+            player,
+            running: None,
+        }
+    }
+
+    pub fn is_running(&self) -> bool {
+        self.running.is_some()
+    }
+
+    /// Restarts with `settings`, so a new password also ends every session.
+    pub fn apply(&mut self, settings: &Settings) -> Result<(), String> {
+        self.stop();
+        if !settings.should_serve() {
+            return Ok(());
+        }
+
+        let tls = cert::server_config(&cert::dir())
+            .map_err(|error| format!("no certificate: {error}"))?;
+        let password = settings.password.clone();
+        self.running = Some(start(self.player.clone(), password, tls, PORT)?);
+
+        Ok(())
+    }
+
+    fn stop(&mut self) {
+        if let Some(running) = self.running.take() {
+            // The stop is sent right away; joining waits for the port to be free again.
+            drop(running.handle.stop(false));
+            let _ = running.thread.join();
+        }
+    }
+}
+
 /// Runs on its own thread because GTK owns the main one.
-pub fn spawn(player: Sender<PlayerMsg>) {
-    std::thread::spawn(move || {
+fn start(
+    player: Sender<PlayerMsg>,
+    password: String,
+    tls: rustls::ServerConfig,
+    port: u16,
+) -> Result<Running, String> {
+    let (ready, started) = mpsc::channel();
+
+    let thread = std::thread::spawn(move || {
         let player = web::Data::new(player);
         let sessions = web::Data::new(Sessions::new(SESSION_LIFETIME));
         let limiter = web::Data::new(LoginLimiter::new(MAX_FAILED_LOGINS, LOGIN_WINDOW));
-
-        let password_file = rooms::installed_dir().with_file_name(PASSWORD_FILE);
-        let Some(password) = read_password(&password_file) else {
-            eprintln!(
-                "roomware: web server not started, no password in {}",
-                password_file.display()
-            );
-            return;
-        };
         let password = web::Data::new(Password(password));
-
-        let tls = match cert::server_config(&cert::dir()) {
-            Ok(tls) => tls,
-            Err(error) => {
-                eprintln!("roomware: web server not started, no certificate: {error}");
-                return;
-            }
-        };
 
         let web_dir = web_dir();
         if web_dir.is_none() {
             eprintln!("roomware: no web directory found, the control page is not served");
         }
 
-        let result = actix_web::rt::System::new().block_on(async move {
-            HttpServer::new(move || {
+        actix_web::rt::System::new().block_on(async move {
+            let bound = HttpServer::new(move || {
                 App::new()
                     .app_data(player.clone())
                     .app_data(sessions.clone())
@@ -159,15 +198,28 @@ pub fn spawn(player: Sender<PlayerMsg>) {
                     })
             })
             .disable_signals()
-            .bind_rustls_0_23(("0.0.0.0", PORT), tls)?
-            .run()
-            .await
-        });
+            .bind_rustls_0_23(("0.0.0.0", port), tls);
 
-        if let Err(error) = result {
-            eprintln!("roomware: web server stopped: {error}");
-        }
+            let server = match bound {
+                Ok(bound) => bound.run(),
+                Err(error) => {
+                    let _ = ready.send(Err(error.to_string()));
+                    return;
+                }
+            };
+            let _ = ready.send(Ok(server.handle()));
+
+            if let Err(error) = server.await {
+                eprintln!("roomware: web server stopped: {error}");
+            }
+        });
     });
+
+    match started.recv() {
+        Ok(Ok(handle)) => Ok(Running { handle, thread }),
+        Ok(Err(error)) => Err(error),
+        Err(_) => Err("the server thread stopped early".to_string()),
+    }
 }
 
 /// The installed one beside `bin`, or `web` in the working directory when run from the repo.
@@ -178,29 +230,6 @@ fn web_dir() -> Option<PathBuf> {
     ]
     .into_iter()
     .find(|dir| dir.is_dir())
-}
-
-/// A blank password counts as none, since it would let anyone in.
-fn read_password(path: &Path) -> Option<String> {
-    let password = decode(&fs::read(path).ok()?)?.trim().to_string();
-    (!password.is_empty()).then_some(password)
-}
-
-/// The installer writes UTF-16 so any password survives, but one saved from an editor is likely UTF-8.
-fn decode(bytes: &[u8]) -> Option<String> {
-    match bytes {
-        [0xFF, 0xFE, rest @ ..] => {
-            let units: Vec<u16> = rest
-                .as_chunks::<2>()
-                .0
-                .iter()
-                .map(|pair| u16::from_le_bytes(*pair))
-                .collect();
-            String::from_utf16(&units).ok()
-        }
-        [0xEF, 0xBB, 0xBF, rest @ ..] => String::from_utf8(rest.to_vec()).ok(),
-        _ => String::from_utf8(bytes.to_vec()).ok(),
-    }
 }
 
 fn static_files(dir: &Path) -> Files {
@@ -564,61 +593,24 @@ mod tests {
         assert_eq!(response.status(), StatusCode::NO_CONTENT);
     }
 
-    fn password_file(name: &str, contents: &[u8]) -> PathBuf {
-        let path = std::env::temp_dir().join(format!(
-            "roomware-password-{name}-{}.txt",
-            std::process::id()
-        ));
-        fs::write(&path, contents).unwrap();
-        path
-    }
-
-    fn utf16_with_bom(text: &str) -> Vec<u8> {
-        let mut bytes = vec![0xFF, 0xFE];
-        bytes.extend(text.encode_utf16().flat_map(u16::to_le_bytes));
-        bytes
-    }
-
     #[test]
-    fn no_password_file_is_no_password() {
-        let path = std::env::temp_dir().join("roomware-password-missing.txt");
+    fn a_stopped_server_frees_its_port_for_the_next_one() {
+        const TEST_PORT: u16 = 48917;
+        let certs = std::env::temp_dir().join(format!("roomware-certs-{}", std::process::id()));
+        let connects = || std::net::TcpStream::connect(("127.0.0.1", TEST_PORT)).is_ok();
+        let mut server = Server::new(relm4::channel().0);
 
-        assert_eq!(read_password(&path), None);
-    }
+        for _ in 0..2 {
+            let tls = cert::server_config(&certs).unwrap();
+            let sender = server.player.clone();
+            server.running = Some(start(sender, PASSCODE.to_string(), tls, TEST_PORT).unwrap());
+            assert!(connects());
 
-    #[test]
-    fn the_installers_utf16_password_is_read() {
-        let path = password_file("utf16", &utf16_with_bom("pässwörd"));
+            server.stop();
+            assert!(!connects());
+        }
 
-        assert_eq!(read_password(&path).as_deref(), Some("pässwörd"));
-        fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn a_utf8_password_is_read_with_or_without_a_bom() {
-        let plain = password_file("utf8", "secret".as_bytes());
-        let with_bom = password_file("utf8-bom", "\u{feff}secret".as_bytes());
-
-        assert_eq!(read_password(&plain).as_deref(), Some("secret"));
-        assert_eq!(read_password(&with_bom).as_deref(), Some("secret"));
-        fs::remove_file(plain).unwrap();
-        fs::remove_file(with_bom).unwrap();
-    }
-
-    #[test]
-    fn whitespace_around_the_password_is_trimmed() {
-        let path = password_file("trimmed", b"  secret\r\n");
-
-        assert_eq!(read_password(&path).as_deref(), Some("secret"));
-        fs::remove_file(path).unwrap();
-    }
-
-    #[test]
-    fn a_blank_password_file_is_no_password() {
-        let path = password_file("blank", &utf16_with_bom("  \r\n"));
-
-        assert_eq!(read_password(&path), None);
-        fs::remove_file(path).unwrap();
+        let _ = std::fs::remove_dir_all(certs);
     }
 
     #[test]

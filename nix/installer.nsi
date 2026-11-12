@@ -5,7 +5,6 @@ Unicode true
 SetCompressor /SOLID lzma
 
 !include Sections.nsh
-!include nsDialogs.nsh
 !include LogicLib.nsh
 
 Name "RoomWare ${VERSION}"
@@ -20,24 +19,19 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\RoomWare"
-; RoomWare reads the web page's password from here, see src/server/mod.rs.
-!define PASSWORD_FILE "$INSTDIR\password.txt"
+; RoomWare keeps the web server's settings here, see src/server/settings.rs.
+!define SERVER_FILE "$INSTDIR\server.toml"
 
 ComponentText "Choose the room this computer runs."
 
 Page components
 Page directory
-; After the directory page, so it checks for a password where this install goes.
-Page custom PasswordPage PasswordPageLeave ": Web Page Password"
 Page instfiles
 UninstPage uninstConfirm
 UninstPage instfiles
 
 ; Section index of the room currently picked on the components page.
 Var Room
-Var PasswordBox
-; Empty keeps the password an earlier install saved.
-Var Password
 
 Section "-RoomWare"
   SetOutPath "$INSTDIR"
@@ -47,12 +41,15 @@ Section "-RoomWare"
   CreateDirectory "$INSTDIR\certs"
   nsExec::Exec 'icacls "$INSTDIR\certs" /grant *S-1-5-32-545:(OI)(CI)M /T'
 
-  ; UTF-16, since FileWrite would squash the password into the ANSI code page.
-  ${If} $Password != ""
-    FileOpen $0 "${PASSWORD_FILE}" w
-    FileWriteUTF16LE /BOM $0 "$Password"
+  ; RoomWare fills this in itself, which runs without admin rights.
+  ${IfNot} ${FileExists} "${SERVER_FILE}"
+    FileOpen $0 "${SERVER_FILE}" w
     FileClose $0
   ${EndIf}
+  nsExec::Exec 'icacls "${SERVER_FILE}" /grant *S-1-5-32-545:M'
+
+  ; Older installers saved the web page's password here.
+  Delete "$INSTDIR\password.txt"
 
   WriteRegStr HKLM "Software\RoomWare" "InstallDir" "$INSTDIR"
   WriteRegStr HKLM "${UNINSTALL_KEY}" "DisplayName" "RoomWare"
@@ -92,35 +89,6 @@ Function .onInit
   ; Puts the shortcut in every user's Start Menu instead of the admin's.
   SetShellVarContext all
   StrCpy $Room ${FIRST_ROOM}
-FunctionEnd
-
-Function PasswordPage
-  nsDialogs::Create 1018
-  Pop $0
-
-  ${If} ${FileExists} "${PASSWORD_FILE}"
-    StrCpy $1 "Password for logging in on RoomWare's web page. Leave it empty to keep the current one."
-  ${Else}
-    StrCpy $1 "Password for logging in on RoomWare's web page."
-  ${EndIf}
-  ${NSD_CreateLabel} 0 0 100% 24u $1
-  Pop $0
-
-  ${NSD_CreateText} 0 30u 100% 12u $Password
-  Pop $PasswordBox
-  ${NSD_SetFocus} $PasswordBox
-
-  nsDialogs::Show
-FunctionEnd
-
-Function PasswordPageLeave
-  ${NSD_GetText} $PasswordBox $Password
-
-  ${If} $Password == ""
-  ${AndIfNot} ${FileExists} "${PASSWORD_FILE}"
-    MessageBox MB_ICONEXCLAMATION|MB_OK "Enter a password, the web page can't be used without one."
-    Abort
-  ${EndIf}
 FunctionEnd
 
 Function .onSelChange

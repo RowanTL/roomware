@@ -9,3 +9,6 @@ result
 
 # elm
 elm-stuff
+
+# generated server settings
+server.toml

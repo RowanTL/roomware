@@ -33,9 +33,11 @@ Find the `releases` section on the right side of the Github repo. Click on the l
 As of writing, the latest release is `v3.4.1`. Once in the releases section, download
 `roomware-setup.exe`.
 
-Once running the installer, select which room you would like to install and set a password
-for the remote video player webpage. There will be a little bit of lag between selecting
-the room and typing in a new password.
+Once running the installer, select which room you would like to install. There will be a
+little bit of lag after selecting the room.
+
+The remote video player webpage is off until you open `Settings` in RoomWare, enter a
+password, and turn the web server on.
 
 # Development Usage
 
@@ -57,8 +59,8 @@ exist in case something goes horribly wrong or for development reasons.
 
 ### Testing the server
 
-If you want to test the server functionality locally and need to use the `\login` route, place a file at
-`target/password.txt` with a single line containing the password.
+The web server is off by default. To use the `\login` route locally, set a password and turn the
+server on under `Settings` in the `Misc` box. This is saved to `target/server.toml`.
 
 ## Building for Windows
 
@@ -74,15 +76,13 @@ the folders in `rooms/`, installs into `Program Files` alongside that room's
 opens with them. Running it again with a different room swaps the room over. It
 can be removed again from Add or Remove Programs.
 
-The installer also asks for the password used to log in on RoomWare's web page,
-and saves it to `password.txt` in the install directory. When running it again,
-leaving the password empty keeps the saved one. Without a `password.txt`, the web
-page isn't served.
+The web page is off until a password is set under `Settings` in the `Misc` box.
+RoomWare keeps the password and the on/off switch in `server.toml` in the install
+directory, which it generates itself and which survives running the installer again.
 
 `nix build .#windows` gives the same build as a plain directory instead, for
 running it off a stick without installing. Copy the whole directory over,
-keeping its layout, and run `bin\roomware.exe` from inside it. Put a
-`password.txt` beside `bin` for the web page.
+keeping its layout, and run `bin\roomware.exe` from inside it.
 
 Those DLLs are MSYS2's Windows builds, pinned in `nix/msys2-packages.json`,
 because nixpkgs cannot build GTK for Windows itself. To move to their current

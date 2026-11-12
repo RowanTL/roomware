@@ -14,7 +14,7 @@ use crate::hints::{Hints, HintsMsg, HintsOutput};
 use crate::misc::{Misc, MiscOutput};
 use crate::player::preview::{PlayerPreview, PlayerPreviewMsg};
 use crate::player::{Player, PlayerMsg, PlayerOutput};
-use crate::{rooms, server};
+use crate::rooms;
 use crate::stats::{Stats, StatsMsg};
 use crate::timer::{Timer, TimerMsg, TimerOutput};
 use crate::utils::apply_css_style;
@@ -137,7 +137,7 @@ impl SimpleComponent for GameMasterWindow {
         let hint_menu_sender = hint_menu.sender().clone();
         let stats_sender = stats.sender().clone();
         let misc = Misc::builder()
-            .launch(())
+            .launch(player.sender().clone())
             .connect_receiver(move |_, output| match output {
                 MiscOutput::ForceLoss(force_loss) => {
                     stats_sender.emit(StatsMsg::ForceLoss(force_loss));
@@ -152,7 +152,6 @@ impl SimpleComponent for GameMasterWindow {
             });
 
         player.widget().present();
-        server::spawn(player.sender().clone());
 
         let player_sender = player.sender().clone();
         play_video_button.connect_clicked(move |_| {
