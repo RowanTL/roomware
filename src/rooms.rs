@@ -48,7 +48,7 @@ pub fn update_failed() -> bool {
     UPDATE_FAILED.load(Ordering::Relaxed)
 }
 
-/// Fetches the latest hints for the downloaded room, if there is one.
+/// Fetches the latest hints for the room [`sync`] downloaded.
 pub fn update_hints() {
     let Some((name, dir)) = ROOM.get() else {
         return;

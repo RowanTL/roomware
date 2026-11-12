@@ -132,13 +132,10 @@ impl SimpleComponent for HintMenu {
     }
 }
 
-/// Fetches the room's latest hints, then loads them from its hints file.
 fn load_hint_tables() -> Vec<HintTable> {
     let Some(path) = super::path() else {
         return Vec::new();
     };
-
-    crate::rooms::update_hints();
 
     read_toml(path)
         .iter()
