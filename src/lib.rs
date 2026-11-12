@@ -7,4 +7,5 @@ pub mod rooms;
 pub mod server;
 pub mod stats;
 pub mod timer;
+pub mod update;
 pub mod utils;

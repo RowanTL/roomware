@@ -35,6 +35,20 @@ UninstPage instfiles
 Var Room
 
 Section "-RoomWare"
+  ; An update is started by RoomWare itself, which is still closing at this point.
+  ${For} $1 1 40
+    ${IfNot} ${FileExists} "$INSTDIR\bin\roomware.exe"
+      ${Break}
+    ${EndIf}
+    ClearErrors
+    FileOpen $0 "$INSTDIR\bin\roomware.exe" a
+    ${IfNot} ${Errors}
+      FileClose $0
+      ${Break}
+    ${EndIf}
+    Sleep 500
+  ${Next}
+
   SetOutPath "$INSTDIR"
   File /r "${BUNDLE}/*"
 
@@ -112,6 +126,17 @@ Function .onInit
     !insertmacro UnselectSection $Room
     StrCpy $Room $1
     !insertmacro SelectSection $Room
+  ${EndIf}
+FunctionEnd
+
+; /RELAUNCH opens RoomWare again after an update it started itself.
+Function .onInstSuccess
+  ${GetParameters} $0
+  ClearErrors
+  ${GetOptions} $0 "/RELAUNCH" $1
+  ${IfNot} ${Errors}
+    ; Through Explorer, so RoomWare doesn't inherit the installer's admin rights.
+    Exec '"$WINDIR\explorer.exe" "$SMPROGRAMS\RoomWare.lnk"'
   ${EndIf}
 FunctionEnd
 

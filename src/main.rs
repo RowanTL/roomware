@@ -5,9 +5,10 @@ use std::path::{Path, PathBuf};
 
 use clap::{Arg, ArgAction, Command};
 use gtk::glib;
-use gtk::prelude::{BoxExt, GtkWindowExt};
+use gtk::prelude::GtkWindowExt;
 use relm4::{RelmApp, gtk};
 use roomware::master::GameMasterWindow;
+use roomware::utils::busy_popup;
 use roomware::{config, hints, rooms};
 
 fn main() {
@@ -77,25 +78,7 @@ fn sync_with_popup(room: &str, dir: &Path, force: bool) {
         return fetch();
     }
 
-    let content = gtk::Box::builder()
-        .orientation(gtk::Orientation::Horizontal)
-        .spacing(10)
-        .margin_top(20)
-        .margin_bottom(20)
-        .margin_start(20)
-        .margin_end(20)
-        .build();
-    content.append(&gtk::Spinner::builder().spinning(true).build());
-    content.append(&gtk::Label::new(Some(
-        "Checking GitHub for updated hints...",
-    )));
-
-    let popup = gtk::Window::builder()
-        .title("RoomWare")
-        .resizable(false)
-        .deletable(false)
-        .child(&content)
-        .build();
+    let popup = busy_popup("Checking GitHub for updated hints...");
     popup.present();
 
     let main_loop = glib::MainLoop::new(None, false);

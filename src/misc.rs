@@ -9,18 +9,25 @@ use relm4::{ComponentParts, ComponentSender, Sender, SimpleComponent, gtk};
 use crate::player::PlayerMsg;
 use crate::server::settings::{self, Settings};
 use crate::server::{self, Server};
+use crate::update::{self, Update};
+use crate::utils::busy_popup;
 
 pub struct Misc {
     root: gtk::Box,
     force_loss: bool,
     settings: Settings,
     server: Server,
+    busy: Option<gtk::Window>,
 }
 
 #[derive(Debug)]
 pub enum MiscMsg {
     ShowSettings,
     SaveSettings(Settings),
+    CheckForUpdate,
+    UpdateChecked(Result<Option<Update>, String>),
+    InstallUpdate(Update),
+    UpdateStarted(Result<(), String>),
     ShowVersion,
     ToggleForceLoss,
     Reset,
@@ -87,6 +94,7 @@ impl SimpleComponent for Misc {
             force_loss: false,
             settings,
             server,
+            busy: None,
         };
 
         let widgets = view_output!();
@@ -113,6 +121,7 @@ impl SimpleComponent for Misc {
                     None => "Not running".to_string(),
                 };
                 let save = gtk::Button::with_label("Save");
+                let check = gtk::Button::with_label("Check for Updates");
 
                 let grid = gtk::Grid::builder()
                     .row_spacing(10)
@@ -129,6 +138,7 @@ impl SimpleComponent for Misc {
                 grid.attach(&active, 1, 1, 1, 1);
                 grid.attach(&label(&status), 0, 2, 2, 1);
                 grid.attach(&save, 0, 3, 2, 1);
+                grid.attach(&check, 0, 4, 2, 1);
 
                 let dialog = gtk::Window::builder()
                     .title("Settings")
@@ -138,6 +148,12 @@ impl SimpleComponent for Misc {
                     .build();
                 dialog.set_transient_for(self.window().as_ref());
 
+                let window = dialog.clone();
+                let update_sender = sender.clone();
+                check.connect_clicked(move |_| {
+                    update_sender.input(MiscMsg::CheckForUpdate);
+                    window.close();
+                });
                 // The server can't be on without a password.
                 let switch = active.clone();
                 password.connect_changed(move |password| {
@@ -171,11 +187,61 @@ impl SimpleComponent for Misc {
                 self.settings = settings;
 
                 if let Err(error) = saved.and(applied) {
-                    gtk::AlertDialog::builder()
-                        .message("Settings")
-                        .detail(error)
-                        .build()
-                        .show(self.window().as_ref());
+                    self.alert("Settings", &error);
+                }
+            }
+            MiscMsg::CheckForUpdate => {
+                self.show_busy("Checking for updates...");
+                std::thread::spawn(move || sender.input(MiscMsg::UpdateChecked(update::check())));
+            }
+            MiscMsg::UpdateChecked(result) => {
+                self.hide_busy();
+                match result {
+                    Ok(Some(update)) if cfg!(windows) => {
+                        let dialog = gtk::AlertDialog::builder()
+                            .message(format!("RoomWare {} is available", update.version))
+                            .detail(
+                                "RoomWare will close, install the update, and open again. \
+                                 Windows asks for permission first.",
+                            )
+                            .buttons(["Cancel", "Update"])
+                            .cancel_button(0)
+                            .default_button(1)
+                            .modal(true)
+                            .build();
+                        dialog.choose(
+                            self.window().as_ref(),
+                            gtk::gio::Cancellable::NONE,
+                            move |choice| {
+                                if matches!(choice, Ok(1)) {
+                                    sender.input(MiscMsg::InstallUpdate(update));
+                                }
+                            },
+                        );
+                    }
+                    Ok(Some(update)) => self.alert(
+                        &format!("RoomWare {} is available", update.version),
+                        "Updates can only be installed from inside RoomWare on Windows.",
+                    ),
+                    Ok(None) => self.alert(
+                        "RoomWare is up to date",
+                        concat!("This is version ", env!("CARGO_PKG_VERSION"), "."),
+                    ),
+                    Err(error) => self.alert("Could not check for updates", &error),
+                }
+            }
+            MiscMsg::InstallUpdate(update) => {
+                self.show_busy("Downloading the update...");
+                std::thread::spawn(move || {
+                    sender.input(MiscMsg::UpdateStarted(update::install(&update)));
+                });
+            }
+            MiscMsg::UpdateStarted(result) => {
+                self.hide_busy();
+                match result {
+                    // The installer waits for RoomWare to close before replacing it.
+                    Ok(()) => relm4::main_application().quit(),
+                    Err(error) => self.alert("Could not install the update", &error),
                 }
             }
             MiscMsg::ShowVersion => {
@@ -221,5 +287,26 @@ impl Misc {
         self.root
             .root()
             .and_then(|root| root.downcast::<gtk::Window>().ok())
+    }
+
+    fn alert(&self, message: &str, detail: &str) {
+        gtk::AlertDialog::builder()
+            .message(message)
+            .detail(detail)
+            .build()
+            .show(self.window().as_ref());
+    }
+
+    fn show_busy(&mut self, text: &str) {
+        let popup = busy_popup(text);
+        popup.set_transient_for(self.window().as_ref());
+        popup.present();
+        self.busy = Some(popup);
+    }
+
+    fn hide_busy(&mut self) {
+        if let Some(popup) = self.busy.take() {
+            popup.destroy();
+        }
     }
 }

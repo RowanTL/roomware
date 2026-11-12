@@ -39,6 +39,12 @@ little bit of lag after selecting the room.
 The remote video player webpage is off until you open `Settings` in RoomWare, enter a
 password, and turn the web server on.
 
+### Updating
+
+`Settings` has a `Check for Updates` button. If a newer release is out, RoomWare offers to
+install it: it downloads the installer, Windows asks for permission, and RoomWare closes,
+updates, and opens again with the same room.
+
 ### With Chocolatey
 
 Each release also has a Chocolatey package, `roomware.<version>.nupkg`, which runs the same
@@ -93,6 +99,9 @@ can be removed again from Add or Remove Programs.
 `setup.exe /S /ROOM=museum` installs without showing any pages, which is what the
 Chocolatey package in `choco/` does. The release workflow packs that package around
 the installer and installs it once on a Windows runner before releasing both.
+
+`Check for Updates` runs the latest release's installer with `/S /RELAUNCH`, which
+also reopens RoomWare from its shortcut once the install is done.
 
 The web page is off until a password is set under `Settings` in the `Misc` box.
 RoomWare keeps the password and the on/off switch in `server.toml` in the install

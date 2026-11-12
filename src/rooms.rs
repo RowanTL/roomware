@@ -11,7 +11,7 @@ use serde_json::Value;
 
 const LISTING_URL: &str = "https://api.github.com/repos/RowanTL/roomware/contents/rooms";
 const RAW_URL: &str = "https://raw.githubusercontent.com/RowanTL/roomware/main/rooms";
-const QUICK_TIMEOUT: Duration = Duration::from_secs(10);
+pub(crate) const QUICK_TIMEOUT: Duration = Duration::from_secs(10);
 
 pub const CONFIG_FILE: &str = "config.toml";
 pub const HINTS_FILE: &str = "hints.toml";
@@ -96,7 +96,7 @@ fn try_sync(name: &str, dir: &Path, force: bool) -> Result<(), Error> {
 
 /// Writes to a temporary file first so a failed download can't leave half a
 /// file behind.
-fn download(url: &str, path: &Path, timeout: Option<Duration>) -> Result<(), Error> {
+pub(crate) fn download(url: &str, path: &Path, timeout: Option<Duration>) -> Result<(), Error> {
     let mut request = client().get(url);
     if let Some(timeout) = timeout {
         request = request.timeout(timeout);
@@ -121,7 +121,7 @@ fn blob_sha(path: &Path) -> Option<String> {
     Some(sha.digest().to_string())
 }
 
-fn client() -> &'static Client {
+pub(crate) fn client() -> &'static Client {
     static CLIENT: OnceLock<Client> = OnceLock::new();
 
     CLIENT.get_or_init(|| {

@@ -3,6 +3,7 @@
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
+use gtk::prelude::BoxExt;
 use relm4::gtk;
 
 /// Load `text` as an image if it is one.
@@ -87,4 +88,26 @@ pub fn apply_css_style(css_string: &str) {
         &provider,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
+}
+
+/// A small window with a spinner, for work that keeps the user waiting.
+pub fn busy_popup(text: &str) -> gtk::Window {
+    let content = gtk::Box::builder()
+        .orientation(gtk::Orientation::Horizontal)
+        .spacing(10)
+        .margin_top(20)
+        .margin_bottom(20)
+        .margin_start(20)
+        .margin_end(20)
+        .build();
+    content.append(&gtk::Spinner::builder().spinning(true).build());
+    content.append(&gtk::Label::new(Some(text)));
+
+    gtk::Window::builder()
+        .title("RoomWare")
+        .resizable(false)
+        .deletable(false)
+        .modal(true)
+        .child(&content)
+        .build()
 }
