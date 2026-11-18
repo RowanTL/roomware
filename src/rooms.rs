@@ -50,15 +50,27 @@ pub fn update_failed() -> bool {
 
 /// Fetches the latest hints for the room [`sync`] downloaded.
 pub fn update_hints() {
-    let Some((name, dir)) = ROOM.get() else {
+    if ROOM.get().is_none() {
         return;
+    }
+
+    if let Err(error) = fetch_hints() {
+        eprintln!("roomware: {error}");
+        UPDATE_FAILED.store(true, Ordering::Relaxed);
+    }
+}
+
+/// [`update_hints`] for mid-game, where the caller reports the failure.
+pub fn fetch_hints() -> Result<(), String> {
+    let Some((name, dir)) = ROOM.get() else {
+        return Err(
+            "This room was opened from local files, so there is nothing to download.".into(),
+        );
     };
 
     let url = format!("{RAW_URL}/{name}/{HINTS_FILE}");
-    if let Err(error) = download(&url, &dir.join(HINTS_FILE), Some(QUICK_TIMEOUT)) {
-        eprintln!("roomware: could not update hints for {name}: {error}");
-        UPDATE_FAILED.store(true, Ordering::Relaxed);
-    }
+    download(&url, &dir.join(HINTS_FILE), Some(QUICK_TIMEOUT))
+        .map_err(|error| format!("Could not update hints for {name}: {error}"))
 }
 
 // Downloads the hints from the hints repo if needed.

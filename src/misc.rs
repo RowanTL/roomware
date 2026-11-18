@@ -1,14 +1,13 @@
 //! This file serves as a hub for various useful options that don't fit in anywhere else.
 
 use gtk::glib::object::Cast;
-use gtk::prelude::{
-    ApplicationExt, BoxExt, ButtonExt, EditableExt, GridExt, GtkWindowExt, OrientableExt, WidgetExt,
-};
+use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{ComponentParts, ComponentSender, Sender, SimpleComponent, gtk};
 
 use crate::player::PlayerMsg;
-use crate::server::settings::{self, Settings};
+use crate::rooms;
 use crate::server::{self, Server};
+use crate::settings::{self, Settings};
 use crate::update::{self, Update};
 use crate::utils::busy_popup;
 
@@ -28,6 +27,8 @@ pub enum MiscMsg {
     UpdateChecked(Result<Option<Update>, String>),
     InstallUpdate(Update),
     UpdateStarted(Result<(), String>),
+    UpdateHints,
+    HintsUpdated(Result<(), String>),
     ShowVersion,
     ToggleForceLoss,
     Reset,
@@ -38,6 +39,7 @@ pub enum MiscMsg {
 pub enum MiscOutput {
     ForceLoss(bool),
     Reset,
+    HintsUpdated,
 }
 
 #[relm4::component(pub)]
@@ -105,75 +107,37 @@ impl SimpleComponent for Misc {
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             MiscMsg::ShowSettings => {
-                let password = gtk::Entry::builder()
-                    .text(self.settings.password.as_str())
-                    .hexpand(true)
-                    .width_chars(30)
-                    .build();
-                let active = gtk::Switch::builder()
-                    .active(self.settings.should_serve())
-                    .sensitive(!self.settings.password.is_empty())
-                    .halign(gtk::Align::Start)
-                    .build();
                 let status = match server::lan_url().filter(|_| self.server.is_running()) {
                     Some(url) => format!("Running at {url}"),
                     None if self.server.is_running() => "Running".to_string(),
                     None => "Not running".to_string(),
                 };
-                let save = gtk::Button::with_label("Save");
-                let check = gtk::Button::with_label("Check for Updates");
-
-                let grid = gtk::Grid::builder()
-                    .row_spacing(10)
-                    .column_spacing(10)
-                    .margin_top(10)
-                    .margin_bottom(10)
-                    .margin_start(10)
-                    .margin_end(10)
-                    .build();
-                let label = |text: &str| gtk::Label::builder().label(text).xalign(0.0).build();
-                grid.attach(&label("Web page password"), 0, 0, 1, 1);
-                grid.attach(&password, 1, 0, 1, 1);
-                grid.attach(&label("Web server"), 0, 1, 1, 1);
-                grid.attach(&active, 1, 1, 1, 1);
-                grid.attach(&label(&status), 0, 2, 2, 1);
-                grid.attach(&save, 0, 3, 2, 1);
-                grid.attach(&check, 0, 4, 2, 1);
-
-                let dialog = gtk::Window::builder()
-                    .title("Settings")
-                    .modal(true)
-                    .resizable(false)
-                    .child(&grid)
-                    .build();
-                dialog.set_transient_for(self.window().as_ref());
-
-                let window = dialog.clone();
                 let update_sender = sender.clone();
-                check.connect_clicked(move |_| {
-                    update_sender.input(MiscMsg::CheckForUpdate);
-                    window.close();
+                let hints_sender = sender.clone();
+                settings::show_dialog(
+                    self.window().as_ref(),
+                    &self.settings,
+                    &status,
+                    move |settings| sender.input(MiscMsg::SaveSettings(settings)),
+                    move || update_sender.input(MiscMsg::CheckForUpdate),
+                    move || hints_sender.input(MiscMsg::UpdateHints),
+                );
+            }
+            MiscMsg::UpdateHints => {
+                self.show_busy("Checking GitHub for updated hints...");
+                std::thread::spawn(move || {
+                    sender.input(MiscMsg::HintsUpdated(rooms::fetch_hints()));
                 });
-                // The server can't be on without a password.
-                let switch = active.clone();
-                password.connect_changed(move |password| {
-                    let blank = password.text().trim().is_empty();
-                    switch.set_sensitive(!blank);
-                    if blank {
-                        switch.set_active(false);
+            }
+            MiscMsg::HintsUpdated(result) => {
+                self.hide_busy();
+                match result {
+                    Ok(()) => {
+                        let _ = sender.output(MiscOutput::HintsUpdated);
+                        self.alert("Hints updated", "The hint menu now shows the latest hints.");
                     }
-                });
-
-                let window = dialog.clone();
-                save.connect_clicked(move |_| {
-                    sender.input(MiscMsg::SaveSettings(Settings {
-                        password: password.text().trim().to_string(),
-                        is_active: active.is_active(),
-                    }));
-                    window.close();
-                });
-
-                dialog.present();
+                    Err(error) => self.alert("Could not update hints", &error),
+                }
             }
             MiscMsg::SaveSettings(settings) => {
                 let path = settings::path();

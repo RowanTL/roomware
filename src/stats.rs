@@ -33,6 +33,8 @@ pub enum StatsMsg {
         start_time: String,
         end_time: String,
     },
+    /// The game's result was undone, so its row goes until the game ends again.
+    GameResumed,
     ForceLoss(bool),
     Reset,
 }
@@ -94,6 +96,14 @@ impl Worker for Stats {
                 let replace = self.recorded.is_some();
                 self.write(&record, replace);
                 self.recorded = Some(record);
+            }
+            StatsMsg::GameResumed => {
+                if self.recorded.take().is_some()
+                    && let Some(log) = &self.log
+                    && let Err(error) = log.remove_last()
+                {
+                    eprintln!("roomware: could not write {}: {error}", log.path.display());
+                }
             }
             StatsMsg::ForceLoss(force_loss) => {
                 self.force_loss = force_loss;
@@ -191,11 +201,25 @@ impl GameLog {
     }
 
     fn replace_last(&self, record: &Record) -> io::Result<()> {
+        fs::write(
+            &self.path,
+            format!("{}{}\n", self.all_but_last()?, record.to_csv()),
+        )
+    }
+
+    fn remove_last(&self) -> io::Result<()> {
+        fs::write(&self.path, self.all_but_last()?)
+    }
+
+    /// Every line before the last row, each still ending in a newline.
+    fn all_but_last(&self) -> io::Result<String> {
         let contents = fs::read_to_string(&self.path)?;
         let contents = contents.trim_end();
-        let kept = contents.rfind('\n').map_or("", |end| &contents[..=end]);
 
-        fs::write(&self.path, format!("{kept}{}\n", record.to_csv()))
+        Ok(contents
+            .rfind('\n')
+            .map_or("", |end| &contents[..=end])
+            .to_string())
     }
 }
 
@@ -252,6 +276,29 @@ mod tests {
                 "{HEADER}\n\
                  Museum,win,600,3600,2,5,2024-01-01T10:00:00+0000,2024-01-01T11:00:00+0000\n\
                  Museum,loss,600,3600,2,5,2024-01-01T10:00:00+0000,2024-01-01T11:00:00+0000\n"
+            )
+        );
+        fs::remove_file(&path).unwrap();
+    }
+
+    #[test]
+    fn remove_last_drops_only_the_last_row() {
+        let path = temp_csv("remove");
+        let log = GameLog::open(&path).unwrap();
+
+        log.append(&record()).unwrap();
+        log.append(&Record {
+            won: false,
+            ..record()
+        })
+        .unwrap();
+        log.remove_last().unwrap();
+
+        assert_eq!(
+            fs::read_to_string(&path).unwrap(),
+            format!(
+                "{HEADER}\n\
+                 Museum,win,600,3600,2,5,2024-01-01T10:00:00+0000,2024-01-01T11:00:00+0000\n"
             )
         );
         fs::remove_file(&path).unwrap();

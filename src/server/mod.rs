@@ -16,10 +16,9 @@ use relm4::Sender;
 
 use crate::player::PlayerMsg;
 use crate::rooms;
-use settings::Settings;
+use crate::settings::Settings;
 
 mod cert;
-pub mod settings;
 
 const PORT: u16 = 8080;
 const COOKIE_NAME: &str = "roomware_session";

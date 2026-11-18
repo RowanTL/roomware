@@ -48,6 +48,8 @@ pub enum TimerOutput {
         start_time: String,
         end_time: String,
     },
+    /// A win or loss was undone and the same game carries on.
+    GameResumed,
 }
 
 #[relm4::component(pub)]
@@ -107,12 +109,17 @@ impl SimpleComponent for Timer {
 
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         let previous = self.outcome;
+        let is_reset = matches!(msg, TimerMsg::Reset);
 
         match msg {
             TimerMsg::Toggle => {
                 if self.running {
                     self.stop();
                 } else {
+                    // Starting after a win carries on as if Win was never pressed
+                    if self.outcome == Outcome::Won && self.remaining > 0 {
+                        self.outcome = Outcome::Undecided;
+                    }
                     self.start(&sender);
                 }
             }
@@ -161,6 +168,10 @@ impl SimpleComponent for Timer {
                 start_time: format_datetime(self.start_time.as_ref()),
                 end_time: format_datetime(end_time.as_ref()),
             });
+        }
+
+        if previous != Outcome::Undecided && self.outcome == Outcome::Undecided && !is_reset {
+            let _ = sender.output(TimerOutput::GameResumed);
         }
     }
 }

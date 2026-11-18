@@ -130,6 +130,7 @@ impl SimpleComponent for GameMasterWindow {
                         end_time,
                     });
                 }
+                TimerOutput::GameResumed => stats_sender.emit(StatsMsg::GameResumed),
             });
         let timer_sender = timer.sender().clone();
         let hints_sender = hints.sender().clone();
@@ -148,6 +149,10 @@ impl SimpleComponent for GameMasterWindow {
                     hint_control_sender.emit(HintControlMsg::Clear);
                     hint_menu_sender.emit(HintMenuMsg::ExpandAll);
                     stats_sender.emit(StatsMsg::Reset);
+                }
+                MiscOutput::HintsUpdated => {
+                    hint_control_sender.emit(HintControlMsg::Clear);
+                    hint_menu_sender.emit(HintMenuMsg::Reload);
                 }
             });
 
@@ -207,7 +212,9 @@ impl SimpleComponent for GameMasterWindow {
              window.main-window expander-widget > box > title > expander {{ color: #{expander}; }} \
              window.main-window expander-widget > box > title:hover > expander {{ color: #{expander_hovered}; }} \
              window.main-window expander-widget > box > title > label {{ font-size: 1.1em; font-weight: bold; }} \
-             window.main-window button {{ background-color: #{button_background}; color: #{button}; }} \
+             window.main-window button {{ background-color: #{button_background}; background-image: none; color: #{button}; }} \
+             window.main-window button:hover {{ background-color: shade(#{button_background}, 1.08); }} \
+             window.main-window button:active {{ background-color: shade(#{button_background}, 0.85); }} \
              window.main-window frame:not(.player-preview-frame) button label {{ color: #{button_label}; }} \
              window.main-window entry {{ background-color: #{entry_background}; color: #{entry_text}; }} \
              window.main-window frame:not(.player-preview-frame) label.hint-selected {{ color: #{hint_select}; }}",

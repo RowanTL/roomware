@@ -17,9 +17,9 @@ struct HintTable {
 }
 
 pub struct HintMenu {
-    tables: Vec<HintTable>,
     expanders: Vec<gtk::Expander>,
     root: gtk::ScrolledWindow,
+    list: gtk::Box,
     selected: Rc<RefCell<Option<gtk::Label>>>,
 }
 
@@ -28,6 +28,8 @@ pub enum HintMenuMsg {
     HintClicked(String),
     HintActivated(String),
     ExpandAll,
+    /// Rebuilds the menu from the hints file.
+    Reload,
 }
 
 #[derive(Debug)]
@@ -49,8 +51,8 @@ impl SimpleComponent for HintMenu {
             set_propagate_natural_height: true,
             set_max_content_height: MENU_MAX_HEIGHT,
 
-            #[name = "list"]
-            gtk::Box {
+            #[local_ref]
+            list -> gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
                 set_spacing: 5,
                 set_margin_all: 5,
@@ -64,48 +66,16 @@ impl SimpleComponent for HintMenu {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let mut model = HintMenu {
-            tables: load_hint_tables(),
             expanders: Vec::new(),
             root: root.clone(),
+            list: gtk::Box::default(),
             selected: Rc::default(),
         };
 
+        let list = &model.list;
         let widgets = view_output!();
 
-        for table in &model.tables {
-            let expander = gtk::Expander::new(Some(&table.name));
-            expander.set_expanded(true);
-            model.expanders.push(expander.clone());
-
-            let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
-            for hint in &table.hints {
-                let label = gtk::Label::new(Some(&format!("• {hint}")));
-                label.set_halign(gtk::Align::Start);
-
-                let click = gtk::GestureClick::new();
-                let value = hint.clone();
-                let input_sender = sender.input_sender().clone();
-                let selected = model.selected.clone();
-                let this = label.clone();
-                click.connect_pressed(move |_, n_press, _, _| {
-                    if n_press == 1 {
-                        if let Some(previous) = selected.replace(Some(this.clone())) {
-                            previous.remove_css_class(SELECTED_CLASS);
-                        }
-                        this.add_css_class(SELECTED_CLASS);
-                        input_sender.emit(HintMenuMsg::HintClicked(value.clone()));
-                    } else if n_press == 2 {
-                        input_sender.emit(HintMenuMsg::HintActivated(value.clone()));
-                    }
-                });
-                label.add_controller(click);
-
-                hints_box.append(&label);
-            }
-            expander.set_child(Some(&hints_box));
-
-            widgets.list.append(&expander);
-        }
+        model.fill(&sender);
 
         ComponentParts { model, widgets }
     }
@@ -128,6 +98,53 @@ impl SimpleComponent for HintMenu {
                 // scroll hint menu back to top
                 self.root.vadjustment().set_value(0.0);
             }
+            HintMenuMsg::Reload => {
+                while let Some(child) = self.list.first_child() {
+                    self.list.remove(&child);
+                }
+                self.expanders.clear();
+                self.selected.take();
+                self.fill(&sender);
+                self.root.vadjustment().set_value(0.0);
+            }
+        }
+    }
+}
+
+impl HintMenu {
+    fn fill(&mut self, sender: &ComponentSender<Self>) {
+        for table in load_hint_tables() {
+            let expander = gtk::Expander::new(Some(&table.name));
+            expander.set_expanded(true);
+            self.expanders.push(expander.clone());
+
+            let hints_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
+            for hint in table.hints {
+                let label = gtk::Label::new(Some(&format!("• {hint}")));
+                label.set_halign(gtk::Align::Start);
+
+                let click = gtk::GestureClick::new();
+                let input_sender = sender.input_sender().clone();
+                let selected = self.selected.clone();
+                let this = label.clone();
+                click.connect_pressed(move |_, n_press, _, _| {
+                    if n_press == 1 {
+                        if let Some(previous) = selected.replace(Some(this.clone())) {
+                            previous.remove_css_class(SELECTED_CLASS);
+                        }
+                        this.add_css_class(SELECTED_CLASS);
+                        input_sender.emit(HintMenuMsg::HintClicked(hint.clone()));
+                    } else if n_press == 2 {
+                        input_sender.emit(HintMenuMsg::HintActivated(hint.clone()));
+                    }
+                });
+                label.add_controller(click);
+
+                hints_box.append(&label);
+            }
+            expander.set_child(Some(&hints_box));
+
+            self.list.append(&expander);
         }
     }
 }

@@ -5,6 +5,7 @@ pub mod misc;
 pub mod player;
 pub mod rooms;
 pub mod server;
+pub mod settings;
 pub mod stats;
 pub mod timer;
 pub mod update;

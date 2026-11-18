@@ -3,6 +3,9 @@
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
+use gtk::prelude::{ButtonExt, EditableExt, GridExt, GtkWindowExt, WidgetExt};
+use relm4::gtk;
+
 use crate::rooms;
 
 const FILE: &str = "server.toml";
@@ -65,6 +68,94 @@ impl Settings {
     pub fn should_serve(&self) -> bool {
         self.is_active && !self.password.is_empty()
     }
+}
+
+/// Opens the settings window; `server_status` is shown as is.
+pub fn show_dialog(
+    parent: Option<&gtk::Window>,
+    settings: &Settings,
+    server_status: &str,
+    on_save: impl Fn(Settings) + 'static,
+    on_check_for_updates: impl Fn() + 'static,
+    on_update_hints: impl Fn() + 'static,
+) {
+    let password = gtk::Entry::builder()
+        .text(settings.password.as_str())
+        .hexpand(true)
+        .width_chars(30)
+        .build();
+    let active = gtk::Switch::builder()
+        .active(settings.should_serve())
+        .sensitive(!settings.password.is_empty())
+        .halign(gtk::Align::Start)
+        .build();
+    let save = gtk::Button::with_label("Save");
+    let check = gtk::Button::with_label("Check for Updates");
+    let hints = gtk::Button::with_label("Update Hints");
+    let close = gtk::Button::with_label("Close");
+
+    let grid = gtk::Grid::builder()
+        .row_spacing(10)
+        .column_spacing(10)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(10)
+        .margin_end(10)
+        .build();
+    let label = |text: &str| gtk::Label::builder().label(text).xalign(0.0).build();
+    grid.attach(&label("Web page password"), 0, 0, 1, 1);
+    grid.attach(&password, 1, 0, 1, 1);
+    grid.attach(&label("Web server"), 0, 1, 1, 1);
+    grid.attach(&active, 1, 1, 1, 1);
+    grid.attach(&label(server_status), 0, 2, 2, 1);
+    grid.attach(&save, 0, 3, 2, 1);
+    grid.attach(&check, 0, 4, 2, 1);
+    grid.attach(&hints, 0, 5, 2, 1);
+    grid.attach(&close, 0, 6, 2, 1);
+
+    let dialog = gtk::Window::builder()
+        .title("Settings")
+        .modal(true)
+        .resizable(false)
+        .child(&grid)
+        .build();
+    dialog.set_transient_for(parent);
+
+    let window = dialog.clone();
+    close.connect_clicked(move |_| window.close());
+
+    let window = dialog.clone();
+    check.connect_clicked(move |_| {
+        on_check_for_updates();
+        window.close();
+    });
+
+    let window = dialog.clone();
+    hints.connect_clicked(move |_| {
+        on_update_hints();
+        window.close();
+    });
+
+    // The server can't be on without a password.
+    let switch = active.clone();
+    password.connect_changed(move |password| {
+        let blank = password.text().trim().is_empty();
+        switch.set_sensitive(!blank);
+        if blank {
+            switch.set_active(false);
+        }
+    });
+
+    let window = dialog.clone();
+    save.connect_clicked(move |_| {
+        on_save(Settings {
+            password: password.text().trim().to_string(),
+            is_active: active.is_active(),
+        });
+        window.close();
+    });
+
+    dialog.present();
 }
 
 #[cfg(test)]
