@@ -75,6 +75,16 @@ let
 
     buildInputs = [ windows.pthreads ];
 
+    # aws-lc-sys (through reqwest's rustls) compiles AWS-LC itself.
+    nativeBuildInputs = [ buildPackages.cmake ];
+    dontUseCmakeConfigure = true;
+
+    # nixpkgs' cargo hook points it at a system AWS-LC, which MSYS2 doesn't ship.
+    # The hook exports it after `env`, so only a later phase can undo it.
+    preBuild = ''
+      export AWS_LC_SYS_USE_SYSTEM=0
+    '';
+
     # The gtk4 crates find their C libraries through pkg-config. Point it at
     # the sysroot and nothing else, so it can't reach this machine's Linux
     # libraries instead.
