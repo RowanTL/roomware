@@ -5,7 +5,7 @@
 
 [player]
 # background.image = "./background.jpg"
-background.color = "D08A3E" # Does nothing if image is set
+background.color = "4A7A1D" # Does nothing if image is set
 clock.color = "FE81F8" # Color of the actual minute:second counter text
 clock.remaining.color = "FFFFFF" # Color of the "Time Remaining" text
 win.color = "89D154"
