@@ -1,12 +1,12 @@
 [No_Code]
-box_name = "Room 1; Pie Box"
+box_name = "Test Box Name"
 box_contents = "Braille Decoder"
 hint_1 = "Open up the blueberry pie."
 
 [POSE]
 box_name = "Room 1; Top Left Drawer on Oven"
 box_contents = "Key for 1st door"
-hint_1 = "Look through the glass door. Use the braille to decode the word from the candy buttons." 
+hint_1 = "Look through the glass door. Use the braille to decode the word from the candy buttons."
 
 [no_lock]
 box_name = "Room 1; Middle Left Drawer on Oven"
