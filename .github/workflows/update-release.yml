@@ -1,0 +1,58 @@
+name: Update latest release
+
+# Rebuilds the installer from the selected branch (so it picks up rooms added since the
+# release) and replaces the assets of the latest release.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.latest.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: latest
+        run: echo "tag=$(gh release view --json tagName --jq .tagName)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: cachix/install-nix-action@v31
+      - run: nix build .#windows-installer
+
+      - run: |
+          mkdir dist
+          cp -L result dist/roomware-setup.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: dist/roomware-setup.exe
+
+  release:
+    needs: installer
+    runs-on: windows-latest
+    env:
+      TAG: ${{ needs.installer.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: installer
+          path: choco/tools
+
+      - name: Pack the Chocolatey package
+        run: |
+          mkdir dist
+          Copy-Item choco/tools/roomware-setup.exe dist
+          choco pack choco/roomware.nuspec --version ($env:TAG.TrimStart('v')) --outputdirectory dist
+
+      - name: Install the package
+        run: |
+          choco install roomware --source dist --yes --params "'/Room:museum'"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Replace the release assets
+        run: gh release upload $env:TAG (Get-ChildItem dist).FullName --clobber
