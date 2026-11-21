@@ -38,6 +38,7 @@ fn main() {
         .get_matches();
 
     let room = matches.get_one::<String>("room").expect("room is required");
+    rooms::set_name(room);
     let dir = if matches.get_flag("local") {
         PathBuf::from("rooms").join(room)
     } else {
@@ -78,7 +79,7 @@ fn sync_with_popup(room: &str, dir: &Path, force: bool) {
         return fetch();
     }
 
-    let popup = busy_popup("Checking GitHub for updated hints...");
+    let popup = busy_popup("Checking GitHub for updated room files");
     popup.present();
 
     let main_loop = glib::MainLoop::new(None, false);

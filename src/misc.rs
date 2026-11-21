@@ -215,6 +215,9 @@ impl SimpleComponent for Misc {
                 .ok();
 
                 let mut comments = String::from("Author: Rowan Torbitzky-Lane");
+                if let Some(room) = rooms::name() {
+                    comments.push_str(&format!("\nRoom: {room}"));
+                }
                 if let Some(url) = server::lan_url() {
                     comments.push_str(&format!("\nWeb page: {url}"));
                 }

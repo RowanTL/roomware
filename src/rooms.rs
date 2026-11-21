@@ -19,6 +19,9 @@ pub const HINTS_FILE: &str = "hints.toml";
 /// Only set when the room is downloaded rather than read straight from disk.
 static ROOM: OnceLock<(String, PathBuf)> = OnceLock::new();
 
+/// The room this run was started with, downloaded or local.
+static NAME: OnceLock<String> = OnceLock::new();
+
 static UPDATE_FAILED: AtomicBool = AtomicBool::new(false);
 
 type Error = Box<dyn std::error::Error>;
@@ -29,6 +32,14 @@ pub fn installed_dir() -> PathBuf {
         .ok()
         .and_then(|exe| Some(exe.parent()?.parent()?.join("rooms")))
         .unwrap_or_else(|| PathBuf::from("rooms"))
+}
+
+pub fn set_name(name: &str) {
+    let _ = NAME.set(name.to_string());
+}
+
+pub fn name() -> Option<&'static str> {
+    NAME.get().map(String::as_str)
 }
 
 /// Brings `dir` up to date with the room called `name`, downloading only the
