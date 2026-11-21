@@ -24,8 +24,8 @@
     "sha256": "f03a2174034ddd2d96cecd34f617c5f8e2ef86c812b8d2bb3b8875257f2c8bfa"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-ca-certificates-20260816-3-any.pkg.tar.zst",
-    "sha256": "037d3bf0b4eb004e2b3586baa29e526db70013dfe3118a2a86748acb46ee07b4"
+    "filename": "mingw-w64-ucrt-x86_64-ca-certificates-20260816-6-any.pkg.tar.zst",
+    "sha256": "c017f0dcbe02c5607a3eca84b3ec4b55317b7eb5ac925f81aa37351b3f18922c"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-cairo-1.18.6-2-any.pkg.tar.zst",
@@ -44,8 +44,8 @@
     "sha256": "b7fbd278e496ee6e796c632d7a1b895b2bdbbd212970f58a6d3f8bc00d76f29c"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-dav1d-1.5.4-1-any.pkg.tar.zst",
-    "sha256": "ccf26c6f29fd36f5692d57fd5e0fe3becec492e0b875fd5e04f47a9582eb8b37"
+    "filename": "mingw-w64-ucrt-x86_64-dav1d-1.5.5-1-any.pkg.tar.zst",
+    "sha256": "9c52b6d0beb6f1b82107be11d7f98be5b8132b00c787949eba59d5cddc415b84"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-directx-headers-1~1.619.5-1-any.pkg.tar.zst",
@@ -68,16 +68,16 @@
     "sha256": "6e6c3e6d748ef546cd7e691637fb1cdade6183bbccab85056dc04f1f9237009f"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-ffmpeg-9.0.2-4-any.pkg.tar.zst",
-    "sha256": "22928bcab225fba6de842204d9e89998a8549ebca615c1de3fe8add560ef1cf0"
+    "filename": "mingw-w64-ucrt-x86_64-ffmpeg-9.1-1-any.pkg.tar.zst",
+    "sha256": "be092dd7cd544c4e235d90926888e31dde3321081a6113675a9c91e00ef07f82"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-flac-1.5.0-2-any.pkg.tar.zst",
-    "sha256": "28e8637795bd7d80289ddbb582d6ad350b73eac64390b877149717dd3757ad79"
+    "filename": "mingw-w64-ucrt-x86_64-flac-1.5.0-3-any.pkg.tar.zst",
+    "sha256": "32b4366f6596a86f64528c5fbb019e40824c6260c1d928b48f565296e4ede1c9"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-fontconfig-2.18.3-1-any.pkg.tar.zst",
-    "sha256": "d0b364f3ee37e3b6f6c136688ce8fa909bb6d8a69df7e08de1aa40870d9e1d60"
+    "filename": "mingw-w64-ucrt-x86_64-fontconfig-2.18.4-1-any.pkg.tar.zst",
+    "sha256": "27e97626d0c9198f4967a8256c98f3ed4f46ec82956dc671cbc2c1de631e45de"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-freetype-2.15.0-1-any.pkg.tar.zst",
@@ -128,8 +128,8 @@
     "sha256": "e82a75968a556484a50084578238a84eb60fb93e34986fd6695c537975bd39ea"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-gnutls-3.8.13-3-any.pkg.tar.zst",
-    "sha256": "303da3babd11f545fcac647439298e8559951ce6a1086666faf8ad2a1f708be6"
+    "filename": "mingw-w64-ucrt-x86_64-gnutls-3.8.14-1-any.pkg.tar.zst",
+    "sha256": "830c3dad6434b2a68a13178474761df8e417f53c43e0101fe110057246240460"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-graphene-1.10.8-3-any.pkg.tar.zst",
@@ -176,8 +176,8 @@
     "sha256": "03e6fd251437d50ea8c53b90e2ece1879064fdc30d0c7675da64f1d0ce3bcde8"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-harfbuzz-15.1.0-1-any.pkg.tar.zst",
-    "sha256": "92b72b54ad320508b700e50f48ac6386f056f4dd1cc9ad77696bc3bf036e67f8"
+    "filename": "mingw-w64-ucrt-x86_64-harfbuzz-15.2.0-1-any.pkg.tar.zst",
+    "sha256": "29ca84c7445d2a485fe46b3c1bae0b1d26edbcb989da637ed5584b757bc6ab01"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-hicolor-icon-theme-0.18-1-any.pkg.tar.zst",
@@ -260,8 +260,8 @@
     "sha256": "0546991e54fbcb42e2da8183d2929517f4b24f6e2f8c8f29dba4bc38bc91fbac"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-libgme-0.6.5-2-any.pkg.tar.zst",
-    "sha256": "f227b2f1beafd244a63f440677fcc6c99d2aa717f23f4443394a4b0770c4c951"
+    "filename": "mingw-w64-ucrt-x86_64-libgme-0.6.5-3-any.pkg.tar.zst",
+    "sha256": "35e9a4fe5c0ef5f11f7d3c0ae5fc5a6a551d42307cd9422563831dccad01970c"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-libgomp-16.2.0-7-any.pkg.tar.zst",
@@ -328,8 +328,8 @@
     "sha256": "a47e66bf8df578990ba4421bb7234e525f32739ede1473323425a62066ce7fe8"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-libshout-2.4.6-7-any.pkg.tar.zst",
-    "sha256": "f21b4a7ed869a2f2362fe8f43349069023122f3d869fd8f6dabde87dcc19e12e"
+    "filename": "mingw-w64-ucrt-x86_64-libshout-2.4.6-8-any.pkg.tar.zst",
+    "sha256": "5ee86d2c7ad1f50f2ebe71a5e6d1a3b364da0d8ade134f808d2d4bcf8aac8017"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-libsndfile-1.2.2-1-any.pkg.tar.zst",
@@ -384,8 +384,8 @@
     "sha256": "de657828b41248a2fd67fa6e8348402a61ef130b0444f1f006c6545c43ad86d8"
   },
   {
-    "filename": "mingw-w64-ucrt-x86_64-libunistring-1.4.2-1-any.pkg.tar.zst",
-    "sha256": "e784273da19bbdcc91cbb510b5e27c3ac021b026140734eefcce5ccbd878bd97"
+    "filename": "mingw-w64-ucrt-x86_64-libunistring-1.5-1-any.pkg.tar.zst",
+    "sha256": "4e95c884bba699a77973645ea39a106708c68011e40d793088a72e58ebbc25f5"
   },
   {
     "filename": "mingw-w64-ucrt-x86_64-libva-2.24.1-1-any.pkg.tar.zst",
