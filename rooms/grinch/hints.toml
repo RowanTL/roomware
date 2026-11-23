@@ -1,7 +1,7 @@
 [No_Code]
-box_name = "Test Box Name"
-box_contents = "Braille Decoder"
-hint_1 = "Open up the blueberry pie."
+box_name = "House Box"
+box_contents = "Susie snowflake suspects"
+hint_1 = "Try moving all of the magnets around."
 
 [POSE]
 box_name = "Room 1; Top Left Drawer on Oven"
