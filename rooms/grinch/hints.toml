@@ -1,7 +1,7 @@
-[No_Code]
-box_name = "Room 1; Pie Box"
-box_contents = "Braille Decoder"
-hint_1 = "Open up the blueberry pie."
+[TREE]
+box_name = "Room 1; House Box"
+box_contents = "Susie snowflake suspects"
+hint_1 = "Try moving the all of the magnets around."
 
 [POSE]
 box_name = "Room 1; Top Left Drawer on Oven"
