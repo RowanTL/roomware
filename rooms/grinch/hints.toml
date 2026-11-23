@@ -13,10 +13,11 @@ hint_2 = "One suspect is carrying a cane and the other works close with reindeer
 box_name = "Room 2; Square present Box"
 box_contents = "Dry Erase Marker"
 
-[317]
-box_name = "Room 2; Pink Cake Box"
-box_contents = "Gum Drop Clue"
-hint_1 = "The cube shelf in the second room reveals a code. Look at the white to see."
+[395]
+box_name = "Room 2; Ornament Box"
+box_contents = "1/2 crossword, solid red sock puzzle piece"
+hint_1 = "Count the colored ornaments according to the box"
+hint_2 = "Count the red, silver, and white ornaments on the christmas tree to get your code."
 
 [355]
 box_name = "Room 2; Small Blue Box"
