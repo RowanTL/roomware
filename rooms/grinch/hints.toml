@@ -1,21 +1,23 @@
-[No_Code]
+[TREE]
 box_name = "House Box"
 box_contents = "Susie snowflake suspects"
 hint_1 = "Try moving all of the magnets around."
 
-[POSE]
-box_name = "Room 1; Top Left Drawer on Oven"
+[212]
+box_name = "Room 1; Yellow Box"
 box_contents = "Key for 1st door"
-hint_1 = "Look through the glass door. Use the braille to decode the word from the candy buttons."
+hint_1 = "Find the two suspects Susie described in the first room."
+hint_2 = "One suspect is carrying a cane and the other works close with reindeers."
 
 [no_lock]
-box_name = "Room 1; Middle Left Drawer on Oven"
-box_contents = "Calculator, Paper, Pen Inside Chocolate Bag"
+box_name = "Room 2; Square Present Box"
+box_contents = "Dry erase marker"
 
-[317]
-box_name = "Room 2; Pink Cake Box"
-box_contents = "Gum Drop Clue"
-hint_1 = "The cube shelf in the second room reveals a code. Look at the white to see."
+[395]
+box_name = "Room 2; Ornament Box"
+box_contents = "1/2 crossword, solid red sock puzzle piece"
+hint_1 = "Count the colored ornaments according to the box"
+hint_2 = "Count the red, silver, and white ornaments on the christmas tree to get your code."
 
 [355]
 box_name = "Room 2; Small Blue Box"
