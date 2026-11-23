@@ -25,11 +25,9 @@ box_contents = "12/3 sighting"
 hint_1 = "The upside down characters will reveal a code. Stand back to see"
 hint_2 = "Trace the upside down characters with the markers and stand back to see a code."
 
-[Short_Lock]
-box_name = "Room 1; Green Chest"
-box_contents = "Rainbow Ribbon Clue, Heart Shape Cookie Cutter"
-hint_1 = "The chocolate wafer straws hold something you need. The cookie with a magnet will help you retrieve those items."
-hint_2 = "You found a key in one wafer. Is there something in the other too?"
+[no_lock]
+box_name = "Room 2; Circle Present Box"
+box_contents = "Stuffed Moose"
 
 [Long_Lock]
 box_name = "Room 1; Brown Cake Box"
