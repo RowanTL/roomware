@@ -1,5 +1,5 @@
 [TREE]
-box_name = "House Box"
+box_name = "Room 1; House Box"
 box_contents = "Susie snowflake suspects"
 hint_1 = "Try moving all of the magnets around."
 
@@ -19,25 +19,24 @@ box_contents = "1/2 crossword, solid red sock puzzle piece"
 hint_1 = "Count the colored ornaments according to the box"
 hint_2 = "Count the red, silver, and white ornaments on the christmas tree to get your code."
 
-[355]
-box_name = "Room 2; Small Blue Box"
-box_contents = "Cookie Rope Magnet"
-hint_1 = "The gumdrops spell an equation. Go around the door and each color will spell a word. Use the gumdrop paper to put the words in order."
-hint_2 = "The yellow gumdrops spell out FIVE"
+[071]
+box_name = "Room 2; Bow Box"
+box_contents = "12/3 sighting"
+hint_1 = "The upside down characters will reveal a code. Stand back to see."
+hint_2 = "Trace the upside down characters with the markers and stand back to see a code."
 
-[Short_Lock]
-box_name = "Room 1; Green Chest"
-box_contents = "Rainbow Ribbon Clue, Heart Shape Cookie Cutter"
-hint_1 = "The chocolate wafer straws hold something you need. The cookie with a magnet will help you retrieve those items."
-hint_2 = "You found a key in one wafer. Is there something in the other too?"
+[no_lock]
+box_name = "Room 2; Circle Present Box"
+box_contents = "Stuffed Moose"
 
-[Long_Lock]
-box_name = "Room 1; Brown Cake Box"
-box_contents = "4 ribbons with circle hooks, cookbook"
+[STAR]
+box_name = "Room 2; Big Blue Box"
+box_contents = "Grinch sighting note, directory"
+hint_1 = "Squeeze the moose."
 
-[4619]
-box_name = "Room 2; Tall Cake Box"
-box_contents = "Grandma Gingers Letter, Star Cookie Cutter"
+[1126]
+box_name = "Room 2; Dark Green Box"
+box_contents = "1/2 crossword, head cookie"
 hint_1 = "Hang the ribbons on the coat rack according to the ribbon clue."
 hint_2 = "The longest ribbon will hang on the dark blue and point to the number 9."
 
