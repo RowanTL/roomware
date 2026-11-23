@@ -19,11 +19,11 @@ box_contents = "1/2 crossword, solid red sock puzzle piece"
 hint_1 = "Count the colored ornaments according to the box"
 hint_2 = "Count the red, silver, and white ornaments on the christmas tree to get your code."
 
-[355]
-box_name = "Room 2; Small Blue Box"
-box_contents = "Cookie Rope Magnet"
-hint_1 = "The gumdrops spell an equation. Go around the door and each color will spell a word. Use the gumdrop paper to put the words in order."
-hint_2 = "The yellow gumdrops spell out FIVE"
+[071]
+box_name = "Room 2; Bow Box"
+box_contents = "12/3 sighting"
+hint_1 = "The upside down characters will reveal a code. Stand back to see"
+hint_2 = "Trace the upside down characters with the markers and stand back to see a code."
 
 [Short_Lock]
 box_name = "Room 1; Green Chest"
