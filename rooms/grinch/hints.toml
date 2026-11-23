@@ -25,10 +25,6 @@ box_contents = "12/3 sighting"
 hint_1 = "The upside down characters will reveal a code. Stand back to see"
 hint_2 = "Trace the upside down characters with the markers and stand back to see a code."
 
-[no_lock]
-box_name = "Room 2; Circle Present Box"
-box_contents = "Stuffed Moose"
-
 [Long_Lock]
 box_name = "Room 1; Brown Cake Box"
 box_contents = "4 ribbons with circle hooks, cookbook"
