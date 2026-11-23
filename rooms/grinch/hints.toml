@@ -10,8 +10,8 @@ hint_1 = "Find the two suspects Susie described in the first room"
 hint_2 = "One suspect is carrying a cane and the other works close with reindeers"
 
 [no_lock]
-box_name = "Room 1; Middle Left Drawer on Oven"
-box_contents = "Calculator, Paper, Pen Inside Chocolate Bag"
+box_name = "Room 2; Square present Box"
+box_contents = "Dry Erase Marker"
 
 [317]
 box_name = "Room 2; Pink Cake Box"
