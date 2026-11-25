@@ -60,25 +60,13 @@ box_contents = "clear letters, 12/13 and 12/20 sighting"
 hint_1 = "Build the puzzle on the clear cookie tray. Once the puzzle is completed carefully lift the puzzle to reveal a code underneath."
 hint_2 = "After completing the puzzle in the cookie tray, lift the tray, it will reveal a word. If you do not see a word make sure their heads are towards the top and their feet at the bottom"
 
-[563]
-box_name = "Room 2; Blue Chest"
-box_contents = "4 Weighted Candies, Do Not Open Clue"
-hint_1 = "Use the connect paper to connect the numbers on the calendar."
+[BEAN]
+box_name = "Room 2; Small Light Blue Box"
+box_contents = "ornament magnet"
+hint_1 = "Lay the clear paper over the calendar."
+hint_2 = "Use the dates on the back of the grinch sightings to find letters on the calendar."
 
-[scale]
-box_name = "Room 1; Right Drawer on Oven"
-box_contents = "Scale"
-
-[electric_puzzle]
-box_name = "Room 2; Electric Puzzle"
-box_contents = "Key to Oven"
-hint_1 = "Use the scale to weigh the candy boxes in grams and then place them lightest to heaviest on the white cupboard."
-hint_2 = "Once you hear the beep, pull down on the trap door."
-hint_3 = "Be sure to turn the scale on when it is on a flat surface and nothing is on the scale."
-hint_4 = "To change the units to grams, keep pressing the units button until the g is highlighted."
-hint_5 = "Place the candy boxes in their correct spots on the white cupboard according to their weights."
-hint_6 = "M&Ms, Raisinets, Crunch, then Good & Plenty is the correct order. Pull the knob on the trap door."
-
-[final_box]
-box_name = "Room 1; Oven"
-box_contents = "Gingerbread People Key to Way Out"
+[key_lock]
+box_name = "Room 1; Big White Box"
+box_contents = "Grinch and Max with key"
+hint_1 = "Use the ornament to slowly drag the key up through the tree."
