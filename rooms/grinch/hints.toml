@@ -48,21 +48,17 @@ box_contents = "Butt cookie, 12/24 sighting, green scarf man puzzle piece"
 hint_1 = "Find the corresponding letter to the colors given to you in the christmas lights. The order of colors do matter."
 hint_2 = "Be sure the light puzzle is held upright(The grinch will be upright). Find the corresponding letters to the colors. The order of colors do matter."
 
-[7018]
-box_name = "Room 1; Big Right Drawer on Oven"
-box_contents = "Cipher Alphabet"
-hint_1 = "Use the blacklight to reveal something on the cake table. Use the cake picture for the order."
-hint_2 = "Use the colored cake layers to put the cake numbers in order."
+[8422]
+box_name = "Room 2; Gingerbread Box"
+box_contents = "4 remaining puzzle piece"
+hint_1 = "There are four numbers hidden in the gingerbread clue. Find the numbers to reveal a code"
+hint_2 = "the grinch ATE all the cookies left FOR santa. Find the four numbers hidden in the gingerbread clue."
 
-[BART]
-box_name = "Room 2; Pink Box"
-box_contents = "Connect Clue, Dry Erase Marker"
-hint_1 = "Layer the clear paper with letters over the paper with symbols to make a decoder."
-hint_2 = "Use the decoder to decode the messages on the gingerbread houses."
-hint_3 = "! = C. Line up the decoders correctly then decode the sides of the gingerbread house."
-hint_4 = "One side of a gingerbread house will decode to: First comes B."
-hint_5 = "The first house will decode to \"First Comes B. T sits last.\" Decode the other house to get the rest of the code (B _ _ T)."
-hint_6 = "GINGERBREAD HOUSE DECODED: First comes B. T sits last. Third will always be R. Second is A."
+[TRICK]
+box_name = "Room 2; Lime Green Box"
+box_contents = "clear letters, 12/13 and 12/20 sighting"
+hint_1 = "Build the puzzle on the clear cookie tray. Once the puzzle is completed carefully lift the puzzle to reveal a code underneath."
+hint_2 = "After completing the puzzle in the cookie tray, lift the tray, it will reveal a word. If you do not see a word make sure their heads are towards the top and their feet at the bottom"
 
 [563]
 box_name = "Room 2; Blue Chest"
