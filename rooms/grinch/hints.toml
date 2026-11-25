@@ -37,16 +37,16 @@ hint_1 = "Read the first word of every line on the Grinch sighting note and pay 
 hint_2 = "Antiques Unlimited is opened 11 TO 6."
 hint_3 = "Read the first word of every line on the Grinch sighting note and pay attention to the hours on the directory. It is open _ _ TO _."
 
-[3741]
-box_name = "Room 2; Orange Chest"
-box_contents = "Bottom Half of Cipher, Circle and Flower Cookie Cutters"
-hint_1 = "Flip the spice jars upside down."
-hint_2 = "Grandma Ginger's letter tells you what recipe to make. Find the spices that are needed and flip them upside down."
+[TALL]
+box_name = "Room 2; Candy Cane Box"
+box_contents = "light puzzle, red and white stripe sock puzzle piece"
+hint_1 = "Solve the crossword. The candy canes will reveal a code."
 
-[8413]
-box_name = "Room 2; Cherry Cake Box"
-box_contents = "Cake Clue, Blacklight"
-hint_1 = "Order the cookie cutters found throughout the room according to the sheetpan hanging above the blue chair."
+[DUSK]
+box_name = "Room 1; Light Box"
+box_contents = "Butt cookie, 12/24 sighting, green scarf man puzzle piece"
+hint_1 = "Find the corresponding letter to the colors given to you in the christmas lights. The order of colors do matter."
+hint_2 = "Be sure the light puzzle is held upright(The grinch will be upright). Find the corresponding letters to the colors. The order of colors do matter."
 
 [7018]
 box_name = "Room 1; Big Right Drawer on Oven"
