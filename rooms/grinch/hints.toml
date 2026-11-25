@@ -30,11 +30,12 @@ box_name = "Room 2; Big Blue Box"
 box_contents = "Grinch sighting note, directory"
 hint_1 = "Squeeze the moose."
 
-[4619]
-box_name = "Room 2; Tall Cake Box"
-box_contents = "Grandma Gingers Letter, Star Cookie Cutter"
-hint_1 = "Hang the ribbons on the coat rack according to the ribbon clue."
-hint_2 = "The longest ribbon will hang on the dark blue and point to the number 9."
+[1126]
+box_name = "Room 2; Dark Green Box"
+box_contents = "1/2 crossword, head cookie"
+hint_1 = "Read the first word of every line on the Grinch sighting note and pay attention to the hours on the directory."
+hint_2 = "Antiques Unlimited is opened 11 TO 6."
+hint_3 = "Read the first word of every line on the Grinch sighting note and pay attention to the hours on the directory. It is open _ _ TO _."
 
 [3741]
 box_name = "Room 2; Orange Chest"
