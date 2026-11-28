@@ -1,15 +1,71 @@
 //! This file holds the text entry box and the show/clear hint buttons.
 
+use std::collections::VecDeque;
+
+use gtk::gdk::Key;
+use gtk::glib::Propagation;
 use gtk::prelude::{
-    BoxExt, ButtonExt, Cast, EditableExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt,
+    BoxExt, ButtonExt, Cast, EditableExt, EntryExt, EventControllerExt, GtkWindowExt,
+    OrientableExt, WidgetExt,
 };
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 use crate::hints;
 use crate::utils::load_image;
 
+const HISTORY_LEN: usize = 5;
+
+/// Sent hints, newest first. Recalled entries are copied into the entry, so edits never touch them.
+#[derive(Default)]
+struct History {
+    entries: VecDeque<String>,
+    pos: Option<usize>,
+    draft: String,
+}
+
+impl History {
+    fn record(&mut self, text: &str) {
+        self.reset();
+        if text.trim().is_empty() || self.entries.front().is_some_and(|e| e == text) {
+            return;
+        }
+        self.entries.push_front(text.to_owned());
+        self.entries.truncate(HISTORY_LEN);
+    }
+
+    fn reset(&mut self) {
+        self.pos = None;
+    }
+
+    fn older(&mut self, current: &str) -> Option<&str> {
+        let next = self.pos.map_or(0, |p| p + 1);
+        if next >= self.entries.len() {
+            return None;
+        }
+        if self.pos.is_none() {
+            self.draft = current.to_owned();
+        }
+        self.pos = Some(next);
+        Some(&self.entries[next])
+    }
+
+    fn newer(&mut self) -> Option<&str> {
+        match self.pos? {
+            0 => {
+                self.pos = None;
+                Some(&self.draft)
+            }
+            p => {
+                self.pos = Some(p - 1);
+                Some(&self.entries[p - 1])
+            }
+        }
+    }
+}
+
 pub struct HintControl {
     entry: Option<gtk::Entry>,
+    history: History,
 }
 
 #[derive(Debug)]
@@ -20,6 +76,8 @@ pub enum HintControlMsg {
     Clear,
     SetText(String),
     ShowValue(String),
+    HistoryOlder,
+    HistoryNewer,
 }
 
 #[derive(Debug)]
@@ -43,6 +101,22 @@ impl SimpleComponent for HintControl {
             gtk::Entry {
                 set_hexpand: true,
                 connect_activate => HintControlMsg::Submit,
+
+                // Capture so the entry's own Up/Down focus navigation never sees the key.
+                add_controller = gtk::EventControllerKey {
+                    set_propagation_phase: gtk::PropagationPhase::Capture,
+                    connect_key_pressed[sender] => move |_, key, _, _| match key {
+                        Key::Up | Key::KP_Up => {
+                            sender.input(HintControlMsg::HistoryOlder);
+                            Propagation::Stop
+                        }
+                        Key::Down | Key::KP_Down => {
+                            sender.input(HintControlMsg::HistoryNewer);
+                            Propagation::Stop
+                        }
+                        _ => Propagation::Proceed,
+                    },
+                },
             },
 
             gtk::Button::with_label("Preview Image") {
@@ -64,7 +138,10 @@ impl SimpleComponent for HintControl {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let mut model = HintControl { entry: None };
+        let mut model = HintControl {
+            entry: None,
+            history: History::default(),
+        };
 
         let widgets = view_output!();
 
@@ -80,7 +157,9 @@ impl SimpleComponent for HintControl {
 
         match msg {
             HintControlMsg::Show => {
-                let _ = sender.output(HintControlOutput::ShowHint(entry.text().to_string()));
+                let hint = entry.text().to_string();
+                self.history.record(&hint);
+                let _ = sender.output(HintControlOutput::ShowHint(hint));
                 entry.set_text("");
             }
             HintControlMsg::PreviewImage => {
@@ -120,21 +199,82 @@ impl SimpleComponent for HintControl {
                     return;
                 }
 
+                self.history.record(&hint);
                 let _ = sender.output(HintControlOutput::ShowHint(hint));
                 entry.set_text("");
             }
             HintControlMsg::Clear => {
+                self.history.reset();
                 let _ = sender.output(HintControlOutput::ShowHint(String::new()));
                 entry.set_text("");
             }
             HintControlMsg::SetText(text) => {
+                self.history.reset();
                 entry.set_text(&text);
             }
             HintControlMsg::ShowValue(text) => {
-                entry.set_text(&text);
+                self.history.record(&text);
                 let _ = sender.output(HintControlOutput::ShowHint(text));
                 entry.set_text("");
             }
+            HintControlMsg::HistoryOlder => {
+                if let Some(text) = self.history.older(&entry.text()) {
+                    entry.set_text(text);
+                    entry.set_position(-1);
+                }
+            }
+            HintControlMsg::HistoryNewer => {
+                if let Some(text) = self.history.newer() {
+                    entry.set_text(text);
+                    entry.set_position(-1);
+                }
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn history(items: &[&str]) -> History {
+        let mut h = History::default();
+        for item in items {
+            h.record(item);
+        }
+        h
+    }
+
+    #[test]
+    fn keeps_only_last_five() {
+        let mut h = history(&["1", "2", "3", "4", "5", "6"]);
+        let recalled: Vec<_> = std::iter::from_fn(|| h.older("").map(str::to_owned)).collect();
+        assert_eq!(recalled, ["6", "5", "4", "3", "2"]);
+    }
+
+    #[test]
+    fn down_past_newest_restores_draft() {
+        let mut h = history(&["a", "b"]);
+        assert_eq!(h.older("typing"), Some("b"));
+        assert_eq!(h.older("b edited"), Some("a"));
+        assert_eq!(h.newer(), Some("b"));
+        assert_eq!(h.newer(), Some("typing"));
+        assert_eq!(h.newer(), None);
+    }
+
+    #[test]
+    fn editing_recalled_entry_keeps_original() {
+        let mut h = history(&["a"]);
+        h.older("");
+        h.record("a changed");
+        assert_eq!(h.older(""), Some("a changed"));
+        assert_eq!(h.older(""), Some("a"));
+    }
+
+    #[test]
+    fn skips_blank_and_repeated() {
+        let mut h = history(&["a", "a", "  "]);
+        assert_eq!(h.older(""), Some("a"));
+        assert_eq!(h.older(""), None);
     }
 }
